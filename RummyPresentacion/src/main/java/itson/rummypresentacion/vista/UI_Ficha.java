@@ -40,16 +40,14 @@ public class UI_Ficha extends JToggleButton {
         Graphics2D g2 = (Graphics2D) g.create();
         
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        // Fondo
+
         if (!puedeSerMovida) {
             g2.setColor(new Color(240, 240, 240));
         } else {
             g2.setColor(Color.WHITE);
         }
         g2.fillRoundRect(2, 2, getWidth()-4, getHeight()-4, 12, 12);
-        
-        // Borde
+
         if (isSelected()) {
             g2.setColor(Color.RED);
             g2.setStroke(new BasicStroke(3f));
@@ -61,8 +59,7 @@ public class UI_Ficha extends JToggleButton {
             g2.setStroke(new BasicStroke(2f));
         }
         g2.drawRoundRect(2, 2, getWidth()-4, getHeight()-4, 12, 12);
-        
-        // Número
+
         g2.setFont(new Font("Arial", Font.BOLD, 24));
         FontMetrics fm = g2.getFontMetrics();
         String text = String.valueOf(numero);
@@ -72,7 +69,7 @@ public class UI_Ficha extends JToggleButton {
         g2.setColor(puedeSerMovida ? color : new Color(
             color.getRed(), color.getGreen(), color.getBlue(), 150
         ));
-        g2.drawString(text, (getWidth()-textWidth)/2, (getHeight()+textHeight)/2 - 8);
+        g2.drawString(text, (getWidth() - textWidth)/2, (getHeight() + textHeight)/2 - 8);
         
         g2.dispose();
     }

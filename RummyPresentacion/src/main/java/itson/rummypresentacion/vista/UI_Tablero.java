@@ -16,10 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author Dana Chavez
- */
 public class UI_Tablero extends javax.swing.JPanel {
     private Map<String, UI_Ficha> fichasEnTablero;
     private int[][] celdasOcupadas;
@@ -37,11 +33,10 @@ public class UI_Tablero extends javax.swing.JPanel {
         
         configurarSeleccionCasillas();
     }
-    
-    // 🔥 CORRECCIÓN: Setter para la mano
+
     public void setMano(UI_Mano mano) {
         this.mano = mano;
-        System.out.println("✅ Mano conectada al tablero");
+        System.out.println("Mano conectada al tablero");
     }
     
     private void configurarSeleccionCasillas() {
@@ -52,25 +47,24 @@ public class UI_Tablero extends javax.swing.JPanel {
                 Point casilla = encontrarCasilla(punto);
                 
                 if (casilla != null) {
-                    System.out.println("🎯 Casilla seleccionada: [" + casilla.x + "," + casilla.y + "]");
+                    System.out.println("Casilla seleccionada: [" + casilla.x + "," + casilla.y + "]");
                     ultimaCasillaSeleccionada = casilla;
-                    
-                    // 🔥 CORRECCIÓN: Verificar que la mano esté conectada
+
                     if (mano == null) {
-                        System.out.println("❌ ERROR: La mano no está conectada al tablero");
+                        System.out.println("ERROR: La mano no está conectada al tablero");
                         return;
                     }
                     
                     List<UI_Ficha> fichasSeleccionadas = mano.getFichasSeleccionadas();
-                    System.out.println("📋 Fichas seleccionadas en mano: " + fichasSeleccionadas.size());
+                    System.out.println("Fichas seleccionadas en mano: " + fichasSeleccionadas.size());
                     
                     if (!fichasSeleccionadas.isEmpty()) {
                         colocarFichasSeleccionadas(casilla);
                     } else {
-                        System.out.println("💡 Selecciona fichas en la mano primero");
+                        System.out.println("Selecciona fichas en la mano primero");
                     }
                     
-                    repaint(); // Actualizar el resaltado de la casilla
+                    repaint(); 
                 }
             }
         });
@@ -90,30 +84,27 @@ public class UI_Tablero extends javax.swing.JPanel {
         List<UI_Ficha> fichasParaColocar = mano.getFichasSeleccionadas();
         int cantidadFichas = fichasParaColocar.size();
         
-        System.out.println("🚀 Intentando colocar " + cantidadFichas + " fichas...");
-        
-        // Buscar espacio disponible
+        System.out.println("Intentando colocar " + cantidadFichas + " fichas");
+
         Point inicioAjustado = encontrarEspacioDisponible(casillaInicio, cantidadFichas);
         
         if (inicioAjustado != null) {
-            System.out.println("📍 Colocando " + cantidadFichas + " fichas desde [" + 
+            System.out.println("Colocando " + cantidadFichas + " fichas desde [" + 
                              inicioAjustado.x + "," + inicioAjustado.y + "]");
-            
-            // Colocar cada ficha
+
             for (int i = 0; i < cantidadFichas; i++) {
                 UI_Ficha ficha = fichasParaColocar.get(i);
                 int columna = inicioAjustado.y + i;
                 
                 colocarFichaEnCasilla(ficha, inicioAjustado.x, columna);
             }
-            
-            // Limpiar selección y remover fichas de la mano
+
             mano.removerFichasSeleccionadas();
-            System.out.println("✅ Fichas colocadas exitosamente");
+            System.out.println("Fichas colocadas exitosamente");
             
         } else {
-            System.out.println("❌ No hay espacio suficiente para " + cantidadFichas + " fichas");
-            // Mostrar estado del tablero para debug
+            System.out.println("No hay espacio suficiente para " + cantidadFichas + " fichas");
+
             mostrarEstadoTablero();
         }
     }
@@ -122,25 +113,21 @@ public class UI_Tablero extends javax.swing.JPanel {
         int fila = casillaInicio.x;
         int columnaInicio = casillaInicio.y;
         
-        System.out.println("🔍 Buscando espacio para " + cantidadFichas + " fichas en fila " + fila);
-        
-        // Intentar hacia la derecha primero
+        System.out.println("Buscando espacio para " + cantidadFichas + " fichas en fila " + fila);
+
         if (hayEspacioDisponible(fila, columnaInicio, cantidadFichas, true)) {
-            System.out.println("   ✅ Espacio encontrado a la derecha: [" + fila + "," + columnaInicio + "]");
+            System.out.println("Espacio encontrado a la derecha: [" + fila + "," + columnaInicio + "]");
             return new Point(fila, columnaInicio);
         }
-        
-        // Si no hay espacio a la derecha, intentar hacia la izquierda
+
         int columnaAjustada = columnaInicio - (cantidadFichas - 1);
         if (columnaAjustada >= 0 && hayEspacioDisponible(fila, columnaAjustada, cantidadFichas, true)) {
-            System.out.println("   ✅ Espacio encontrado a la izquierda: [" + fila + "," + columnaAjustada + "]");
+            System.out.println("Espacio encontrado a la izquierda: [" + fila + "," + columnaAjustada + "]");
             return new Point(fila, columnaAjustada);
         }
-        
-        // Buscar en otras filas
+
         for (int f = 0; f < 4; f++) {
             if (f != fila) {
-                // Buscar desde el inicio de la fila
                 for (int c = 0; c <= 10 - cantidadFichas; c++) {
                     if (hayEspacioDisponible(f, c, cantidadFichas, true)) {
                         System.out.println("   🔄 Moviendo a fila " + f + ", columna " + c);
@@ -150,32 +137,30 @@ public class UI_Tablero extends javax.swing.JPanel {
             }
         }
         
-        System.out.println("   ❌ No hay espacio en ninguna fila");
+        System.out.println("No hay espacio en ninguna fila");
         return null;
     }
     
     private boolean hayEspacioDisponible(int fila, int columnaInicio, int cantidad, boolean buscarDesdeInicio) {
         if (buscarDesdeInicio) {
-            // Verificar espacio específico desde columnaInicio
             for (int i = 0; i < cantidad; i++) {
                 int columna = columnaInicio + i;
                 if (columna >= 10) {
-                    System.out.println("      ❌ Columna " + columna + " fuera de límites");
+                    System.out.println("Columna " + columna + " fuera de límites");
                     return false;
                 }
                 if (celdasOcupadas[fila][columna] == 1) {
-                    System.out.println("      ❌ Celda [" + fila + "," + columna + "] ocupada");
+                    System.out.println("Celda [" + fila + "," + columna + "] ocupada");
                     return false;
                 }
             }
-            System.out.println("      ✅ Espacio libre desde [" + fila + "," + columnaInicio + "]");
+            System.out.println("Espacio libre desde [" + fila + "," + columnaInicio + "]");
             return true;
         }
         return false;
     }
     
     private void colocarFichaEnCasilla(UI_Ficha ficha, int fila, int columna) {
-        // Crear una copia para el tablero
         UI_Ficha fichaEnTablero = new UI_Ficha(ficha.getNumero(), ficha.getFichaColor());
         fichaEnTablero.setPuedeSerMovida(false);
         
@@ -187,20 +172,19 @@ public class UI_Tablero extends javax.swing.JPanel {
         
         fichaEnTablero.setBounds(x, y, fichaEnTablero.getPreferredSize().width, fichaEnTablero.getPreferredSize().height);
         add(fichaEnTablero);
-        
-        // Registrar en el mapa
+
         String clave = fila + "_" + columna;
         fichasEnTablero.put(clave, fichaEnTablero);
         celdasOcupadas[fila][columna] = 1;
         
-        System.out.println("   ✅ Ficha " + ficha.getNumero() + " colocada en [" + fila + "," + columna + "]");
+        System.out.println("Ficha " + ficha.getNumero() + " colocada en [" + fila + "," + columna + "]");
         
         revalidate();
         repaint();
     }
     
     public void mostrarEstadoTablero() {
-        System.out.println("🎯 Estado del Tablero:");
+        System.out.println("Estado del Tablero:");
         for (int fila = 0; fila < 4; fila++) {
             StringBuilder linea = new StringBuilder();
             for (int columna = 0; columna < 10; columna++) {
@@ -218,8 +202,7 @@ public class UI_Tablero extends javax.swing.JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        
-        // Dibujar grid del tablero
+
         int cellWidth = Math.max(getWidth() / 10, 40);
         int cellHeight = Math.max(getHeight() / 4, 40);
         
@@ -229,16 +212,14 @@ public class UI_Tablero extends javax.swing.JPanel {
                 int x = columna * cellWidth;
                 int y = fila * cellHeight;
                 g2.drawRect(x, y, cellWidth, cellHeight);
-                
-                // Resaltar casilla seleccionada
+
                 if (ultimaCasillaSeleccionada != null && 
                     ultimaCasillaSeleccionada.x == fila && ultimaCasillaSeleccionada.y == columna) {
                     g2.setColor(new Color(255, 255, 0, 100));
                     g2.fillRect(x + 1, y + 1, cellWidth - 2, cellHeight - 2);
                     g2.setColor(Color.LIGHT_GRAY);
                 }
-                
-                // Marcar celdas ocupadas
+
                 if (celdasOcupadas[fila][columna] == 1) {
                     g2.setColor(new Color(255, 200, 200, 100));
                     g2.fillRect(x + 1, y + 1, cellWidth - 2, cellHeight - 2);
@@ -246,8 +227,7 @@ public class UI_Tablero extends javax.swing.JPanel {
                 }
             }
         }
-        
-        // Dibujar coordenadas
+
         g2.setColor(Color.GRAY);
         g2.setFont(new Font("Arial", Font.PLAIN, 10));
         for (int fila = 0; fila < 4; fila++) {

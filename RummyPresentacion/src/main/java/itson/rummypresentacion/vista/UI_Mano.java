@@ -6,20 +6,11 @@ package itson.rummypresentacion.vista;
 
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.SwingUtilities;
 
-/**
- *
- * @author Dana Chavez
- */
+
 public class UI_Mano extends javax.swing.JPanel {
     private List<UI_Ficha> fichas;
     private UI_Tablero tablero;
@@ -48,22 +39,20 @@ public class UI_Mano extends javax.swing.JPanel {
     private void configurarFichaParaSeleccion(UI_Ficha ficha) {
         ficha.addActionListener(e -> {
             if (ficha.isSelected()) {
-                // Seleccionar ficha
                 fichasSeleccionadas.add(ficha);
-                System.out.println("✅ Ficha " + ficha.getNumero() + " seleccionada");
+                System.out.println("Ficha " + ficha.getNumero() + " seleccionada");
             } else {
-                // Deseleccionar ficha
                 fichasSeleccionadas.remove(ficha);
-                System.out.println("❌ Ficha " + ficha.getNumero() + " deseleccionada");
+                System.out.println("Ficha " + ficha.getNumero() + " deseleccionada");
             }
             actualizarInfoSeleccion();
         });
     }
     
     private void actualizarInfoSeleccion() {
-        System.out.println("📋 Fichas seleccionadas: " + fichasSeleccionadas.size());
+        System.out.println("Fichas seleccionadas: " + fichasSeleccionadas.size());
         for (UI_Ficha ficha : fichasSeleccionadas) {
-            System.out.println("   - Ficha " + ficha.getNumero() + " " + ficha.getFichaColor());
+            System.out.println(" - Ficha " + ficha.getNumero() + " " + ficha.getFichaColor());
         }
     }
     

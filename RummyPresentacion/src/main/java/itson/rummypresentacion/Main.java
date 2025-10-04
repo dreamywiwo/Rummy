@@ -22,9 +22,7 @@ public class Main {
                 UI_TurnoJugador frame = new UI_TurnoJugador();
 
                 cargarFichasDeEjemplo(frame);
-
                 configurarFrame(frame);
-
                 
             } catch (Exception e) {
                 System.err.println("Error al iniciar la aplicación:");

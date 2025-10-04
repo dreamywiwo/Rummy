@@ -101,6 +101,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame {
         );
 
         getContentPane().add(jPanelContenedorTablero, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 210, 1230, 660));
+
+        jLabelFondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/UI_TurnoJugador.png"))); // NOI18N
         getContentPane().add(jLabelFondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         btnTerminarTurno.setText("jButton1");

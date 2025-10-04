@@ -2,6 +2,7 @@ itson\rummypresentacion\modelo\Modelo.class
 itson\rummypresentacion\vista\UI_Tablero$1.class
 itson\rummypresentacion\vista\ComponenteBase.class
 itson\rummypresentacion\vista\UI_TurnoJugador$1.class
+itson\rummypresentacion\modelo\NewMain.class
 itson\rummypresentacion\vista\UI_Tablero.class
 itson\rummypresentacion\modelo\IObserver.class
 itson\rummypresentacion\vista\UI_TurnoJugador.class

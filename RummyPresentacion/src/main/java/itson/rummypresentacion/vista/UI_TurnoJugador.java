@@ -6,12 +6,17 @@ package itson.rummypresentacion.vista;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.List;
 
 /**
  *
  * @author Dana Chavez
  */
-public class UI_TurnoJugador extends javax.swing.JFrame {
+public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente {
+    
+    private String id = "root";
+    private List<UI_Componente> componentes;
+    
     private UI_Mano uiMano;
     private UI_Tablero uiTablero;
     
@@ -152,4 +157,39 @@ public class UI_TurnoJugador extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelContenedorMano;
     private javax.swing.JPanel jPanelContenedorTablero;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void mostrar() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void ocultar() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void actualizar() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void agregarComponente(UI_Componente componente) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void removerComponente(UI_Componente componente) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public UI_Componente getComponente(int index) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public List<UI_Componente> getComponentes() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

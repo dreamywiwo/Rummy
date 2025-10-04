@@ -4,54 +4,62 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.controlador.ControlTurno;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author Dana Chavez
  */
 public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente {
-    
+
     private String id = "root";
     private List<UI_Componente> componentes;
-    
+
     private UI_Mano uiMano;
     private UI_Tablero uiTablero;
-    
+
+    private ControlTurno control;
+
     public UI_TurnoJugador() {
         initComponents();
         inicializarComponentesVisuales();
     }
-    
+
+    public void mostrarMensaje(String msg) {
+        JOptionPane.showMessageDialog(this, msg);
+    }
+
     private void inicializarComponentesVisuales() {
         uiMano = new UI_Mano();
         uiTablero = new UI_Tablero();
-        
+
         jPanelContenedorMano.setLayout(new BorderLayout());
         jPanelContenedorTablero.setLayout(new BorderLayout());
-        
+
         jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
         jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
-        
+
         uiMano.setTablero(uiTablero);
-        uiTablero.setMano(uiMano); 
-        
+        uiTablero.setMano(uiMano);
+
         configurarBotonesMock();
     }
-    
+
     private void configurarBotonesMock() {
 
         btnTerminarTurno.addActionListener(e -> {
             System.out.println("Botón Terminar Turno clickeado");
         });
     }
-    
+
     public void agregarFichaAMano(int numero, Color color) {
         uiMano.agregarFicha(new UI_Ficha(numero, color));
     }
-    
+
     public void cargarManoEjemplo() {
         agregarFichaAMano(1, Color.RED);
         agregarFichaAMano(2, Color.RED);
@@ -63,11 +71,11 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente
         agregarFichaAMano(5, Color.BLUE);
         agregarFichaAMano(6, Color.GREEN);
     }
-    
+
     public UI_Tablero getUITablero() {
         return uiTablero;
     }
-    
+
     public void limpiarMano() {
         uiMano.limpiarMano();
     }
@@ -170,7 +178,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente
 
     @Override
     public void actualizar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        this.revalidate();
+        this.repaint();
     }
 
     @Override

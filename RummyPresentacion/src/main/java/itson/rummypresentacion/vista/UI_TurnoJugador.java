@@ -2,19 +2,69 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package itson.rummypresentacion.ejercerturno;
+package itson.rummypresentacion.vista;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
 
 /**
  *
  * @author Dana Chavez
  */
 public class UI_TurnoJugador extends javax.swing.JFrame {
-
-    /**
-     * Creates new form UI_TurnoJugador
-     */
+    private UI_Mano uiMano;
+    private UI_Tablero uiTablero;
+    
     public UI_TurnoJugador() {
         initComponents();
+        inicializarComponentesVisuales();
+    }
+    
+    private void inicializarComponentesVisuales() {
+        uiMano = new UI_Mano();
+        uiTablero = new UI_Tablero();
+        
+        jPanelContenedorMano.setLayout(new BorderLayout());
+        jPanelContenedorTablero.setLayout(new BorderLayout());
+        
+        jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
+        jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
+        
+        uiMano.setTablero(uiTablero);
+        uiTablero.setMano(uiMano); 
+        
+        configurarBotonesMock();
+    }
+    
+    private void configurarBotonesMock() {
+
+        btnTerminarTurno.addActionListener(e -> {
+            System.out.println("Botón Terminar Turno clickeado");
+        });
+    }
+    
+    public void agregarFichaAMano(int numero, Color color) {
+        uiMano.agregarFicha(new UI_Ficha(numero, color));
+    }
+    
+    public void cargarManoEjemplo() {
+        agregarFichaAMano(1, Color.RED);
+        agregarFichaAMano(2, Color.RED);
+        agregarFichaAMano(3, Color.RED);
+        agregarFichaAMano(7, Color.BLUE);
+        agregarFichaAMano(7, Color.GREEN);
+        agregarFichaAMano(7, Color.YELLOW);
+        agregarFichaAMano(4, Color.RED);
+        agregarFichaAMano(5, Color.BLUE);
+        agregarFichaAMano(6, Color.GREEN);
+    }
+    
+    public UI_Tablero getUITablero() {
+        return uiTablero;
+    }
+    
+    public void limpiarMano() {
+        uiMano.limpiarMano();
     }
 
     /**
@@ -29,6 +79,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame {
         jPanelContenedorMano = new javax.swing.JPanel();
         jPanelContenedorTablero = new javax.swing.JPanel();
         jLabelFondo = new javax.swing.JLabel();
+        btnTerminarTurno = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -51,6 +102,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame {
 
         getContentPane().add(jPanelContenedorTablero, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 210, 1230, 660));
         getContentPane().add(jLabelFondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        btnTerminarTurno.setText("jButton1");
+        getContentPane().add(btnTerminarTurno, new org.netbeans.lib.awtextra.AbsoluteConstraints(1600, 890, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -91,6 +145,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnTerminarTurno;
     private javax.swing.JLabel jLabelFondo;
     private javax.swing.JPanel jPanelContenedorMano;
     private javax.swing.JPanel jPanelContenedorTablero;

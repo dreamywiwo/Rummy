@@ -114,9 +114,17 @@ public class ControlTurno {
 
     }
 
+    @Override
     public void tomarFicha() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        try {
+            String jugadorId = modelo.getJugadorActualId(); 
+            modelo.tomarFicha(jugadorId);
+            modelo.pasarTurno();
+
+        } catch (Exception e) {
+            vista.mostrarMensaje("Error al tomar ficha: " + e.getMessage());
+        }
+}
     
     public void terminarTurno(){
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody        

@@ -89,13 +89,25 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        btnTomarFicha = new javax.swing.JButton();
+        btnTerminarTurno = new javax.swing.JButton();
         jPanelContenedorMano = new javax.swing.JPanel();
         jPanelContenedorTablero = new javax.swing.JPanel();
         jLabelFondo = new javax.swing.JLabel();
-        btnTerminarTurno = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        btnTomarFicha.setText("TOMAR FICHA");
+        btnTomarFicha.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTomarFichaActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnTomarFicha, new org.netbeans.lib.awtextra.AbsoluteConstraints(1610, 1010, 100, 80));
+
+        btnTerminarTurno.setText("TERMINAR TURNO");
+        getContentPane().add(btnTerminarTurno, new org.netbeans.lib.awtextra.AbsoluteConstraints(1610, 910, 100, 80));
 
         jPanelContenedorMano.setBackground(new java.awt.Color(39, 41, 72));
         jPanelContenedorMano.setPreferredSize(new java.awt.Dimension(1418, 235));
@@ -118,49 +130,17 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente
         jLabelFondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/UI_TurnoJugador.png"))); // NOI18N
         getContentPane().add(jLabelFondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
-        btnTerminarTurno.setText("jButton1");
-        getContentPane().add(btnTerminarTurno, new org.netbeans.lib.awtextra.AbsoluteConstraints(1600, 890, -1, -1));
-
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UI_TurnoJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UI_TurnoJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UI_TurnoJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(UI_TurnoJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void btnTomarFichaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTomarFichaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnTomarFichaActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new UI_TurnoJugador().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnTerminarTurno;
+    private javax.swing.JButton btnTomarFicha;
     private javax.swing.JLabel jLabelFondo;
     private javax.swing.JPanel jPanelContenedorMano;
     private javax.swing.JPanel jPanelContenedorTablero;
@@ -201,4 +181,5 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente
     public List<UI_Componente> getComponentes() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    
 }

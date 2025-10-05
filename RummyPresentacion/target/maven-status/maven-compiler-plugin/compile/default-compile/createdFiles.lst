@@ -3,10 +3,13 @@ itson\rummypresentacion\vista\UI_Tablero$1.class
 itson\rummypresentacion\vista\ComponenteBase.class
 itson\rummypresentacion\vista\UI_TurnoJugador$1.class
 itson\rummypresentacion\modelo\NewMain.class
+itson\rummypresentacion\fachada\IFachadaDominio.class
 itson\rummypresentacion\vista\UI_Tablero.class
 itson\rummypresentacion\modelo\IObserver.class
 itson\rummypresentacion\vista\UI_TurnoJugador.class
 itson\rummypresentacion\modelo\ISubject.class
+itson\rummypresentacion\fachada\FachadaDominio.class
+itson\rummypresentacion\vista\UI_Grupo.class
 itson\rummypresentacion\controlador\ControlTurno.class
 itson\rummypresentacion\Main.class
 itson\rummypresentacion\vista\UI_Componente.class

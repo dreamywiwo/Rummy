@@ -1,15 +1,14 @@
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\ISubject.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_Tablero.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_TurnoJugador.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_Ficha.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\IComponente.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\ComponenteBase.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\IModelo.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\fachada\FachadaDominio.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_Grupo.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\IObserver.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\Main.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\controlador\ControlTurno.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\fachada\IFachadaDominio.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\Modelo.java
-C:\Users\Dana Chavez\OneDrive\Documents\GitHub\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\NewMain.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\controlador\ControlTurno.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\fachada\FachadaDominio.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\fachada\IFachadaDominio.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\Main.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\IModelo.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\IObserver.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\ISubject.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\modelo\Modelo.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\ComponenteBase.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\IComponente.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_Ficha.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_Grupo.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_Tablero.java
+C:\Users\jrasc\OneDrive\Documentos\NetBeansProjects\Practica4\Rummy\RummyPresentacion\src\main\java\itson\rummypresentacion\vista\UI_TurnoJugador.java

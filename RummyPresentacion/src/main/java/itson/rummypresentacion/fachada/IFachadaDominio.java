@@ -4,10 +4,20 @@
  */
 package itson.rummypresentacion.fachada;
 
+import java.util.List;
+
 /**
  *
  * @author Dana Chavez
  */
 public interface IFachadaDominio {
-    
+
+    public void terminarTurno(String jugadorId) throws Exception;
+    public void tomarFicha(String jugadorId) throws Exception;
+    public int getNumeroTurno();
+    public String getJugadorActualId();
+    public boolean esTurnoDelJugador(String jugadorId);
+    public boolean pasarTurno();
+    public void registrarJugador(String idJugador);
+    public List<String> getJugadores();
 }

@@ -16,20 +16,23 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, IObserver {
+
     private String id = "root";
     private List<IComponente> componentes;
     private UI_Grupo uiGrupoMano;
     private UI_Tablero uiTablero;
     private ControlTurno control;
     private String jugadorId;
+    private javax.swing.JComponent glassBlocker;
 
     public UI_TurnoJugador(String jugadorId) {
         this.jugadorId = jugadorId;
         this.componentes = new ArrayList<>();
         initComponents();
         inicializarComponentesVisuales();
+        bloquearJugador();
     }
-    
+
     public void registrarEnModelo(Observable modelo) {
         modelo.addObserver(new java.util.Observer() {
             @Override
@@ -47,41 +50,47 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         SwingUtilities.invokeLater(() -> {
             System.out.println("UI_TurnoJugador recibió actualización del modelo");
             actualizar(modelo);
+            actualizarInformacionTurno(modelo);
+            actualizarEstadoBotones(modelo);
         });
     }
-
 
     private void inicializarComponentesVisuales() {
         uiGrupoMano = new UI_Grupo("mano_jugador");
         uiTablero = new UI_Tablero("tablero_principal");
-        
+
         // Agregar componentes al composite
         agregarComponente(uiGrupoMano);
         agregarComponente(uiTablero);
 
         jPanelContenedorMano.setLayout(new BorderLayout());
         jPanelContenedorTablero.setLayout(new BorderLayout());
-        
+
         jPanelContenedorMano.add(uiGrupoMano, BorderLayout.CENTER);
         jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
-        
+
         uiGrupoMano.setTablero(uiTablero);
         uiTablero.setGrupoMano(uiGrupoMano);
-        
+
         configurarBotones();
     }
-    
+
     //TODO: 
     private void configurarBotones() {
         btnTerminarTurno.addActionListener(e -> {
-            if (control != null) {
-                control.terminarTurno();
+            try {
+                control.terminarTurno(jugadorId);
+                mostrarMensaje("El jugador: " + jugadorId + " finalizo su turno");
+            } catch (Exception ex) {
+                mostrarMensaje("Error al terminar turno: " + ex.getMessage());
             }
         });
-        
         btnTomarFicha.addActionListener(e -> {
-            if (control != null) {
-                control.tomarFicha();
+            try {
+                control.tomarFicha(jugadorId);
+                mostrarMensaje("Ficha agregada a la mano");
+            } catch (Exception ex) {
+                mostrarMensaje("Error al tomar ficha: " + ex.getMessage());
             }
         });
     }
@@ -91,23 +100,23 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     public void actualizar(IModelo modelo) {
         try {
             System.out.println("Propagando actualización a componentes hijos...");
-            
+
             // 1. Primero actualizar el estado específico de UI_TurnoJugador
             actualizarEstadoBotones(modelo);
             actualizarInformacionTurno(modelo);
-            
+
             // 2. Luego propagar la actualización a todos los componentes hijos
             // Esto automáticamente actualizará UI_Grupo y UI_Tablero
             for (IComponente componente : componentes) {
                 componente.actualizar(modelo);
             }
-            
+
             // actualizar este componente
             this.revalidate();
             this.repaint();
-            
+
             System.out.println("Actualización completada para " + componentes.size() + " componentes");
-            
+
         } catch (Exception ex) {
             System.err.println("Error en actualización composite: " + ex.getMessage());
             ex.printStackTrace();
@@ -116,30 +125,33 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
 
     //TODO:
     private void actualizarEstadoBotones(IModelo modelo) {
-//        boolean esMiTurno = modelo.esTurnoDelJugador(jugadorId);
-//        
-//        btnTerminarTurno.setEnabled(esMiTurno && modelo.puedeTerminarTurno());
-//        btnTomarFicha.setEnabled(esMiTurno && modelo.puedeTomarFicha());
-        
-//        if (esMiTurno) {
-//            btnTerminarTurno.setText("TERMINAR TURNO");
-//            btnTomarFicha.setText("TOMAR FICHA");
-//        } else {
-//            btnTerminarTurno.setText("ESPERANDO");
-//            btnTomarFicha.setText("ESPERANDO");
-//        }
+        boolean esMiTurno = modelo.esTurnoDelJugador(jugadorId);
+        btnTerminarTurno.setEnabled(esMiTurno);
+        btnTomarFicha.setEnabled(esMiTurno);
+        if (esMiTurno) {
+            btnTerminarTurno.setText("TERMINAR TURNO");
+            btnTomarFicha.setText("TOMAR FICHA");
+        } else {
+            btnTerminarTurno.setText("ESPERANDO...");
+            btnTomarFicha.setText("ESPERANDO...");
+        }
+        if (uiTablero != null) {
+            uiTablero.setEnabled(esMiTurno);
+        }
+        if (uiGrupoMano != null) {
+            uiGrupoMano.setEnabled(esMiTurno);
+        }
+        habilitar(esMiTurno);
     }
-    
+
     //TOOD:
     private void actualizarInformacionTurno(IModelo modelo) {
-//        String jugadorActual = modelo.getJugadorActualNombre();
-//        int turno = modelo.getTurnoActual();
-//        setTitle("Rummy - Turno: " + turno + " - Jugador Actual: " + jugadorActual);
-//        
-//        if (modelo.isJuegoTerminado()) {
-//            String ganador = modelo.getGanador();
-//            mostrarMensaje("Juego terminado Ganador: " + ganador);
-//        }
+        try {
+            String jugadorActual = modelo.getJugadorActualId();
+            setTitle("Turno de: " + jugadorActual);
+        } catch (Exception e) {
+            System.err.println("Error obteniendo jugador actual: " + e.getMessage());
+        }
     }
 
     public void mostrarMensaje(String msg) {
@@ -269,6 +281,60 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     public void limpiarMano() {
         if (uiGrupoMano != null) {
             uiGrupoMano.limpiarGrupo();
+        }
+    }
+
+    private void bloquearJugador() {
+        if (glassBlocker != null) {
+            return;
+        }
+
+        javax.swing.JPanel blocker = new javax.swing.JPanel(null) {
+            @Override
+            public boolean isOpaque() {
+                return false;
+            }
+        };
+        java.awt.event.MouseAdapter mouseEater = new java.awt.event.MouseAdapter() {
+        };
+        blocker.addMouseListener(mouseEater);
+        blocker.addMouseMotionListener(mouseEater);
+        blocker.addMouseWheelListener(mouseEater);
+        blocker.setFocusable(true);
+        blocker.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void keyTyped(java.awt.event.KeyEvent e) {
+                e.consume();
+            }
+
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                e.consume();
+            }
+        });
+        blocker.setCursor(java.awt.Cursor.getDefaultCursor());
+
+        glassBlocker = blocker;
+        setGlassPane(glassBlocker);
+    }
+
+    private void habilitar(boolean habilitada) {
+        bloquearJugador();
+        boolean bloquear = !habilitada;
+        glassBlocker.setVisible(bloquear);
+        if (bloquear) {
+            glassBlocker.requestFocusInWindow();
+        } else {
+            if (btnTomarFicha.isEnabled()) {
+                btnTomarFicha.requestFocusInWindow();
+            } else {
+                this.requestFocusInWindow();
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ import entidades.Jugador;
 import entidades.Movimiento;
 import entidades.Tablero;
 import entidades.Turno;
+import itson.rummypresentacion.fachada.IFachadaDominio;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,14 +23,29 @@ import java.util.UUID;
  */
 public class Modelo implements IModelo, ISubject {
 
+    private IFachadaDominio fachada;
+    private int numeroTurno;
+    private String idJugador;
+    private List<IObserver> observers = new ArrayList<>();
+    EstadoJuego estado = new EstadoJuego();
+    Tablero tablero = new Tablero();
+
+    public Modelo(IFachadaDominio fachada) {
+        this.fachada = fachada;
+    }
+
     @Override
     public void terminarTurno(String jugadorId) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        fachada.terminarTurno(jugadorId);
+        cargarDesdeFachada();
+        notificarObservers();
     }
 
     @Override
     public void pasarTurno() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        fachada.pasarTurno();
+        cargarDesdeFachada();
+        notificarObservers();
     }
 
     @Override
@@ -102,45 +118,12 @@ public class Modelo implements IModelo, ISubject {
     }
 
     @Override
-    public Ficha tomarFicha(String jugadorId) throws Exception {
-        Jugador jugador = getJugador(jugadorId);
-        List<Ficha> pozo = estado.getPozoDeFichas(); 
-
-        if (pozo == null || pozo.isEmpty()) {
-            throw new Exception("No hay más fichas para tomar.");
-        }
-        
-        Ficha fichaTomada = pozo.remove(0);
-        jugador.getMano().add(fichaTomada);
-        notificarObservers();
-        return fichaTomada;
-    }
-
-    @Override
-    public void terminarTurno(String jugadorId) throws Exception {
-        System.out.println("Turno terminado para el jugador: " + jugadorId);
-    }
-
-    @Override
-    public void pasarTurno() throws Exception {
-        List<Jugador> jugadores = estado.getJugadores();
-        if (jugadores == null || jugadores.size() < 2) {
-            return; 
-        }
-        Jugador jugadorActual = estado.getTurnoActual().getJugadorActual();
-
-        int indiceActual = jugadores.indexOf(jugadorActual);
-
-        int indiceSiguiente = (indiceActual + 1) % jugadores.size();
-        Jugador siguienteJugador = jugadores.get(indiceSiguiente);
-
-        Turno nuevoTurno = new Turno(estado.getTurnoActual().getNumero() + 1, siguienteJugador);
-        
-        estado.setTurnoActual(nuevoTurno);
-
+    public void tomarFicha(String jugadorId) throws Exception {
+        fachada.tomarFicha(jugadorId);
+        cargarDesdeFachada();
         notificarObservers();
     }
-    
+
     @Override
     public void suscribir(IObserver observer) {
         observers.add(observer);
@@ -158,18 +141,14 @@ public class Modelo implements IModelo, ISubject {
         }
     }
 
-    private List<IObserver> observers = new ArrayList<>();
-    EstadoJuego estado = new EstadoJuego();
-    Tablero tablero = new Tablero();
-
     public void iniciarNuevaPartida(List<Jugador> jugadores) throws Exception {
+        if (jugadores.isEmpty()) {
+            throw new Exception("No se pudo iniciar la partida");
+        }
         estado.getTablero().getGrupos().clear();
         estado.setJugadores(jugadores);
         Turno primerTurno = new Turno(1, jugadores.get(0));
         estado.setTurnoActual(primerTurno);
-        if (jugadores.isEmpty()) {
-            throw new Exception("No se pudo iniciar la partida");
-        }
     }
 
     public void registrarMovimiento(EstadoJuego estado, Movimiento movimiento) throws Exception {
@@ -333,5 +312,37 @@ public class Modelo implements IModelo, ISubject {
             }
         }
         throw new Exception("Grupo no encontrado: " + grupoId);
+    }
+
+    private void cargarDesdeFachada() {
+        this.numeroTurno = fachada.getNumeroTurno();
+        this.idJugador = fachada.getJugadorActualId();
+    }
+
+    @Override
+    public boolean esTurnoDelJugador(String jugadorId) {
+        return fachada.esTurnoDelJugador(jugadorId);
+    }
+
+    @Override
+    public String getJugadorActualId() {
+        return idJugador;
+    }
+
+    @Override
+    public int getTurnoNumero() {
+        return numeroTurno;
+    }
+
+    @Override
+    public void registrarJugador(String idJugador) {
+        fachada.registrarJugador(idJugador);
+        cargarDesdeFachada();
+        notificarObservers();
+    }
+
+    @Override
+    public List<String> getJugadores() {
+        return fachada.getJugadores();
     }
 }

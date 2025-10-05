@@ -88,7 +88,6 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         btnTomarFicha.addActionListener(e -> {
             try {
                 control.tomarFicha(jugadorId);
-                mostrarMensaje("Ficha agregada a la mano");
             } catch (Exception ex) {
                 mostrarMensaje("Error al tomar ficha: " + ex.getMessage());
             }
@@ -144,7 +143,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         habilitar(esMiTurno);
     }
 
-    //TOOD:
+    //TODO:
     private void actualizarInformacionTurno(IModelo modelo) {
         try {
             String jugadorActual = modelo.getJugadorActualId();
@@ -186,7 +185,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
                 btnTomarFichaActionPerformed(evt);
             }
         });
-        getContentPane().add(btnTomarFicha, new org.netbeans.lib.awtextra.AbsoluteConstraints(1610, 1010, 100, 80));
+        getContentPane().add(btnTomarFicha, new org.netbeans.lib.awtextra.AbsoluteConstraints(1610, 790, 100, 80));
 
         btnTerminarTurno.setText("TERMINAR TURNO");
         getContentPane().add(btnTerminarTurno, new org.netbeans.lib.awtextra.AbsoluteConstraints(1610, 910, 100, 80));

@@ -4,6 +4,8 @@
  */
 package itson.rummypresentacion.fachada;
 
+import itson.rummypresentacion.DTOs.FichaDTO;
+import itson.rummypresentacion.DTOs.GrupoDTO;
 import java.util.List;
 
 /**
@@ -20,4 +22,5 @@ public interface IFachadaDominio {
     public boolean pasarTurno();
     public void registrarJugador(String idJugador);
     public List<String> getJugadores();
+    public GrupoDTO crearGrupo(List<FichaDTO> fichas) throws Exception;
 }

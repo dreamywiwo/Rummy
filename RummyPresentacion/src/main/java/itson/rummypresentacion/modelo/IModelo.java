@@ -8,27 +8,12 @@ import entidades.Ficha;
 import java.util.List;
 
 /**
- *
- * @author Dana Chavez
+ * IModelo es una segregacion del modelo, esta interfaz sirve 
+ * para mandar a la vista lo que necesita para pintarse
+ * 
  */
 public interface IModelo {
-
-    public void crearGrupo(List<Ficha> fichas, String jugadorId) throws Exception;
-
-    public void terminarTurno(String jugadorId) throws Exception;
-
-    public void pasarTurno() throws Exception;
-
-    public void suscribir(IObserver observer);
-
-    public void separarGrupo(String grupoId, String jugadorId) throws Exception;
-
-    public void sustituirFicha(String jugadorId, String grupoId, Ficha fichaNueva) throws Exception;
-
-    public void cambiarFicha(String jugadorId, String grupoId) throws Exception;
-
-    public void tomarFicha(String jugadorId) throws Exception;
-
+    
     public String getJugadorActualId() throws Exception;
 
     public boolean esTurnoDelJugador(String idJugador);

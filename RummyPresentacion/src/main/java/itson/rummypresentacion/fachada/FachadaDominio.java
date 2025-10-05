@@ -70,10 +70,11 @@ public class FachadaDominio implements IFachadaDominio {
             System.out.println("Jugador registrado: " + idJugador);
         }
     }
-
+    
+    @Override
     public GrupoDTO crearGrupo(List<FichaDTO> fichas) throws Exception {
-        if (fichas == null || fichas.size() < 3) {
-            throw new Exception("Un grupo debe tener al menos 3 fichas.");
+        if (fichas == null) {
+            throw new Exception("No hay fichas para ese grupo.");
         }
         boolean esSecuencia = validarSecuencia(fichas);
         boolean esMismoNumero = validarNumeroIgual(fichas);
@@ -83,9 +84,9 @@ public class FachadaDominio implements IFachadaDominio {
         return new GrupoDTO(new ArrayList<>(fichas), true);
     }
     
-    public GrupoDTO agregarFicha(FichaDTO ficha, GrupoDTO grupo)throws Exception{
-        if (grupo == null || grupo.getFichas().size() < 3) {
-            throw new Exception("Un grupo debe tener al menos 3 fichas.");
+    public GrupoDTO agregarFichaAGrupo(FichaDTO ficha, GrupoDTO grupo)throws Exception{
+        if (grupo == null) {
+            throw new Exception("Debe de existir un grupo al cual anadir la ficha.");
         }
         List<FichaDTO> fichas = grupo.getFichas();
         fichas.add(ficha);
@@ -99,7 +100,7 @@ public class FachadaDominio implements IFachadaDominio {
         return new GrupoDTO(new ArrayList<>(fichas), true);
     }
 
-    public GrupoDTO eliminarFicha(FichaDTO ficha, GrupoDTO grupo)throws Exception{
+    public GrupoDTO eliminarFichaDeGrupo(FichaDTO ficha, GrupoDTO grupo)throws Exception{
         
         if (grupo == null || grupo.getFichas().size() < 4) {
             throw new Exception("Un grupo debe tener al menos 4 fichas para poder eliminar una.");
@@ -119,6 +120,7 @@ public class FachadaDominio implements IFachadaDominio {
         
         return new GrupoDTO(new ArrayList<>(fichas), true);
     }
+    
     @Override
     public int getNumeroTurno() {
         return numeroTurno;
@@ -138,6 +140,8 @@ public class FachadaDominio implements IFachadaDominio {
         return new ArrayList<>(jugadores);
     }
 
+    
+    /* Validaciones grupos */
     public boolean validarSecuencia(List<FichaDTO> fichas) throws Exception {
         if (fichas == null || fichas.isEmpty()) {
             throw new Exception("La lista está vacía.");
@@ -181,4 +185,5 @@ public class FachadaDominio implements IFachadaDominio {
         }
         return true;
     }
+
 }

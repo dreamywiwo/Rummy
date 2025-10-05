@@ -18,7 +18,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             IFachadaDominio fachada = new FachadaDominio();
-            IModelo modelo = new Modelo(fachada);
+            Modelo modelo = new Modelo(fachada);
 
             UI_TurnoJugador vistaA = new UI_TurnoJugador("A");
             UI_TurnoJugador vistaB = new UI_TurnoJugador("B");

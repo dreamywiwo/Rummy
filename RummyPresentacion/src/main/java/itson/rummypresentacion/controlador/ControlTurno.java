@@ -5,7 +5,7 @@
 package itson.rummypresentacion.controlador;
 
 import entidades.Ficha;
-import itson.rummypresentacion.modelo.IModelo;
+import itson.rummypresentacion.modelo.Modelo;
 import itson.rummypresentacion.vista.UI_TurnoJugador;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +17,12 @@ import java.util.List;
 public class ControlTurno {
 
     private final UI_TurnoJugador vista;
-    private final IModelo modelo;
+    private final Modelo modelo;
 
     private final List<Ficha> seleccionActualFichas = new ArrayList<>();
     private String grupoSeleccionadoId;
 
-    public ControlTurno(UI_TurnoJugador vista, IModelo modelo) {
+    public ControlTurno(UI_TurnoJugador vista, Modelo modelo) {
         this.vista = vista;
         this.modelo = modelo;
     }
@@ -37,15 +37,6 @@ public class ControlTurno {
 
     public void clickSeleccionaCasilla(String casillaId) {
 
-    }
-
-    public void crearGrupo(String jugadorId) {
-        try {
-            modelo.crearGrupo(new ArrayList<>(seleccionActualFichas), jugadorId);
-            seleccionActualFichas.clear();
-        } catch (Exception e) {
-            vista.mostrarMensaje("Error al crear grupo: " + e.getMessage());
-        }
     }
 
     public void terminarTurno(String jugadorId) {
@@ -73,39 +64,6 @@ public class ControlTurno {
             return;
         }
         seleccionActualFichas.add(ficha);
-
-    }
-
-    public void separarGrupo(String jugadorId) {
-        try {
-            modelo.separarGrupo(grupoSeleccionadoId, jugadorId);
-        } catch (Exception e) {
-        }
-
-    }
-
-    public void sustituirFicha(String jugadorId) {
-        if (seleccionActualFichas.isEmpty()) {
-            vista.mostrarMensaje("Debe seleccionar una ficha para sustituir.");
-            return;
-        }
-        Ficha fichaNueva = seleccionActualFichas.get(seleccionActualFichas.size() - 1);
-        try {
-            modelo.sustituirFicha(jugadorId, grupoSeleccionadoId, fichaNueva);
-            vista.mostrarMensaje("Ficha sustituida correctamente.");
-        } catch (Exception e) {
-            vista.mostrarMensaje("Error al sustituir ficha: " + e.getMessage());
-        }
-
-    }
-
-    public void cambiarFicha(String jugadorId) {
-        try {
-            modelo.cambiarFicha(jugadorId, grupoSeleccionadoId);
-            vista.mostrarMensaje("Cambio de ficha realizado correctamente.");
-        } catch (Exception e) {
-            vista.mostrarMensaje("Error al cambiar ficha: " + e.getMessage());
-        }
 
     }
 

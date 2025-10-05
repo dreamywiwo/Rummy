@@ -43,7 +43,6 @@ public class ControlTurno {
         try {
             modelo.crearGrupo(new ArrayList<>(seleccionActualFichas), jugadorId);
             seleccionActualFichas.clear();
-            vista.mostrarMensaje("Grupo creado correctamente.");
         } catch (Exception e) {
             vista.mostrarMensaje("Error al crear grupo: " + e.getMessage());
         }
@@ -53,9 +52,7 @@ public class ControlTurno {
         try {
             modelo.terminarTurno(jugadorId);
             modelo.pasarTurno();
-            vista.mostrarMensaje("Turno terminado para " + jugadorId);
         } catch (Exception e) {
-            vista.mostrarMensaje("Error al terminar turno: " + e.getMessage());
         }
 
     }
@@ -82,9 +79,7 @@ public class ControlTurno {
     public void separarGrupo(String jugadorId) {
         try {
             modelo.separarGrupo(grupoSeleccionadoId, jugadorId);
-            vista.mostrarMensaje("Grupo separado correctamente.");
         } catch (Exception e) {
-            vista.mostrarMensaje("Error al separar grupo: " + e.getMessage());
         }
 
     }
@@ -114,19 +109,31 @@ public class ControlTurno {
 
     }
 
-    @Override
-    public void tomarFicha() {
+    public void tomarFicha(String idJugador) {
         try {
-            String jugadorId = modelo.getJugadorActualId(); 
-            modelo.tomarFicha(jugadorId);
+            modelo.tomarFicha(idJugador);
             modelo.pasarTurno();
 
         } catch (Exception e) {
             vista.mostrarMensaje("Error al tomar ficha: " + e.getMessage());
         }
-}
-    
-    public void terminarTurno(){
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody        
+    }
+
+    public void registrarJugador(String idJugador) {
+        try {
+            modelo.registrarJugador(idJugador);
+            System.out.println("Jugador registrado: " + idJugador);
+        } catch (Exception e) {
+            vista.mostrarMensaje("Error al registrar jugador: " + e.getMessage());
+        }
+    }
+
+    public List<String> getJugadores() {
+        try {
+            return modelo.getJugadores();
+        } catch (Exception e) {
+            vista.mostrarMensaje("Error al obtener jugadores: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 }

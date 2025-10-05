@@ -18,4 +18,10 @@ public interface IModelo {
     void separarGrupo(String grupoId, String jugadorId) throws Exception;
     void sustituirFicha(String jugadorId, String grupoId, Ficha fichaNueva) throws Exception;
     void cambiarFicha(String jugadorId, String grupoId) throws Exception;
+    
+    Ficha tomarFicha(String jugadorId) throws Exception;
+
+    String getJugadorActualId() throws Exception;
+    
+    
 }

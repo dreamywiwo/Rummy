@@ -82,7 +82,43 @@ public class FachadaDominio implements IFachadaDominio {
         }
         return new GrupoDTO(new ArrayList<>(fichas), true);
     }
+    
+    public GrupoDTO agregarFicha(FichaDTO ficha, GrupoDTO grupo)throws Exception{
+        if (grupo == null || grupo.getFichas().size() < 3) {
+            throw new Exception("Un grupo debe tener al menos 3 fichas.");
+        }
+        List<FichaDTO> fichas = grupo.getFichas();
+        fichas.add(ficha);
+        
+        boolean esSecuencia = validarSecuencia(fichas);
+        boolean esMismoNumero = validarNumeroIgual(fichas);
+        if (!esSecuencia && !esMismoNumero) {
+            throw new Exception("Grupo inválido: debe ser secuencia del mismo color o del mismo número con colores distintos.");
+        }
+        
+        return new GrupoDTO(new ArrayList<>(fichas), true);
+    }
 
+    public GrupoDTO eliminarFicha(FichaDTO ficha, GrupoDTO grupo)throws Exception{
+        
+        if (grupo == null || grupo.getFichas().size() < 4) {
+            throw new Exception("Un grupo debe tener al menos 4 fichas para poder eliminar una.");
+        }
+        
+        List<FichaDTO> fichas = grupo.getFichas();
+        if (!fichas.contains(ficha)) {
+            throw new Exception("el grupo no contiene la ficha seleccionada");
+        }
+        
+        fichas.remove(ficha);
+        boolean esSecuencia = validarSecuencia(fichas);
+        boolean esMismoNumero = validarNumeroIgual(fichas);
+        if (!esSecuencia && !esMismoNumero) {
+            throw new Exception("Grupo inválido: debe ser secuencia del mismo color o del mismo número con colores distintos.");
+        }
+        
+        return new GrupoDTO(new ArrayList<>(fichas), true);
+    }
     @Override
     public int getNumeroTurno() {
         return numeroTurno;

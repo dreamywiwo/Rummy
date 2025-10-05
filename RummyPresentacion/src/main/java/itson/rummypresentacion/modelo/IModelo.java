@@ -11,8 +11,7 @@ import java.util.List;
  *
  * @author Dana Chavez
  */
-public interface IModelo {
-    
+public interface IModelo {   
     void crearGrupo(List<Ficha> fichas, String jugadorId) throws Exception;
     void terminarTurno(String jugadorId) throws Exception;
     void pasarTurno() throws Exception;

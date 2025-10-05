@@ -4,6 +4,7 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.modelo.IModelo;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,12 +13,15 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JToggleButton;
 
-public class UI_Ficha extends JToggleButton {
+public class UI_Ficha extends JToggleButton implements IComponente{
     private int numero;
     private Color color;
     private boolean puedeSerMovida = true;
+    private String id;
     
     public UI_Ficha(int numero, Color color) {
         this.numero = numero;
@@ -74,11 +78,58 @@ public class UI_Ficha extends JToggleButton {
         g2.dispose();
     }
     
+    public void setId(String id) {
+        this.id = id;
+    }
+    
     public int getNumero() {
         return numero;
     }
     
     public Color getFichaColor() {
         return color;
+    }
+
+    /* Se definen los metodos de IComponente */
+    @Override
+    public void mostrar() {
+        setVisible(true);
+    }
+
+    @Override
+    public void ocultar() {
+        setVisible(false);
+    }
+
+    @Override
+    public void actualizar(IModelo modelo) {
+        // Las fichas individuales no necesitan logica compleja de actualización
+        // Solo repintarse si es necesario
+        this.repaint();
+    }
+
+    @Override
+    public void agregarComponente(IComponente componente) {
+        throw new UnsupportedOperationException("UI_Ficha no puede contener componentes hijos");
+    }
+
+    @Override
+    public void removerComponente(IComponente componente) {
+        throw new UnsupportedOperationException("UI_Ficha no puede contener componentes hijos");
+    }
+
+    @Override
+    public IComponente getComponente(int index) {
+        throw new UnsupportedOperationException("UI_Ficha no puede contener componentes hijos");
+    }
+
+    @Override
+    public List<IComponente> getComponentes() {
+        return new ArrayList<>(); 
+    }
+
+    @Override
+    public String getId() {
+        return "ficha_" + numero + "_" + color.toString();
     }
 }

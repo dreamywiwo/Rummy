@@ -5,79 +5,149 @@
 package itson.rummypresentacion.vista;
 
 import itson.rummypresentacion.controlador.ControlTurno;
+import itson.rummypresentacion.modelo.IModelo;
+import itson.rummypresentacion.modelo.IObserver;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
-/**
- *
- * @author Dana Chavez
- */
-public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente {
-
+public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, IObserver {
     private String id = "root";
-    private List<UI_Componente> componentes;
-
-    private UI_Mano uiMano;
+    private List<IComponente> componentes;
+    private UI_Grupo uiGrupoMano;
     private UI_Tablero uiTablero;
-
     private ControlTurno control;
+    private String jugadorId;
 
-    public UI_TurnoJugador() {
+    public UI_TurnoJugador(String jugadorId) {
+        this.jugadorId = jugadorId;
+        this.componentes = new ArrayList<>();
         initComponents();
         inicializarComponentesVisuales();
+    }
+    
+    public void registrarEnModelo(Observable modelo) {
+        modelo.addObserver(new java.util.Observer() {
+            @Override
+            public void update(Observable o, Object arg) {
+                if (arg instanceof IModelo) {
+                    UI_TurnoJugador.this.update((IModelo) arg);
+                }
+            }
+        });
+        System.out.println("UI_TurnoJugador registrado como observer del modelo");
+    }
+
+    @Override
+    public void update(IModelo modelo) {
+        SwingUtilities.invokeLater(() -> {
+            System.out.println("UI_TurnoJugador recibió actualización del modelo");
+            actualizar(modelo);
+        });
+    }
+
+
+    private void inicializarComponentesVisuales() {
+        uiGrupoMano = new UI_Grupo("mano_jugador");
+        uiTablero = new UI_Tablero("tablero_principal");
+        
+        // Agregar componentes al composite
+        agregarComponente(uiGrupoMano);
+        agregarComponente(uiTablero);
+
+        jPanelContenedorMano.setLayout(new BorderLayout());
+        jPanelContenedorTablero.setLayout(new BorderLayout());
+        
+        jPanelContenedorMano.add(uiGrupoMano, BorderLayout.CENTER);
+        jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
+        
+        uiGrupoMano.setTablero(uiTablero);
+        uiTablero.setGrupoMano(uiGrupoMano);
+        
+        configurarBotones();
+    }
+    
+    //TODO: 
+    private void configurarBotones() {
+        btnTerminarTurno.addActionListener(e -> {
+            if (control != null) {
+                control.terminarTurno();
+            }
+        });
+        
+        btnTomarFicha.addActionListener(e -> {
+            if (control != null) {
+                control.tomarFicha();
+            }
+        });
+    }
+
+    // Implementación del método actualizar del Composite
+    @Override
+    public void actualizar(IModelo modelo) {
+        try {
+            System.out.println("Propagando actualización a componentes hijos...");
+            
+            // 1. Primero actualizar el estado específico de UI_TurnoJugador
+            actualizarEstadoBotones(modelo);
+            actualizarInformacionTurno(modelo);
+            
+            // 2. Luego propagar la actualización a todos los componentes hijos
+            // Esto automáticamente actualizará UI_Grupo y UI_Tablero
+            for (IComponente componente : componentes) {
+                componente.actualizar(modelo);
+            }
+            
+            // actualizar este componente
+            this.revalidate();
+            this.repaint();
+            
+            System.out.println("Actualización completada para " + componentes.size() + " componentes");
+            
+        } catch (Exception ex) {
+            System.err.println("Error en actualización composite: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    //TODO:
+    private void actualizarEstadoBotones(IModelo modelo) {
+//        boolean esMiTurno = modelo.esTurnoDelJugador(jugadorId);
+//        
+//        btnTerminarTurno.setEnabled(esMiTurno && modelo.puedeTerminarTurno());
+//        btnTomarFicha.setEnabled(esMiTurno && modelo.puedeTomarFicha());
+        
+//        if (esMiTurno) {
+//            btnTerminarTurno.setText("TERMINAR TURNO");
+//            btnTomarFicha.setText("TOMAR FICHA");
+//        } else {
+//            btnTerminarTurno.setText("ESPERANDO");
+//            btnTomarFicha.setText("ESPERANDO");
+//        }
+    }
+    
+    //TOOD:
+    private void actualizarInformacionTurno(IModelo modelo) {
+//        String jugadorActual = modelo.getJugadorActualNombre();
+//        int turno = modelo.getTurnoActual();
+//        setTitle("Rummy - Turno: " + turno + " - Jugador Actual: " + jugadorActual);
+//        
+//        if (modelo.isJuegoTerminado()) {
+//            String ganador = modelo.getGanador();
+//            mostrarMensaje("Juego terminado Ganador: " + ganador);
+//        }
     }
 
     public void mostrarMensaje(String msg) {
         JOptionPane.showMessageDialog(this, msg);
     }
 
-    private void inicializarComponentesVisuales() {
-        uiMano = new UI_Mano();
-        uiTablero = new UI_Tablero();
-
-        jPanelContenedorMano.setLayout(new BorderLayout());
-        jPanelContenedorTablero.setLayout(new BorderLayout());
-
-        jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
-        jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
-
-        uiMano.setTablero(uiTablero);
-        uiTablero.setMano(uiMano);
-
-        configurarBotonesMock();
-    }
-
-    private void configurarBotonesMock() {
-
-        btnTerminarTurno.addActionListener(e -> {
-            System.out.println("Botón Terminar Turno clickeado");
-        });
-    }
-
-    public void agregarFichaAMano(int numero, Color color) {
-        uiMano.agregarFicha(new UI_Ficha(numero, color));
-    }
-
-    public void cargarManoEjemplo() {
-        agregarFichaAMano(1, Color.RED);
-        agregarFichaAMano(2, Color.RED);
-        agregarFichaAMano(3, Color.RED);
-        agregarFichaAMano(7, Color.BLUE);
-        agregarFichaAMano(7, Color.GREEN);
-        agregarFichaAMano(7, Color.YELLOW);
-        agregarFichaAMano(4, Color.RED);
-        agregarFichaAMano(5, Color.BLUE);
-        agregarFichaAMano(6, Color.GREEN);
-    }
-
-    public UI_Tablero getUITablero() {
-        return uiTablero;
-    }
-
-    public void limpiarMano() {
-        uiMano.limpiarMano();
+    public void setControlador(ControlTurno control) {
+        this.control = control;
     }
 
     /**
@@ -148,38 +218,57 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements UI_Componente
 
     @Override
     public void mostrar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        this.setVisible(true);
+        for (IComponente componente : componentes) {
+            componente.mostrar();
+        }
     }
 
     @Override
     public void ocultar() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        this.setVisible(false);
+        for (IComponente componente : componentes) {
+            componente.ocultar();
+        }
     }
 
     @Override
-    public void actualizar() {
-        this.revalidate();
-        this.repaint();
+    public void agregarComponente(IComponente componente) {
+        componentes.add(componente);
     }
 
     @Override
-    public void agregarComponente(UI_Componente componente) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void removerComponente(IComponente componente) {
+        componentes.remove(componente);
     }
 
     @Override
-    public void removerComponente(UI_Componente componente) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public IComponente getComponente(int index) {
+        return componentes.get(index);
     }
 
     @Override
-    public UI_Componente getComponente(int index) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public List<IComponente> getComponentes() {
+        return new ArrayList<>(componentes);
     }
 
     @Override
-    public List<UI_Componente> getComponentes() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public String getId() {
+        return id;
     }
-    
+
+    // PRUEBAS
+    public void agregarFichaAMano(int numero, Color color) {
+        if (uiGrupoMano != null) {
+            uiGrupoMano.agregarFicha(new UI_Ficha(numero, color));
+        } else {
+            System.err.println("Error: uiGrupoMano no está inicializado");
+        }
+    }
+
+    public void limpiarMano() {
+        if (uiGrupoMano != null) {
+            uiGrupoMano.limpiarGrupo();
+        }
+    }
 }

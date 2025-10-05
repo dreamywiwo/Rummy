@@ -4,64 +4,77 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.modelo.IModelo;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JPanel;
 
 /**
  *
  * @author Dana Chavez
  */
-public abstract class ComponenteBase implements UI_Componente {
-    protected String id;
-    protected List<UI_Componente> componentes;
+public abstract class ComponenteBase extends JPanel implements IComponente {
+     protected String id;
+    protected List<IComponente> componentes;
     protected boolean visible;
-    
+
     public ComponenteBase(String id) {
         this.id = id;
         this.componentes = new ArrayList<>();
         this.visible = true;
     }
-    
+
     @Override
     public void mostrar() {
         this.visible = true;
-        for (UI_Componente componente : componentes) {
+        this.setVisible(true);
+        for (IComponente componente : componentes) {
             componente.mostrar();
         }
     }
-    
+
     @Override
     public void ocultar() {
         this.visible = false;
-        for (UI_Componente componente : componentes) {
+        this.setVisible(false);
+        for (IComponente componente : componentes) {
             componente.ocultar();
         }
     }
-    
+
     @Override
-    public void actualizar() {
-        for (UI_Componente componente : componentes) {
-            componente.actualizar();
+    public void actualizar(IModelo modelo) {
+        // Propagar la actualización a todos los componentes hijos
+        for (IComponente componente : componentes) {
+            componente.actualizar(modelo);
         }
+        // Actualización visual específica del componente
+        this.revalidate();
+        this.repaint();
     }
-    
+
     @Override
-    public void agregarComponente(UI_Componente componente) {
+    public void agregarComponente(IComponente componente) {
         componentes.add(componente);
     }
-    
+
     @Override
-    public void removerComponente(UI_Componente componente) {
+    public void removerComponente(IComponente componente) {
         componentes.remove(componente);
     }
-    
+
     @Override
-    public UI_Componente getComponente(int index) {
+    public IComponente getComponente(int index) {
         return componentes.get(index);
     }
-    
+
     @Override
-    public List<UI_Componente> getComponentes() {
+    public List<IComponente> getComponentes() {
         return new ArrayList<>(componentes);
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 }

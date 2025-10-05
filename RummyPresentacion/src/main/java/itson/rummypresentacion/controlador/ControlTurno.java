@@ -32,11 +32,11 @@ public class ControlTurno {
             return;
         }
         seleccionActualFichas.add(ficha);
-        vista.actualizar();
+
     }
 
     public void clickSeleccionaCasilla(String casillaId) {
-        vista.actualizar();
+
     }
 
     public void crearGrupo(String jugadorId) {
@@ -47,7 +47,6 @@ public class ControlTurno {
         } catch (Exception e) {
             vista.mostrarMensaje("Error al crear grupo: " + e.getMessage());
         }
-        vista.actualizar();
     }
 
     public void terminarTurno(String jugadorId) {
@@ -58,18 +57,18 @@ public class ControlTurno {
         } catch (Exception e) {
             vista.mostrarMensaje("Error al terminar turno: " + e.getMessage());
         }
-        vista.actualizar();
+
     }
 
     public void limpiarSeleccion() {
         seleccionActualFichas.clear();
         grupoSeleccionadoId = null;
-        vista.actualizar();
+
     }
 
     public void grupoSeleccionado(String grupoId) {
         this.grupoSeleccionadoId = grupoId;
-        vista.actualizar();
+
     }
 
     public void fichaSeleccionada(Ficha ficha) {
@@ -77,7 +76,7 @@ public class ControlTurno {
             return;
         }
         seleccionActualFichas.add(ficha);
-        vista.actualizar();
+
     }
 
     public void separarGrupo(String jugadorId) {
@@ -87,7 +86,7 @@ public class ControlTurno {
         } catch (Exception e) {
             vista.mostrarMensaje("Error al separar grupo: " + e.getMessage());
         }
-        vista.actualizar();
+
     }
 
     public void sustituirFicha(String jugadorId) {
@@ -102,7 +101,7 @@ public class ControlTurno {
         } catch (Exception e) {
             vista.mostrarMensaje("Error al sustituir ficha: " + e.getMessage());
         }
-        vista.actualizar();
+
     }
 
     public void cambiarFicha(String jugadorId) {
@@ -112,6 +111,14 @@ public class ControlTurno {
         } catch (Exception e) {
             vista.mostrarMensaje("Error al cambiar ficha: " + e.getMessage());
         }
-        vista.actualizar();
+
+    }
+
+    public void tomarFicha() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
+    public void terminarTurno(){
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody        
     }
 }

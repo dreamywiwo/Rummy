@@ -4,6 +4,7 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.modelo.IModelo;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,27 +17,67 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UI_Tablero extends javax.swing.JPanel {
+public class UI_Tablero extends ComponenteBase {
     private Map<String, UI_Ficha> fichasEnTablero;
     private int[][] celdasOcupadas;
-    private UI_Mano mano;
+    private UI_Grupo grupoMano; 
     private Point ultimaCasillaSeleccionada;
     
-    public UI_Tablero() {
+    public UI_Tablero(String id) {
+        super(id);
         this.fichasEnTablero = new HashMap<>();
         this.celdasOcupadas = new int[4][10];
         this.ultimaCasillaSeleccionada = null;
-        initComponents();
+        inicializarComponente();
+    }
+
+    private void inicializarComponente() {
         setPreferredSize(new Dimension(1230, 660));
         setBackground(new Color(230, 230, 230));
         setLayout(null);
-        
         configurarSeleccionCasillas();
     }
 
-    public void setMano(UI_Mano mano) {
-        this.mano = mano;
-        System.out.println("Mano conectada al tablero");
+    // Metodo actualizar del Composite
+    @Override
+    public void actualizar(IModelo modelo) {
+        try {
+            System.out.println("Actualizando UI_Tablero...");
+            
+            // Limpiar tablero actual
+            limpiarTablero();
+            
+            // TODO: Obtener grupos del modelo y agregarlos al tablero
+            
+            // Propagar actualización a componentes hijos (fichas en el tablero)
+            super.actualizar(modelo);
+            
+        } catch (Exception ex) {
+            System.err.println("Error actualizando tablero: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    public void setGrupoMano(UI_Grupo grupoMano) {
+        this.grupoMano = grupoMano;
+        System.out.println("GrupoMano conectado al tablero");
+    }
+
+    public void agregarGrupo() {
+        // TODO: aqui se utilizaria para encontrarPosicionParaGrupo, ya que se creen los grupos
+    }
+
+
+    private Point encontrarPosicionParaGrupo(int tamañoGrupo) {
+
+        for (int fila = 0; fila < 4; fila++) {
+            for (int columna = 0; columna <= 10 - tamañoGrupo; columna++) {
+                if (hayEspacioDisponible(fila, columna, tamañoGrupo)) {
+                    return new Point(fila, columna);
+                }
+            }
+        }
+        return null;
     }
     
     private void configurarSeleccionCasillas() {
@@ -50,12 +91,12 @@ public class UI_Tablero extends javax.swing.JPanel {
                     System.out.println("Casilla seleccionada: [" + casilla.x + "," + casilla.y + "]");
                     ultimaCasillaSeleccionada = casilla;
 
-                    if (mano == null) {
-                        System.out.println("ERROR: La mano no está conectada al tablero");
+                    if (grupoMano == null) {
+                        System.out.println("ERROR: El grupo mano no está conectado al tablero");
                         return;
                     }
                     
-                    List<UI_Ficha> fichasSeleccionadas = mano.getFichasSeleccionadas();
+                    List<UI_Ficha> fichasSeleccionadas = grupoMano.getFichasSeleccionadas();
                     System.out.println("Fichas seleccionadas en mano: " + fichasSeleccionadas.size());
                     
                     if (!fichasSeleccionadas.isEmpty()) {
@@ -81,7 +122,7 @@ public class UI_Tablero extends javax.swing.JPanel {
     }
     
     private void colocarFichasSeleccionadas(Point casillaInicio) {
-        List<UI_Ficha> fichasParaColocar = mano.getFichasSeleccionadas();
+        List<UI_Ficha> fichasParaColocar = grupoMano.getFichasSeleccionadas();
         int cantidadFichas = fichasParaColocar.size();
         
         System.out.println("Intentando colocar " + cantidadFichas + " fichas");
@@ -99,12 +140,11 @@ public class UI_Tablero extends javax.swing.JPanel {
                 colocarFichaEnCasilla(ficha, inicioAjustado.x, columna);
             }
 
-            mano.removerFichasSeleccionadas();
+            grupoMano.removerFichasSeleccionadas();
             System.out.println("Fichas colocadas exitosamente");
             
         } else {
             System.out.println("No hay espacio suficiente para " + cantidadFichas + " fichas");
-
             mostrarEstadoTablero();
         }
     }
@@ -115,13 +155,13 @@ public class UI_Tablero extends javax.swing.JPanel {
         
         System.out.println("Buscando espacio para " + cantidadFichas + " fichas en fila " + fila);
 
-        if (hayEspacioDisponible(fila, columnaInicio, cantidadFichas, true)) {
+        if (hayEspacioDisponible(fila, columnaInicio, cantidadFichas)) {
             System.out.println("Espacio encontrado a la derecha: [" + fila + "," + columnaInicio + "]");
             return new Point(fila, columnaInicio);
         }
 
         int columnaAjustada = columnaInicio - (cantidadFichas - 1);
-        if (columnaAjustada >= 0 && hayEspacioDisponible(fila, columnaAjustada, cantidadFichas, true)) {
+        if (columnaAjustada >= 0 && hayEspacioDisponible(fila, columnaAjustada, cantidadFichas)) {
             System.out.println("Espacio encontrado a la izquierda: [" + fila + "," + columnaAjustada + "]");
             return new Point(fila, columnaAjustada);
         }
@@ -129,7 +169,7 @@ public class UI_Tablero extends javax.swing.JPanel {
         for (int f = 0; f < 4; f++) {
             if (f != fila) {
                 for (int c = 0; c <= 10 - cantidadFichas; c++) {
-                    if (hayEspacioDisponible(f, c, cantidadFichas, true)) {
+                    if (hayEspacioDisponible(f, c, cantidadFichas)) {
                         System.out.println("   🔄 Moviendo a fila " + f + ", columna " + c);
                         return new Point(f, c);
                     }
@@ -141,28 +181,26 @@ public class UI_Tablero extends javax.swing.JPanel {
         return null;
     }
     
-    private boolean hayEspacioDisponible(int fila, int columnaInicio, int cantidad, boolean buscarDesdeInicio) {
-        if (buscarDesdeInicio) {
-            for (int i = 0; i < cantidad; i++) {
-                int columna = columnaInicio + i;
-                if (columna >= 10) {
-                    System.out.println("Columna " + columna + " fuera de límites");
-                    return false;
-                }
-                if (celdasOcupadas[fila][columna] == 1) {
-                    System.out.println("Celda [" + fila + "," + columna + "] ocupada");
-                    return false;
-                }
+    private boolean hayEspacioDisponible(int fila, int columnaInicio, int cantidad) {
+        for (int i = 0; i < cantidad; i++) {
+            int columna = columnaInicio + i;
+            if (columna >= 10) {
+                System.out.println("Columna " + columna + " fuera de límites");
+                return false;
             }
-            System.out.println("Espacio libre desde [" + fila + "," + columnaInicio + "]");
-            return true;
+            if (celdasOcupadas[fila][columna] == 1) {
+                System.out.println("Celda [" + fila + "," + columna + "] ocupada");
+                return false;
+            }
         }
-        return false;
+        System.out.println("Espacio libre desde [" + fila + "," + columnaInicio + "]");
+        return true;
     }
     
     private void colocarFichaEnCasilla(UI_Ficha ficha, int fila, int columna) {
         UI_Ficha fichaEnTablero = new UI_Ficha(ficha.getNumero(), ficha.getFichaColor());
         fichaEnTablero.setPuedeSerMovida(false);
+        fichaEnTablero.setId("ficha_tablero_" + fila + "_" + columna);
         
         int cellWidth = getWidth() / 10;
         int cellHeight = getHeight() / 4;
@@ -171,6 +209,9 @@ public class UI_Tablero extends javax.swing.JPanel {
         int y = fila * cellHeight + (cellHeight - fichaEnTablero.getHeight()) / 2;
         
         fichaEnTablero.setBounds(x, y, fichaEnTablero.getPreferredSize().width, fichaEnTablero.getPreferredSize().height);
+        
+        // Agregar al composite y al panel Swing
+        agregarComponente(fichaEnTablero);
         add(fichaEnTablero);
 
         String clave = fila + "_" + columna;
@@ -181,6 +222,32 @@ public class UI_Tablero extends javax.swing.JPanel {
         
         revalidate();
         repaint();
+    }
+
+    public void limpiarTablero() {
+        // Limpiar del composite
+        for (IComponente componente : getComponentes()) {
+            if (componente instanceof UI_Ficha) {
+                removerComponente(componente);
+            }
+        }
+        
+        // Limpiar del panel Swing
+        removeAll();
+        
+        // Limpiar estructuras de datos
+        fichasEnTablero.clear();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 10; j++) {
+                celdasOcupadas[i][j] = 0;
+            }
+        }
+        
+        ultimaCasillaSeleccionada = null;
+        
+        revalidate();
+        repaint();
+        System.out.println("Tablero limpiado completamente");
     }
     
     public void mostrarEstadoTablero() {
@@ -238,6 +305,7 @@ public class UI_Tablero extends javax.swing.JPanel {
             }
         }
     }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

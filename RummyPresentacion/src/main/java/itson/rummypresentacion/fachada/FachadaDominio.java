@@ -4,6 +4,8 @@
  */
 package itson.rummypresentacion.fachada;
 
+import itson.rummypresentacion.DTOs.FichaDTO;
+import itson.rummypresentacion.DTOs.GrupoDTO;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,6 +71,18 @@ public class FachadaDominio implements IFachadaDominio {
         }
     }
 
+    public GrupoDTO crearGrupo(List<FichaDTO> fichas) throws Exception {
+        if (fichas == null || fichas.size() < 3) {
+            throw new Exception("Un grupo debe tener al menos 3 fichas.");
+        }
+        boolean esSecuencia = validarSecuencia(fichas);
+        boolean esMismoNumero = validarNumeroIgual(fichas);
+        if (!esSecuencia && !esMismoNumero) {
+            throw new Exception("Grupo inválido: debe ser secuencia del mismo color o del mismo número con colores distintos.");
+        }
+        return new GrupoDTO(new ArrayList<>(fichas), true);
+    }
+
     @Override
     public int getNumeroTurno() {
         return numeroTurno;
@@ -87,40 +101,48 @@ public class FachadaDominio implements IFachadaDominio {
     public List<String> getJugadores() {
         return new ArrayList<>(jugadores);
     }
-        public boolean validarSecuencia(List<Integer> numero, List<String> color) throws Exception {
-        if (numero.isEmpty() || color.isEmpty()) {
-            throw new Exception("La lista vacia.");
-        }
 
-        String colorBase = color.get(0);
-        for (String c : color) {
-            if (!c.equalsIgnoreCase(colorBase)) {
+    public boolean validarSecuencia(List<FichaDTO> fichas) throws Exception {
+        if (fichas == null || fichas.isEmpty()) {
+            throw new Exception("La lista está vacía.");
+        }
+        java.awt.Color colorBase = fichas.get(0).getColor();
+        for (FichaDTO f : fichas) {
+            if (!f.getColor().equals(colorBase)) {
                 return false;
             }
         }
+        List<Integer> numeros = new ArrayList<>();
+        for (FichaDTO f : fichas) {
+            numeros.add(f.getNumero());
+        }
 
-        List<Integer> ordenar = new ArrayList<>(numero);
-        Collections.sort(ordenar);
-        for (int i = 1; i < ordenar.size(); i++) {
-            if (ordenar.get(i) != ordenar.get(i - 1) + 1) {
+        Collections.sort(numeros);
+        for (int i = 1; i < numeros.size(); i++) {
+            if (numeros.get(i) != numeros.get(i - 1) + 1) {
                 return false;
             }
         }
         return true;
     }
 
-    public boolean validarNumeroIgual(List<Integer> numero, List<String> color) throws Exception {
-        if (numero.isEmpty() || color.isEmpty()) {
-            return false;
+    public boolean validarNumeroIgual(List<FichaDTO> fichas) throws Exception {
+        if (fichas == null || fichas.isEmpty()) {
+            throw new Exception("La lista está vacía.");
         }
-        int numeroBase = numero.get(0);
-        for (int n : numero) {
-            if (n != numeroBase) {
+        int numeroBase = fichas.get(0).getNumero();
+        for (FichaDTO f : fichas) {
+            if (f.getNumero() != numeroBase) {
                 return false;
+            }
+        }
+        for (int i = 0; i < fichas.size(); i++) {
+            for (int j = i + 1; j < fichas.size(); j++) {
+                if (fichas.get(i).getColor().equals(fichas.get(j).getColor())) {
+                    return false;
+                }
             }
         }
         return true;
     }
 }
-
-

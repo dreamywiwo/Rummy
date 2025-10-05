@@ -102,6 +102,46 @@ public class Modelo implements IModelo, ISubject {
     }
 
     @Override
+    public Ficha tomarFicha(String jugadorId) throws Exception {
+        Jugador jugador = getJugador(jugadorId);
+        List<Ficha> pozo = estado.getPozoDeFichas(); 
+
+        if (pozo == null || pozo.isEmpty()) {
+            throw new Exception("No hay más fichas para tomar.");
+        }
+        
+        Ficha fichaTomada = pozo.remove(0);
+        jugador.getMano().add(fichaTomada);
+        notificarObservers();
+        return fichaTomada;
+    }
+
+    @Override
+    public void terminarTurno(String jugadorId) throws Exception {
+        System.out.println("Turno terminado para el jugador: " + jugadorId);
+    }
+
+    @Override
+    public void pasarTurno() throws Exception {
+        List<Jugador> jugadores = estado.getJugadores();
+        if (jugadores == null || jugadores.size() < 2) {
+            return; 
+        }
+        Jugador jugadorActual = estado.getTurnoActual().getJugadorActual();
+
+        int indiceActual = jugadores.indexOf(jugadorActual);
+
+        int indiceSiguiente = (indiceActual + 1) % jugadores.size();
+        Jugador siguienteJugador = jugadores.get(indiceSiguiente);
+
+        Turno nuevoTurno = new Turno(estado.getTurnoActual().getNumero() + 1, siguienteJugador);
+        
+        estado.setTurnoActual(nuevoTurno);
+
+        notificarObservers();
+    }
+    
+    @Override
     public void suscribir(IObserver observer) {
         observers.add(observer);
     }

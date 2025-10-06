@@ -51,6 +51,10 @@ public class FachadaDominio implements IFachadaDominio {
         // Inicializar turno
         this.numeroTurno = 0;
         this.idJugadorActual = "Jugador1";
+        for (int i = 0; i < jugadores.size(); i++) {
+            turnoPropio.add(0);
+            puntosIniciales.add(0);
+        }
         
         System.out.println("DEBUG - Fachada.inicializarJuego FIN");
         System.out.println("  - Mano Jugador1: " + manoJugador1.size() + " fichas");
@@ -129,7 +133,6 @@ public class FachadaDominio implements IFachadaDominio {
         for (int i = 0; i < fichas.size(); i++) {
             total = total + fichas.get(i).getNumero();
         }
-        
         return total;
     }
     

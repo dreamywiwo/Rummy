@@ -29,4 +29,6 @@ public interface IFachadaDominio {
     public List<FichaDTO> obtenerManoJugadorActual();
     public List<GrupoDTO> obtenerGruposTablero();
     List<FichaDTO> obtenerManoJugador(String jugadorId);
+    boolean jugadorYaBajo30(String jugadorId);
+
 }

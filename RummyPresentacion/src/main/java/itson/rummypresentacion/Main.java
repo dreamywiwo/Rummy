@@ -119,7 +119,7 @@ public class Main {
         pozo.add(new FichaDTO(11, "azul", "P2"));
         pozo.add(new FichaDTO(12, "verde", "P3"));
         pozo.add(new FichaDTO(13, "amarillo", "P4"));
-        pozo.add(new FichaDTO(1, "negro", "P5")); // Comodín
+        pozo.add(new FichaDTO(1, "negro", "P5", true)); // Comodín
         return pozo;
     }
 }

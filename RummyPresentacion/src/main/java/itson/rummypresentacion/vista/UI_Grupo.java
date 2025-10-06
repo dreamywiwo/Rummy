@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.Set;
 
 public class UI_Grupo extends ComponenteBase {
+
     private List<UI_Ficha> fichas;
     private UI_Tablero padre; // Ahora el padre es UI_Tablero
     private List<UI_Ficha> fichasSeleccionadas;
     private boolean esMano;
-    private Set<String> idsFichasSeleccionadas = new HashSet<>(); 
+    private Set<String> idsFichasSeleccionadas = new HashSet<>();
     private List<FichaDTO> manoAnterior = new ArrayList<>();
+    private boolean esGrupoDeTablero = false;
 
     public UI_Grupo(String id) {
         super(id);
@@ -28,7 +30,7 @@ public class UI_Grupo extends ComponenteBase {
         this.esMano = "mano_jugador".equals(id);
         inicializarComponente();
     }
-    
+
     private void inicializarComponente() {
         if (esMano) {
             setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -44,38 +46,31 @@ public class UI_Grupo extends ComponenteBase {
     @Override
     public void actualizar(IModelo modelo) {
         try {
-            List<FichaDTO> manoActual = modelo.getManoJugadorActual();
-            
-            // VERIFICAR SI REALMENTE HAY CAMBIOS PARA EVITAR ACTUALIZACIONES INNECESARIAS
-            if (manoActual != null && manoActual.equals(manoAnterior)) {
-                System.out.println("DEBUG - No hay cambios en la mano, omitiendo actualización");
+            if (esGrupoDeTablero) {
+// Evita limpiar las fichas de los grupos del tablero
                 return;
             }
-            
-            System.out.println("UI_Grupo '" + getId() + "' actualizando desde modelo...");
-            
-            // Preservar selecciones antes de limpiar
+            List<FichaDTO> manoActual = modelo.getManoJugadorActual();
+            if (manoActual != null && manoActual.equals(manoAnterior)) {
+                System.out.println("DEBUG - No hay cambios en la mano,omitiendo actualización");
+                return;
+            }
+            System.out.println("UI_Grupo '" + getId() + "' actualizandodesde modelo...");
             preservarSelecciones();
-            
-            // Limpiar el grupo actual
             limpiarGrupo();
-            
             if (esMano) {
                 actualizarManoDesdeModelo(modelo);
                 restaurarSelecciones();
-                
-                // Guardar el estado actual para comparaciones futuras
                 manoAnterior = new ArrayList<>(manoActual);
             }
-            
-            System.out.println("UI_Grupo '" + getId() + "' actualizado con " + fichas.size() + " fichas, " + fichasSeleccionadas.size() + " seleccionadas");
-            
+            System.out.println("UI_Grupo '" + getId() + "' actualizadocon " + fichas.size() + " fichas, "
+                    + fichasSeleccionadas.size() + " seleccionadas");
         } catch (Exception ex) {
-            System.err.println("Error actualizando UI_Grupo: " + ex.getMessage());
+            System.err.println("Error actualizando UI_Grupo: "
+                    + ex.getMessage());
             ex.printStackTrace();
         }
     }
-
 
     /**
      * Preserva los IDs de las fichas seleccionadas antes de limpiar
@@ -108,7 +103,7 @@ public class UI_Grupo extends ComponenteBase {
             List<FichaDTO> fichasMano = modelo.getManoJugadorActual();
             System.out.println("DEBUG - UI_Grupo.actualizarManoDesdeModelo:");
             System.out.println("  Fichas del modelo: " + (fichasMano != null ? fichasMano.size() : "null"));
-            
+
             if (fichasMano != null && !fichasMano.isEmpty()) {
                 for (FichaDTO fichaDTO : fichasMano) {
                     UI_Ficha fichaUI = new UI_Ficha(fichaDTO);
@@ -131,14 +126,14 @@ public class UI_Grupo extends ComponenteBase {
         add(ficha);
         revalidate();
         repaint();
-        
+
         System.out.println("DEBUG - Ficha agregada: " + ficha.getId());
     }
 
     private void configurarFichaParaSeleccion(UI_Ficha ficha) {
         ficha.addActionListener(e -> {
             boolean estabaSeleccionada = ficha.isSelected();
-            
+
             if (estabaSeleccionada) {
                 fichasSeleccionadas.add(ficha);
                 idsFichasSeleccionadas.add(ficha.getId()); // Actualizar el conjunto
@@ -148,7 +143,7 @@ public class UI_Grupo extends ComponenteBase {
                 idsFichasSeleccionadas.remove(ficha.getId()); // Actualizar el conjunto
                 System.out.println("Ficha deseleccionada: " + ficha.getId());
             }
-            
+
             // Notificar al padre sobre la selección cambiada
             if (padre != null) {
                 List<String> fichasIds = obtenerIdsFichasSeleccionadas();
@@ -217,7 +212,7 @@ public class UI_Grupo extends ComponenteBase {
     public List<UI_Ficha> getFichas() {
         return new ArrayList<>(fichas);
     }
-    
+
     /**
      * Establece el padre (UI_Tablero) para este grupo
      */
@@ -227,12 +222,17 @@ public class UI_Grupo extends ComponenteBase {
     }
 
     /**
-     * Método de compatibilidad - establece el padre que es UI_Tablero
-     * Este método es necesario para mantener la compatibilidad con el código existente
+     * Método de compatibilidad - establece el padre que es UI_Tablero Este
+     * método es necesario para mantener la compatibilidad con el código
+     * existente
      */
     public void setTablero(UI_Tablero tablero) {
         setPadre(tablero); // Llama a setPadre para mantener la consistencia
         System.out.println("UI_Grupo '" + getId() + "' - Tablero establecido como padre");
+    }
+
+    public void setEsGrupoDeTablero(boolean esTablero) {
+        this.esGrupoDeTablero = esTablero;
     }
 
 }

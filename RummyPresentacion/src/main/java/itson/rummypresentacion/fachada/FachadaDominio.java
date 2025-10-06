@@ -26,16 +26,16 @@ public class FachadaDominio implements IFachadaDominio {
     private final List<Integer> puntosIniciales = new ArrayList<>();
     private int numeroTurno = 0;
     private String idJugadorActual = null;
-    
+
     private List<GrupoDTO> gruposTablero = new ArrayList<>();
     private Map<String, List<FichaDTO>> manosJugadores = new HashMap<>();
-    private List<FichaDTO> pozoFichas = new ArrayList<>(); 
+    private List<FichaDTO> pozoFichas = new ArrayList<>();
     private Map<GrupoDTO, Point> posicionesGrupos = new HashMap<>();
-    
+
     @Override
     public void inicializarJuego(List<FichaDTO> manoJugador1, List<FichaDTO> manoJugador2, List<FichaDTO> pozo) {
         System.out.println("DEBUG - Fachada.inicializarJuego INICIO");
-        
+
         // Limpiar estado anterior
         gruposTablero.clear();
         posicionesGrupos.clear();
@@ -55,13 +55,13 @@ public class FachadaDominio implements IFachadaDominio {
             turnoPropio.add(0);
             puntosIniciales.add(0);
         }
-        
+
         System.out.println("DEBUG - Fachada.inicializarJuego FIN");
         System.out.println("  - Mano Jugador1: " + manoJugador1.size() + " fichas");
         System.out.println("  - Mano Jugador2: " + manoJugador2.size() + " fichas");
         System.out.println("  - Pozo: " + pozoFichas.size() + " fichas");
     }
-    
+
     @Override
     public void registrarJugador(String idJugador) {
         if (idJugador == null || idJugador.isBlank()) {
@@ -75,7 +75,7 @@ public class FachadaDominio implements IFachadaDominio {
             System.out.println("Jugador registrado: " + idJugador);
         }
     }
-    
+
     @Override
     public boolean pasarTurno() {
         if (pozoFichas.isEmpty()) {
@@ -104,18 +104,18 @@ public class FachadaDominio implements IFachadaDominio {
             throw new Exception("Jugador no registrado: " + jugadorId);
         }
     }
-    
+
     @Override
     public ResultadoJugada colocarFichas(String jugadorId, List<FichaDTO> fichas, Point posicion) throws Exception {
         if (!esTurnoDelJugador(jugadorId)) {
             return new ResultadoJugada(false, "No es tu turno");
         }
-        
+
         if (!manoContieneFichas(jugadorId, fichas)) {
             return new ResultadoJugada(false, "No tienes estas fichas en tu mano");
         }
         GrupoDTO grupoAdyacente = encontrarGrupoAdyacente(posicion);
-        
+
         if (grupoAdyacente != null) {
             return unirAGrupoExistente(grupoAdyacente, fichas, jugadorId);
         } else {
@@ -123,14 +123,14 @@ public class FachadaDominio implements IFachadaDominio {
         }
     }
 
-    private int sumaDeFichas(List<FichaDTO> fichas, String jugadorId){
+    private int sumaDeFichas(List<FichaDTO> fichas, String jugadorId) {
         int total = 0;
         for (int i = 0; i < fichas.size(); i++) {
             total = total + fichas.get(i).getNumero();
         }
         return total;
     }
-    
+
     private boolean manoContieneFichas(String jugadorId, List<FichaDTO> fichas) {
         List<FichaDTO> mano = manosJugadores.get(jugadorId);
 
@@ -142,7 +142,7 @@ public class FachadaDominio implements IFachadaDominio {
             System.out.println("DEBUG - Mano es null!");
             return false;
         }
-    
+
         // Verificar cada ficha individualmente
         for (FichaDTO ficha : fichas) {
             boolean contiene = mano.contains(ficha);
@@ -182,7 +182,7 @@ public class FachadaDominio implements IFachadaDominio {
 
         return (mismaFila && columnaAdyacente) || (mismaColumna && filaAdyacente);
     }
-    
+
     private ResultadoJugada unirAGrupoExistente(GrupoDTO grupoExistente, List<FichaDTO> fichas, String jugadorId) throws Exception {
         List<FichaDTO> fichasTemporal = new ArrayList<>(grupoExistente.getFichas());
         fichasTemporal.addAll(fichas);
@@ -206,7 +206,7 @@ public class FachadaDominio implements IFachadaDominio {
             }
         }
     }
-    
+
     private ResultadoJugada crearNuevoGrupoEnTablero(List<FichaDTO> fichas, Point posicion, String jugadorId) throws Exception {
         GrupoDTO nuevoGrupo = crearGrupo(fichas);
         posicionesGrupos.put(nuevoGrupo, posicion);
@@ -216,13 +216,12 @@ public class FachadaDominio implements IFachadaDominio {
         // SOLO éxito y mensaje, NO estadoActual
         return new ResultadoJugada(true, "Nuevo grupo creado en el tablero");
     }
-    
 
     private void removerFichasDeMano(String jugadorId, List<FichaDTO> fichas) {
         List<FichaDTO> mano = manosJugadores.get(jugadorId);
         mano.removeAll(fichas);
     }
-    
+
     private Point encontrarPosicionParaNuevoGrupo(int tamañoGrupo) {
         // Buscar en el tablero 4x10
         for (int fila = 0; fila < 4; fila++) {
@@ -248,9 +247,9 @@ public class FachadaDominio implements IFachadaDominio {
 
     private boolean estaOcupado(Point punto) {
         return posicionesGrupos.values().stream()
-            .anyMatch(pos -> pos.equals(punto));
+                .anyMatch(pos -> pos.equals(punto));
     }
-    
+
     @Override
     public GrupoDTO crearGrupo(List<FichaDTO> fichas) throws Exception {
         if (fichas == null) {
@@ -263,44 +262,44 @@ public class FachadaDominio implements IFachadaDominio {
         }
         return new GrupoDTO(new ArrayList<>(fichas), true);
     }
-    
-    public GrupoDTO agregarFichaAGrupo(FichaDTO ficha, GrupoDTO grupo)throws Exception{
+
+    public GrupoDTO agregarFichaAGrupo(FichaDTO ficha, GrupoDTO grupo) throws Exception {
         if (grupo == null) {
             throw new Exception("Debe de existir un grupo al cual anadir la ficha.");
         }
         List<FichaDTO> fichas = grupo.getFichas();
         fichas.add(ficha);
-        
+
         boolean esSecuencia = validarSecuencia(fichas);
         boolean esMismoNumero = validarNumeroIgual(fichas);
         if (!esSecuencia && !esMismoNumero) {
             throw new Exception("Grupo inválido: debe ser secuencia del mismo color o del mismo número con colores distintos.");
         }
-        
+
         return new GrupoDTO(new ArrayList<>(fichas), true);
     }
 
-    public GrupoDTO eliminarFichaDeGrupo(FichaDTO ficha, GrupoDTO grupo)throws Exception{
-        
+    public GrupoDTO eliminarFichaDeGrupo(FichaDTO ficha, GrupoDTO grupo) throws Exception {
+
         if (grupo == null) {
             throw new Exception("No hay grupo del cual eliminar fichas.");
         }
-        
+
         List<FichaDTO> fichas = grupo.getFichas();
         if (!fichas.contains(ficha)) {
             throw new Exception("el grupo no contiene la ficha seleccionada");
         }
-        
+
         fichas.remove(ficha);
         boolean esSecuencia = validarSecuencia(fichas);
         boolean esMismoNumero = validarNumeroIgual(fichas);
         if (!esSecuencia && !esMismoNumero) {
             throw new Exception("Grupo inválido: debe ser secuencia del mismo color o del mismo número con colores distintos.");
         }
-        
+
         return new GrupoDTO(new ArrayList<>(fichas), true);
     }
-    
+
     @Override
     public int getNumeroTurno() {
         return numeroTurno;
@@ -320,7 +319,6 @@ public class FachadaDominio implements IFachadaDominio {
         return new ArrayList<>(jugadores);
     }
 
-    
     /* Validaciones grupos */
     public boolean validarSecuencia(List<FichaDTO> fichas) throws Exception {
         if (fichas == null || fichas.isEmpty()) {
@@ -367,7 +365,7 @@ public class FachadaDominio implements IFachadaDominio {
         }
         return true;
     }
-    
+
     @Override
     public void terminarTurno(String idJugador) throws Exception {
         if (!esTurnoDelJugador(idJugador)) {
@@ -416,13 +414,20 @@ public class FachadaDominio implements IFachadaDominio {
     public List<FichaDTO> obtenerManoJugadorActual() {
         String jugadorActual = getJugadorActualId();
         List<FichaDTO> mano = manosJugadores.get(jugadorActual);
-        System.out.println("DEBUG - Fachada.obtenerManoJugadorActual() para " + jugadorActual + ": " + 
-                          (mano != null ? mano.size() : "null") + " fichas");
+        System.out.println("DEBUG - Fachada.obtenerManoJugadorActual() para " + jugadorActual + ": "
+                + (mano != null ? mano.size() : "null") + " fichas");
         return mano != null ? new ArrayList<>(mano) : new ArrayList<>();
     }
-    
+
     @Override
     public List<GrupoDTO> obtenerGruposTablero() {
         return new ArrayList<>(gruposTablero);
     }
+
+    @Override
+    public List<FichaDTO> obtenerManoJugador(String jugadorId) {
+        List<FichaDTO> mano = manosJugadores.get(jugadorId);
+        return mano != null ? new ArrayList<>(mano) : new ArrayList<>();
+    }
+
 }

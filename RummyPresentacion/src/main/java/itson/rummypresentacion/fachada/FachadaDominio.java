@@ -22,6 +22,8 @@ import java.util.Map;
 public class FachadaDominio implements IFachadaDominio {
 
     private final List<String> jugadores = new ArrayList<>();
+    private final List<Integer> turnoPropio = new ArrayList<>();
+    private final List<Integer> puntosIniciales = new ArrayList<>();
     private int numeroTurno = 0;
     private String idJugadorActual = null;
     
@@ -49,6 +51,10 @@ public class FachadaDominio implements IFachadaDominio {
         // Inicializar turno
         this.numeroTurno = 0;
         this.idJugadorActual = "Jugador1";
+        for (int i = 0; i < jugadores.size(); i++) {
+            turnoPropio.add(0);
+            puntosIniciales.add(0);
+        }
         
         System.out.println("DEBUG - Fachada.inicializarJuego FIN");
         System.out.println("  - Mano Jugador1: " + manoJugador1.size() + " fichas");
@@ -109,6 +115,10 @@ public class FachadaDominio implements IFachadaDominio {
             return new ResultadoJugada(false, "No tienes estas fichas en tu mano");
         }
         
+        if (this.sumaDeFichas(fichas, jugadorId) < 30 && turnoPropio.get(jugadores.indexOf(jugadorId)) <1) {
+            return new ResultadoJugada(false, "No ha juntado los 30 puntos");
+        }
+        
         GrupoDTO grupoAdyacente = encontrarGrupoAdyacente(posicion);
         
         if (grupoAdyacente != null) {
@@ -118,6 +128,14 @@ public class FachadaDominio implements IFachadaDominio {
         }
     }
 
+    private int sumaDeFichas(List<FichaDTO> fichas, String jugadorId){
+        int total = 0;
+        for (int i = 0; i < fichas.size(); i++) {
+            total = total + fichas.get(i).getNumero();
+        }
+        return total;
+    }
+    
     private boolean manoContieneFichas(String jugadorId, List<FichaDTO> fichas) {
         List<FichaDTO> mano = manosJugadores.get(jugadorId);
 

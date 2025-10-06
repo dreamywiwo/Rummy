@@ -99,6 +99,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         btnTomarFicha.addActionListener(e -> {
             if (control != null) {
                 control.tomarFicha(jugadorId);
+                control.terminarTurno(jugadorId);
             } else {
                 mostrarMensaje("Controlador no configurado");
             }
@@ -380,6 +381,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnTerminarTurno;
     private javax.swing.JButton btnTomarFicha;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanelContenedorMano;
     private javax.swing.JPanel jPanelContenedorTablero;
     private javax.swing.JPanel jPanelJugadorActual;

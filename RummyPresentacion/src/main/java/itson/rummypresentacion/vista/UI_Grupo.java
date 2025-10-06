@@ -22,6 +22,7 @@ public class UI_Grupo extends ComponenteBase {
     private Set<String> idsFichasSeleccionadas = new HashSet<>();
     private List<FichaDTO> manoAnterior = new ArrayList<>();
     private boolean esGrupoDeTablero = false;
+    private String manoIdJugador;
 
     public UI_Grupo(String id) {
         super(id);
@@ -29,6 +30,10 @@ public class UI_Grupo extends ComponenteBase {
         this.fichasSeleccionadas = new ArrayList<>();
         this.esMano = "mano_jugador".equals(id);
         inicializarComponente();
+    }
+
+    public void manoIdJugador(String jugadorId) {
+        this.manoIdJugador = jugadorId;
     }
 
     private void inicializarComponente() {
@@ -43,31 +48,36 @@ public class UI_Grupo extends ComponenteBase {
         setOpaque(true);
     }
 
-    @Override
+@Override
     public void actualizar(IModelo modelo) {
         try {
             if (esGrupoDeTablero) {
-// Evita limpiar las fichas de los grupos del tablero
                 return;
             }
-            List<FichaDTO> manoActual = modelo.getManoJugadorActual();
+            List<FichaDTO> manoActual = (manoIdJugador != null)
+                    ? modelo.getManoDe(manoIdJugador)
+                    : modelo.getManoJugadorActual();
             if (manoActual != null && manoActual.equals(manoAnterior)) {
-                System.out.println("DEBUG - No hay cambios en la mano,omitiendo actualización");
+                System.out.println("DEBUG - No hay cambios en la mano, omitiendo actualización");
                 return;
             }
-            System.out.println("UI_Grupo '" + getId() + "' actualizandodesde modelo...");
+            System.out.println("UI_Grupo '" + getId() + "' actualizando desde modelo...");
             preservarSelecciones();
             limpiarGrupo();
+
             if (esMano) {
-                actualizarManoDesdeModelo(modelo);
+                actualizarManoDesdeLista(manoActual);
                 restaurarSelecciones();
-                manoAnterior = new ArrayList<>(manoActual);
+                if (manoActual != null) {
+                    manoAnterior = new ArrayList<>(manoActual);
+                } else {
+                    manoAnterior = null;
+                }
             }
-            System.out.println("UI_Grupo '" + getId() + "' actualizadocon " + fichas.size() + " fichas, "
-                    + fichasSeleccionadas.size() + " seleccionadas");
+            System.out.println("UI_Grupo '" + getId() + "' actualizado con " + fichas.size()
+                    + " fichas, " + fichasSeleccionadas.size() + " seleccionadas");
         } catch (Exception ex) {
-            System.err.println("Error actualizando UI_Grupo: "
-                    + ex.getMessage());
+            System.err.println("Error actualizando UI_Grupo: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -98,12 +108,10 @@ public class UI_Grupo extends ComponenteBase {
         System.out.println("DEBUG - Selecciones restauradas: " + fichasSeleccionadas.size() + " fichas");
     }
 
-    private void actualizarManoDesdeModelo(IModelo modelo) {
+    private void actualizarManoDesdeLista(List<FichaDTO> fichasMano) {
         try {
-            List<FichaDTO> fichasMano = modelo.getManoJugadorActual();
-            System.out.println("DEBUG - UI_Grupo.actualizarManoDesdeModelo:");
-            System.out.println("  Fichas del modelo: " + (fichasMano != null ? fichasMano.size() : "null"));
-
+            System.out.println("DEBUG - UI_Grupo.actualizarManoDesdeLista: "
+                    + (fichasMano != null ? fichasMano.size() : "null"));
             if (fichasMano != null && !fichasMano.isEmpty()) {
                 for (FichaDTO fichaDTO : fichasMano) {
                     UI_Ficha fichaUI = new UI_Ficha(fichaDTO);
@@ -114,7 +122,7 @@ public class UI_Grupo extends ComponenteBase {
                 System.out.println("DEBUG - La mano está vacía o es null");
             }
         } catch (Exception e) {
-            System.err.println("Error en actualizarManoDesdeModelo: " + e.getMessage());
+            System.err.println("Error en actualizarManoDesdeLista: " + e.getMessage());
             e.printStackTrace();
         }
     }

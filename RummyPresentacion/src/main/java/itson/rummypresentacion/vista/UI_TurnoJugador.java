@@ -222,6 +222,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         // Manejar eventos específicos
         if (ultimoEvento != null) {
             switch (ultimoEvento) {
+                case "PRIMER_BAJADA_30":
+                    mostrarMensaje("Primer movimiento exitoso: has cumplido con los 30 puntos");
+                    break;
                 case "TURNO_TERMINADO":
                     if (modelo.esTurnoDe(jugadorId)) {
                         mostrarMensaje("¡Turno terminado exitosamente!");

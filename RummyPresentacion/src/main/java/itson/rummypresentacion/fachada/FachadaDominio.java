@@ -31,6 +31,8 @@ public class FachadaDominio implements IFachadaDominio {
     private Map<String, List<FichaDTO>> manosJugadores = new HashMap<>();
     private List<FichaDTO> pozoFichas = new ArrayList<>();
     private Map<GrupoDTO, Point> posicionesGrupos = new HashMap<>();
+    private Map<String, Boolean> jugadorBajo30 = new HashMap<>();
+
 
     @Override
     public void inicializarJuego(List<FichaDTO> manoJugador1, List<FichaDTO> manoJugador2, List<FichaDTO> pozo) {
@@ -69,6 +71,7 @@ public class FachadaDominio implements IFachadaDominio {
         }
         if (!jugadores.contains(idJugador)) {
             jugadores.add(idJugador);
+            jugadorBajo30.put(idJugador, false);
             if (idJugadorActual == null) {
                 idJugadorActual = idJugador;
             }
@@ -115,7 +118,17 @@ public class FachadaDominio implements IFachadaDominio {
             return new ResultadoJugada(false, "No tienes estas fichas en tu mano");
         }
         GrupoDTO grupoAdyacente = encontrarGrupoAdyacente(posicion);
-
+        
+        if (!jugadorBajo30.getOrDefault(jugadorId, false)) {
+        int suma = fichas.stream().mapToInt(FichaDTO::getNumero).sum();
+        if (suma < 30) {
+            return new ResultadoJugada(false, "Necesitas al menos sumar 30 puntos para continuar del primer turno");
+        } else {
+            jugadorBajo30.put(jugadorId, true);
+            crearNuevoGrupoEnTablero(fichas, posicion, jugadorId);
+        }
+    }
+        
         if (grupoAdyacente != null) {
             return unirAGrupoExistente(grupoAdyacente, fichas, jugadorId);
         } else {
@@ -429,5 +442,12 @@ public class FachadaDominio implements IFachadaDominio {
         List<FichaDTO> mano = manosJugadores.get(jugadorId);
         return mano != null ? new ArrayList<>(mano) : new ArrayList<>();
     }
+    
+    public boolean jugadorYaBajo30(String jugadorId) {
+        return jugadorBajo30.getOrDefault(jugadorId, false);
+}
+
+
+    
 
 }

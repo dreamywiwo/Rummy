@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import itson.rummypresentacion.DTOs.JugadorDTO;
 
 public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, IObserver {
 

@@ -14,7 +14,8 @@ import java.util.List;
  * 
  */
 
-public interface IModelo {
+public interface IModelo extends ISubject{
+    
     // Informacion
     String getJugadorActivoId();
     List<FichaDTO> getManoJugadorActual();

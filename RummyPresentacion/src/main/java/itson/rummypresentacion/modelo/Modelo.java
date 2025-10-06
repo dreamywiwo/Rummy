@@ -13,29 +13,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Modelo implements IModelo, ISubject {
+
     private IFachadaDominio fachada;
     private List<IObserver> observers = new ArrayList<>();
-    
+
     // Estado interno para la UI
     private List<String> fichasSeleccionadas = new ArrayList<>();
     private String ultimoEvento = "INICIALIZADO";
     private String ultimoError;
-    
+
     public Modelo(IFachadaDominio fachada) {
         this.fachada = fachada;
     }
 
     // Llamadas de control
-
     public void colocarFichasEnTablero(String jugadorId, List<FichaDTO> fichas, Point posicion) {
         try {
             System.out.println("DEBUG - Modelo.colocarFichasEnTablero:");
             System.out.println("  Jugador: " + jugadorId);
             System.out.println("  Fichas: " + fichas.size());
             System.out.println("  Posición: " + posicion);
-            
+
             ResultadoJugada resultado = fachada.colocarFichas(jugadorId, fichas, posicion);
-            
+
             if (resultado.esExitoso()) {
                 fichasSeleccionadas.clear();
                 ultimoEvento = "FICHAS_COLOCADAS";
@@ -44,9 +44,9 @@ public class Modelo implements IModelo, ISubject {
                 ultimoError = resultado.getMensaje();
                 ultimoEvento = "ERROR_COLOCACION";
             }
-            
+
             notificarObservers();
-            
+
         } catch (Exception e) {
             ultimoError = "Error al colocar fichas: " + e.getMessage();
             ultimoEvento = "ERROR_SISTEMA";
@@ -54,7 +54,7 @@ public class Modelo implements IModelo, ISubject {
         }
     }
 
-   // En otros métodos, solo notificar si hubo cambios reales
+    // En otros métodos, solo notificar si hubo cambios reales
     public void terminarTurno(String jugadorId) {
         try {
             fachada.terminarTurno(jugadorId);
@@ -62,7 +62,7 @@ public class Modelo implements IModelo, ISubject {
             ultimoEvento = "TURNO_TERMINADO";
             ultimoError = null;
             notificarObservers();
-            
+
         } catch (Exception e) {
             ultimoError = e.getMessage();
             ultimoEvento = "ERROR_TERMINAR_TURNO";
@@ -76,7 +76,7 @@ public class Modelo implements IModelo, ISubject {
             ultimoEvento = "FICHA_TOMADA";
             ultimoError = null;
             notificarObservers();
-            
+
         } catch (Exception e) {
             ultimoError = "Error al tomar ficha: " + e.getMessage();
             ultimoEvento = "ERROR_TOMAR_FICHA";
@@ -91,7 +91,7 @@ public class Modelo implements IModelo, ISubject {
             ultimoEvento = "TURNO_CAMBIADO";
             ultimoError = null;
             notificarObservers();
-            
+
         } catch (Exception e) {
             ultimoError = "Error al pasar turno: " + e.getMessage();
             ultimoEvento = "ERROR_CAMBIAR_TURNO";
@@ -109,7 +109,7 @@ public class Modelo implements IModelo, ISubject {
             fichasSeleccionadas.add(fichaId);
             cambio = true;
         }
-        
+
         if (cambio) {
             ultimoEvento = "SELECCION_CAMBIADA";
             notificarObservers();
@@ -123,7 +123,7 @@ public class Modelo implements IModelo, ISubject {
             ultimoEvento = "GRUPO_CREADO";
             ultimoError = null;
             notificarObservers();
-            
+
         } catch (Exception e) {
             ultimoError = "Error al crear grupo: " + e.getMessage();
             ultimoEvento = "ERROR_CREAR_GRUPO";
@@ -132,20 +132,19 @@ public class Modelo implements IModelo, ISubject {
     }
 
     // Inicializacion
-
     public void inicializarJuego(List<FichaDTO> manoJugador1, List<FichaDTO> manoJugador2, List<FichaDTO> pozoFichas) {
         try {
             // Registrar jugadores
             fachada.registrarJugador("Jugador1");
             fachada.registrarJugador("Jugador2");
-            
+
             // Inicializar juego en la fachada
             fachada.inicializarJuego(manoJugador1, manoJugador2, pozoFichas);
-            
+
             ultimoEvento = "JUEGO_INICIALIZADO";
             ultimoError = null;
             notificarObservers();
-            
+
         } catch (Exception e) {
             ultimoError = "Error al inicializar juego: " + e.getMessage();
             ultimoEvento = "ERROR_INICIALIZACION";
@@ -154,7 +153,6 @@ public class Modelo implements IModelo, ISubject {
     }
 
     // IModelo (para pasar a la vista solo lo necesario)
-
     @Override
     public String getJugadorActivoId() {
         return fachada.getJugadorActualId();
@@ -163,8 +161,8 @@ public class Modelo implements IModelo, ISubject {
     @Override
     public List<FichaDTO> getManoJugadorActual() {
         List<FichaDTO> mano = fachada.obtenerManoJugadorActual();
-        System.out.println("DEBUG - Modelo.getManoJugadorActual(): " + 
-                          (mano != null ? mano.size() : "null") + " fichas");
+        System.out.println("DEBUG - Modelo.getManoJugadorActual(): "
+                + (mano != null ? mano.size() : "null") + " fichas");
         if (mano != null) {
             for (FichaDTO ficha : mano) {
                 System.out.println("  - " + ficha.getId() + " (" + ficha.getNumero() + ", " + ficha.getColor() + ")");
@@ -175,7 +173,10 @@ public class Modelo implements IModelo, ISubject {
 
     @Override
     public List<GrupoDTO> getGruposTablero() {
-        return fachada.obtenerGruposTablero();
+        List<GrupoDTO> grupos = fachada.obtenerGruposTablero();
+        System.out.println("DEBUG - Modelo.getGruposTablero(): "
+                + (grupos != null ? grupos.size() : "null") + "grupos");
+        return grupos;
     }
 
     @Override
@@ -231,7 +232,6 @@ public class Modelo implements IModelo, ISubject {
     }
 
     // Observer
-
     @Override
     public void suscribir(IObserver observer) {
         if (!observers.contains(observer)) {
@@ -241,7 +241,7 @@ public class Modelo implements IModelo, ISubject {
 
     @Override
     public void notificar(IObserver observer) {
-        observer.update(this); 
+        observer.update(this);
     }
 
     @Override
@@ -250,13 +250,12 @@ public class Modelo implements IModelo, ISubject {
             observer.update(this);
         }
     }
-    
+
     // Utils
-    
     public void limpiarErrores() {
         this.ultimoError = null;
     }
-    
+
     public void limpiarSeleccion() {
         this.fichasSeleccionadas.clear();
     }

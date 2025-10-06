@@ -4,7 +4,8 @@
  */
 package itson.rummypresentacion.modelo;
 
-import entidades.Ficha;
+import itson.rummypresentacion.DTOs.FichaDTO;
+import itson.rummypresentacion.DTOs.GrupoDTO;
 import java.util.List;
 
 /**
@@ -12,15 +13,25 @@ import java.util.List;
  * para mandar a la vista lo que necesita para pintarse
  * 
  */
+
 public interface IModelo {
+    // Informacion
+    String getJugadorActivoId();
+    List<FichaDTO> getManoJugadorActual();
+    List<GrupoDTO> getGruposTablero();
+    int getTurnoActual();
+    boolean esTurnoDe(String jugadorId);
     
-    public String getJugadorActualId() throws Exception;
-
-    public boolean esTurnoDelJugador(String idJugador);
-
-    public int getTurnoNumero();
-
-    public void registrarJugador(String idJugador);
-
-    public List<String> getJugadores();
+    // Estado
+    List<String> getFichasSeleccionadas();
+    String getUltimoEvento();
+    String getUltimoError();
+    long getTimestamp();
+    
+    // TODO: A futuro (algo que se podria llevar)
+    boolean isJuegoTerminado();
+    String getGanador();
+    
+    void registrarJugador(String idJugador);
+    List<String> getJugadores();
 }

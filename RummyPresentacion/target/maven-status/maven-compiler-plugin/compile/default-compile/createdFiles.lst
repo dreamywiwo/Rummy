@@ -1,4 +1,5 @@
 itson\rummypresentacion\modelo\Modelo.class
+itson\rummypresentacion\fachada\ResultadoJugada.class
 itson\rummypresentacion\vista\UI_Tablero$1.class
 itson\rummypresentacion\vista\ComponenteBase.class
 itson\rummypresentacion\vista\UI_TurnoJugador$1.class
@@ -16,7 +17,6 @@ itson\rummypresentacion\vista\IComponente.class
 itson\rummypresentacion\vista\UI_Grupo.class
 itson\rummypresentacion\controlador\ControlTurno.class
 itson\rummypresentacion\DTOs\FichaDTO.class
-itson\rummypresentacion\vista\UI_TurnoJugador$5.class
 itson\rummypresentacion\Main.class
 itson\rummypresentacion\modelo\IModelo.class
 itson\rummypresentacion\vista\UI_Ficha.class

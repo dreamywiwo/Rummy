@@ -4,6 +4,8 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.DTOs.FichaDTO;
+import itson.rummypresentacion.DTOs.GrupoDTO;
 import itson.rummypresentacion.modelo.IModelo;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,44 +15,43 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class UI_Tablero extends ComponenteBase {
-    private Map<String, UI_Ficha> fichasEnTablero;
-    private int[][] celdasOcupadas;
     private UI_Grupo grupoMano; 
+    private UI_TurnoJugador padre; // Referencia al root
     private Point ultimaCasillaSeleccionada;
+    private List<UI_Grupo> gruposTablero; // Para grupos en el tablero
     
     public UI_Tablero(String id) {
         super(id);
-        this.fichasEnTablero = new HashMap<>();
-        this.celdasOcupadas = new int[4][10];
         this.ultimaCasillaSeleccionada = null;
+        this.gruposTablero = new ArrayList<>();
         inicializarComponente();
     }
 
     private void inicializarComponente() {
         setPreferredSize(new Dimension(1230, 660));
         setBackground(new Color(230, 230, 230));
-        setLayout(null);
+        setLayout(null); // Usamos layout absoluto para posicionar grupos
         configurarSeleccionCasillas();
     }
 
-    // Metodo actualizar del Composite
     @Override
     public void actualizar(IModelo modelo) {
         try {
-            System.out.println("Actualizando UI_Tablero...");
+            System.out.println("Actualizando UI_Tablero desde modelo...");
             
-            // Limpiar tablero actual
-            limpiarTablero();
+            // 1. Actualizar grupos del tablero desde el modelo
+            actualizarGruposTablero(modelo);
             
-            // TODO: Obtener grupos del modelo y agregarlos al tablero
-            
-            // Propagar actualización a componentes hijos (fichas en el tablero)
+            // 2. Propagar actualización a componentes hijos (incluyendo grupoMano)
             super.actualizar(modelo);
+            
+            // 3. Repintar
+            this.revalidate();
+            this.repaint();
             
         } catch (Exception ex) {
             System.err.println("Error actualizando tablero: " + ex.getMessage());
@@ -58,32 +59,98 @@ public class UI_Tablero extends ComponenteBase {
         }
     }
 
-    public void setGrupoMano(UI_Grupo grupoMano) {
-        this.grupoMano = grupoMano;
-        System.out.println("GrupoMano conectado al tablero");
-    }
-
-    public void agregarGrupo() {
-        // TODO: aqui se utilizaria para encontrarPosicionParaGrupo, ya que se creen los grupos
-    }
-
-
-    private Point encontrarPosicionParaGrupo(int tamañoGrupo) {
-
-        for (int fila = 0; fila < 4; fila++) {
-            for (int columna = 0; columna <= 10 - tamañoGrupo; columna++) {
-                if (hayEspacioDisponible(fila, columna, tamañoGrupo)) {
-                    return new Point(fila, columna);
+    /**
+     * Actualiza los grupos del tablero desde el modelo
+     */
+    private void actualizarGruposTablero(IModelo modelo) {
+        // Limpiar grupos existentes del tablero (no la mano)
+        for (UI_Grupo grupo : gruposTablero) {
+            removerComponente(grupo);
+            remove(grupo);
+        }
+        gruposTablero.clear();
+        
+        // Obtener grupos del modelo y crear UI_Grupo para cada uno
+        List<GrupoDTO> gruposDTO = modelo.getGruposTablero();
+        if (gruposDTO != null) {
+            System.out.println("Pintando " + gruposDTO.size() + " grupos en el tablero");
+            
+            int xPos = 10;
+            int yPos = 10;
+            
+            for (int i = 0; i < gruposDTO.size(); i++) {
+                GrupoDTO grupoDTO = gruposDTO.get(i);
+                UI_Grupo grupoUI = new UI_Grupo("grupo_tablero_" + i);
+                grupoUI.setPadre(this); // El tablero es el padre de los grupos del tablero
+                
+                // Posicionar el grupo en el tablero
+                grupoUI.setBounds(xPos, yPos, 400, 100);
+                grupoUI.setBackground(new Color(200, 200, 200, 100));
+                
+                // Agregar fichas al grupo
+                for (FichaDTO fichaDTO : grupoDTO.getFichas()) {
+                    UI_Ficha fichaUI = new UI_Ficha(fichaDTO);
+                    grupoUI.agregarFicha(fichaUI);
+                }
+                
+                // Agregar al composite y al panel
+                agregarComponente(grupoUI);
+                gruposTablero.add(grupoUI);
+                add(grupoUI);
+                
+                // Actualizar posición para el siguiente grupo
+                xPos += 420;
+                if (xPos > 800) {
+                    xPos = 10;
+                    yPos += 120;
                 }
             }
         }
-        return null;
     }
-    
+
+    /**
+     * Método para que los grupos hijos notifiquen eventos
+     */
+    public void onFichasSeleccionadas(List<String> fichasIds) {
+        System.out.println("UI_Tablero: Propagando selección de " + fichasIds.size() + " fichas al padre");     
+        // Propagar la notificación al padre (UI_TurnoJugador)
+        if (padre != null) {
+            padre.onFichasSeleccionadas(fichasIds);
+        } else {
+            System.err.println("ERROR: UI_Tablero no tiene referencia al padre");
+        }
+    }
+
+    /**
+     * Método para que los grupos notifiquen creación de grupos
+     */
+    public void onGrupoCreado(List<FichaDTO> fichasDTO) {
+        if (padre != null) {
+            // Notificar al controlador para crear el grupo
+            // Esto podría necesitar ajustes dependiendo de tu lógica
+        }
+    }
+
+    public void setGrupoMano(UI_Grupo grupoMano) {
+        this.grupoMano = grupoMano;
+        // El grupoMano es un hijo especial - se maneja en el contenedor de mano, no en el tablero visual
+        System.out.println("GrupoMano conectado al tablero");
+    }
+
+    public void setPadre(UI_TurnoJugador padre) {
+        this.padre = padre;
+    }
+
+    // Resto del código permanece igual...
     private void configurarSeleccionCasillas() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (!isEnabled()) {
+                    System.out.println("Tablero deshabilitado - ignorando clic");
+                    return;
+                }
+                
                 Point punto = e.getPoint();
                 Point casilla = encontrarCasilla(punto);
                 
@@ -91,18 +158,12 @@ public class UI_Tablero extends ComponenteBase {
                     System.out.println("Casilla seleccionada: [" + casilla.x + "," + casilla.y + "]");
                     ultimaCasillaSeleccionada = casilla;
 
-                    if (grupoMano == null) {
-                        System.out.println("ERROR: El grupo mano no está conectado al tablero");
-                        return;
-                    }
-                    
-                    List<UI_Ficha> fichasSeleccionadas = grupoMano.getFichasSeleccionadas();
-                    System.out.println("Fichas seleccionadas en mano: " + fichasSeleccionadas.size());
-                    
-                    if (!fichasSeleccionadas.isEmpty()) {
-                        colocarFichasSeleccionadas(casilla);
+                    // Notificar al padre (UI_TurnoJugador) sobre el clic en el tablero
+                    if (padre != null && grupoMano != null) {
+                        List<String> fichasSeleccionadasIds = grupoMano.obtenerIdsFichasSeleccionadas();
+                        padre.onCeldaTableroClickeada(casilla, fichasSeleccionadasIds);
                     } else {
-                        System.out.println("Selecciona fichas en la mano primero");
+                        System.out.println("ERROR: Padre o grupoMano no configurados");
                     }
                     
                     repaint(); 
@@ -110,7 +171,7 @@ public class UI_Tablero extends ComponenteBase {
             }
         });
     }
-    
+
     private Point encontrarCasilla(Point punto) {
         int cellWidth = getWidth() / 10;
         int cellHeight = getHeight() / 4;
@@ -121,109 +182,9 @@ public class UI_Tablero extends ComponenteBase {
         return new Point(fila, columna);
     }
     
-    private void colocarFichasSeleccionadas(Point casillaInicio) {
-        List<UI_Ficha> fichasParaColocar = grupoMano.getFichasSeleccionadas();
-        int cantidadFichas = fichasParaColocar.size();
-        
-        System.out.println("Intentando colocar " + cantidadFichas + " fichas");
-
-        Point inicioAjustado = encontrarEspacioDisponible(casillaInicio, cantidadFichas);
-        
-        if (inicioAjustado != null) {
-            System.out.println("Colocando " + cantidadFichas + " fichas desde [" + 
-                             inicioAjustado.x + "," + inicioAjustado.y + "]");
-
-            for (int i = 0; i < cantidadFichas; i++) {
-                UI_Ficha ficha = fichasParaColocar.get(i);
-                int columna = inicioAjustado.y + i;
-                
-                colocarFichaEnCasilla(ficha, inicioAjustado.x, columna);
-            }
-
-            grupoMano.removerFichasSeleccionadas();
-            System.out.println("Fichas colocadas exitosamente");
-            
-        } else {
-            System.out.println("No hay espacio suficiente para " + cantidadFichas + " fichas");
-            mostrarEstadoTablero();
-        }
-    }
-    
-    private Point encontrarEspacioDisponible(Point casillaInicio, int cantidadFichas) {
-        int fila = casillaInicio.x;
-        int columnaInicio = casillaInicio.y;
-        
-        System.out.println("Buscando espacio para " + cantidadFichas + " fichas en fila " + fila);
-
-        if (hayEspacioDisponible(fila, columnaInicio, cantidadFichas)) {
-            System.out.println("Espacio encontrado a la derecha: [" + fila + "," + columnaInicio + "]");
-            return new Point(fila, columnaInicio);
-        }
-
-        int columnaAjustada = columnaInicio - (cantidadFichas - 1);
-        if (columnaAjustada >= 0 && hayEspacioDisponible(fila, columnaAjustada, cantidadFichas)) {
-            System.out.println("Espacio encontrado a la izquierda: [" + fila + "," + columnaAjustada + "]");
-            return new Point(fila, columnaAjustada);
-        }
-
-        for (int f = 0; f < 4; f++) {
-            if (f != fila) {
-                for (int c = 0; c <= 10 - cantidadFichas; c++) {
-                    if (hayEspacioDisponible(f, c, cantidadFichas)) {
-                        System.out.println("   🔄 Moviendo a fila " + f + ", columna " + c);
-                        return new Point(f, c);
-                    }
-                }
-            }
-        }
-        
-        System.out.println("No hay espacio en ninguna fila");
-        return null;
-    }
-    
-    private boolean hayEspacioDisponible(int fila, int columnaInicio, int cantidad) {
-        for (int i = 0; i < cantidad; i++) {
-            int columna = columnaInicio + i;
-            if (columna >= 10) {
-                System.out.println("Columna " + columna + " fuera de límites");
-                return false;
-            }
-            if (celdasOcupadas[fila][columna] == 1) {
-                System.out.println("Celda [" + fila + "," + columna + "] ocupada");
-                return false;
-            }
-        }
-        System.out.println("Espacio libre desde [" + fila + "," + columnaInicio + "]");
-        return true;
-    }
-    
-    private void colocarFichaEnCasilla(UI_Ficha ficha, int fila, int columna) {
-        UI_Ficha fichaEnTablero = new UI_Ficha(ficha.getNumero(), ficha.getFichaColor());
-        fichaEnTablero.setPuedeSerMovida(false);
-        fichaEnTablero.setId("ficha_tablero_" + fila + "_" + columna);
-        
-        int cellWidth = getWidth() / 10;
-        int cellHeight = getHeight() / 4;
-        
-        int x = columna * cellWidth + (cellWidth - fichaEnTablero.getWidth()) / 2;
-        int y = fila * cellHeight + (cellHeight - fichaEnTablero.getHeight()) / 2;
-        
-        fichaEnTablero.setBounds(x, y, fichaEnTablero.getPreferredSize().width, fichaEnTablero.getPreferredSize().height);
-        
-        // Agregar al composite y al panel Swing
-        agregarComponente(fichaEnTablero);
-        add(fichaEnTablero);
-
-        String clave = fila + "_" + columna;
-        fichasEnTablero.put(clave, fichaEnTablero);
-        celdasOcupadas[fila][columna] = 1;
-        
-        System.out.println("Ficha " + ficha.getNumero() + " colocada en [" + fila + "," + columna + "]");
-        
-        revalidate();
-        repaint();
-    }
-
+    /**
+     * Limpia el tablero - SOLO LA VISTA, no el estado del modelo
+     */
     public void limpiarTablero() {
         // Limpiar del composite
         for (IComponente componente : getComponentes()) {
@@ -235,34 +196,20 @@ public class UI_Tablero extends ComponenteBase {
         // Limpiar del panel Swing
         removeAll();
         
-        // Limpiar estructuras de datos
-        fichasEnTablero.clear();
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 10; j++) {
-                celdasOcupadas[i][j] = 0;
-            }
-        }
-        
         ultimaCasillaSeleccionada = null;
         
         revalidate();
         repaint();
-        System.out.println("Tablero limpiado completamente");
+        System.out.println("Vista del tablero limpiada");
     }
-    
+
+    /**
+     * Muestra información de debug del tablero
+     */
     public void mostrarEstadoTablero() {
-        System.out.println("Estado del Tablero:");
-        for (int fila = 0; fila < 4; fila++) {
-            StringBuilder linea = new StringBuilder();
-            for (int columna = 0; columna < 10; columna++) {
-                if (celdasOcupadas[fila][columna] == 1) {
-                    linea.append("[X]");
-                } else {
-                    linea.append("[ ]");
-                }
-            }
-            System.out.println("Fila " + fila + ": " + linea.toString());
-        }
+        System.out.println("UI_Tablero - Estado de la vista:");
+        System.out.println("Componentes hijos: " + getComponentes().size());
+        System.out.println("Última casilla seleccionada: " + ultimaCasillaSeleccionada);
     }
     
     @Override
@@ -273,6 +220,7 @@ public class UI_Tablero extends ComponenteBase {
         int cellWidth = Math.max(getWidth() / 10, 40);
         int cellHeight = Math.max(getHeight() / 4, 40);
         
+        // Dibujar grid del tablero
         g2.setColor(Color.LIGHT_GRAY);
         for (int fila = 0; fila < 4; fila++) {
             for (int columna = 0; columna < 10; columna++) {
@@ -280,21 +228,17 @@ public class UI_Tablero extends ComponenteBase {
                 int y = fila * cellHeight;
                 g2.drawRect(x, y, cellWidth, cellHeight);
 
+                // Resaltar casilla seleccionada
                 if (ultimaCasillaSeleccionada != null && 
                     ultimaCasillaSeleccionada.x == fila && ultimaCasillaSeleccionada.y == columna) {
                     g2.setColor(new Color(255, 255, 0, 100));
                     g2.fillRect(x + 1, y + 1, cellWidth - 2, cellHeight - 2);
                     g2.setColor(Color.LIGHT_GRAY);
                 }
-
-                if (celdasOcupadas[fila][columna] == 1) {
-                    g2.setColor(new Color(255, 200, 200, 100));
-                    g2.fillRect(x + 1, y + 1, cellWidth - 2, cellHeight - 2);
-                    g2.setColor(Color.LIGHT_GRAY);
-                }
             }
         }
 
+        // Dibujar coordenadas
         g2.setColor(Color.GRAY);
         g2.setFont(new Font("Arial", Font.PLAIN, 10));
         for (int fila = 0; fila < 4; fila++) {

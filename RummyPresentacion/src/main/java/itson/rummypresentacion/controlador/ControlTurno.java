@@ -4,83 +4,107 @@
  */
 package itson.rummypresentacion.controlador;
 
-import entidades.Ficha;
+import itson.rummypresentacion.DTOs.FichaDTO;
 import itson.rummypresentacion.modelo.Modelo;
 import itson.rummypresentacion.vista.UI_TurnoJugador;
-import java.util.ArrayList;
+import java.awt.Point;
 import java.util.List;
 
-/**
- *
- * @author Dana Chavez
- */
 public class ControlTurno {
 
     private final UI_TurnoJugador vista;
     private final Modelo modelo;
-
-    private final List<Ficha> seleccionActualFichas = new ArrayList<>();
-    private String grupoSeleccionadoId;
 
     public ControlTurno(UI_TurnoJugador vista, Modelo modelo) {
         this.vista = vista;
         this.modelo = modelo;
     }
 
-    public void clickSeleccionaFichas(Ficha ficha) {
-        if (ficha == null) {
+    // Cuando se seleccionen fichas
+
+    public void toggleSeleccionFicha(String fichaId) {
+        if (fichaId == null || fichaId.isBlank()) {
             return;
         }
-        seleccionActualFichas.add(ficha);
-
-    }
-
-    public void clickSeleccionaCasilla(String casillaId) {
-
-    }
-
-    public void terminarTurno(String jugadorId) {
-        try {
-            modelo.terminarTurno(jugadorId);
-            modelo.pasarTurno();
-        } catch (Exception e) {
-        }
-
+        modelo.toggleSeleccionFicha(fichaId);
     }
 
     public void limpiarSeleccion() {
-        seleccionActualFichas.clear();
-        grupoSeleccionadoId = null;
-
+        modelo.limpiarSeleccion();
     }
 
-    public void grupoSeleccionado(String grupoId) {
-        this.grupoSeleccionadoId = grupoId;
+    // Juego
 
-    }
-
-    public void fichaSeleccionada(Ficha ficha) {
-        if (ficha == null) {
+    public void colocarFichasEnTablero(String jugadorId, List<FichaDTO> fichas, Point posicion) {
+        if (!modelo.esTurnoDe(jugadorId)) {
+            vista.mostrarMensaje("No es tu turno");
             return;
         }
-        seleccionActualFichas.add(ficha);
-
-    }
-
-    public void tomarFicha(String idJugador) {
-        try {
-            modelo.tomarFicha(idJugador);
-            modelo.pasarTurno();
-
-        } catch (Exception e) {
-            vista.mostrarMensaje("Error al tomar ficha: " + e.getMessage());
+        
+        if (fichas == null || fichas.isEmpty()) {
+            vista.mostrarMensaje("Selecciona fichas primero");
+            return;
         }
+        
+        if (posicion == null) {
+            vista.mostrarMensaje("Selecciona una posición en el tablero");
+            return;
+        }
+        
+        System.out.println("DEBUG - ControlTurno.colocarFichasEnTablero:");
+        System.out.println("  Jugador: " + jugadorId);
+        System.out.println("  Fichas: " + fichas.size());
+        for (FichaDTO ficha : fichas) {
+            System.out.println("    - " + ficha.getId() + " (" + ficha.getNumero() + ", " + ficha.getColor() + ")");
+        }
+        System.out.println("  Posición: " + posicion);
+        
+        modelo.colocarFichasEnTablero(jugadorId, fichas, posicion);
     }
+
+    public void terminarTurno(String jugadorId) {
+        if (!modelo.esTurnoDe(jugadorId)) {
+            vista.mostrarMensaje("No es tu turno");
+            return;
+        }
+        
+        modelo.terminarTurno(jugadorId);
+    }
+
+    public void tomarFicha(String jugadorId) {
+        if (!modelo.esTurnoDe(jugadorId)) {
+            vista.mostrarMensaje("No es tu turno");
+            return;
+        }
+        
+        modelo.tomarFicha(jugadorId);
+    }
+
+    public void crearGrupo(List<FichaDTO> fichas) {
+        if (fichas == null || fichas.isEmpty()) {
+            vista.mostrarMensaje("Selecciona fichas para crear un grupo");
+            return;
+        }
+        
+        if (fichas.size() < 3) {
+            vista.mostrarMensaje("Un grupo debe tener al menos 3 fichas");
+            return;
+        }
+        
+        modelo.crearGrupo(fichas);
+    }
+
+    // Inicializacion
 
     public void registrarJugador(String idJugador) {
+        if (idJugador == null || idJugador.isBlank()) {
+            vista.mostrarMensaje("ID de jugador inválido");
+            return;
+        }
+        
         try {
             modelo.registrarJugador(idJugador);
-            System.out.println("Jugador registrado: " + idJugador);
+            vista.mostrarMensaje("Jugador registrado: " + idJugador);
         } catch (Exception e) {
             vista.mostrarMensaje("Error al registrar jugador: " + e.getMessage());
         }
@@ -91,7 +115,42 @@ public class ControlTurno {
             return modelo.getJugadores();
         } catch (Exception e) {
             vista.mostrarMensaje("Error al obtener jugadores: " + e.getMessage());
-            return new ArrayList<>();
+            return List.of(); // Lista vacía
         }
+    }
+
+    // Consultas
+
+    public boolean esTurnoDelJugador(String jugadorId) {
+        return modelo.esTurnoDe(jugadorId);
+    }
+
+    public String getJugadorActualId() {
+        try {
+            return modelo.getJugadorActivoId();
+        } catch (Exception e) {
+            vista.mostrarMensaje("Error al obtener jugador actual: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public int getTurnoActual() {
+        try {
+            return modelo.getTurnoActual();
+        } catch (Exception e) {
+            vista.mostrarMensaje("Error al obtener turno actual: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    // Utils
+
+    public void inicializarJuego(List<FichaDTO> manoJugador1, List<FichaDTO> manoJugador2, List<FichaDTO> pozoFichas) {
+        if (manoJugador1 == null || manoJugador2 == null || pozoFichas == null) {
+            vista.mostrarMensaje("Datos de inicialización inválidos");
+            return;
+        }
+        
+        modelo.inicializarJuego(manoJugador1, manoJugador2, pozoFichas);
     }
 }

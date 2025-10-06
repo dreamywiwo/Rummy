@@ -4,153 +4,244 @@
  */
 package itson.rummypresentacion.modelo;
 
-import entidades.EstadoJuego;
-import entidades.Grupo;
-import entidades.Jugador;
-import entidades.Tablero;
-import entidades.Turno;
 import itson.rummypresentacion.DTOs.FichaDTO;
 import itson.rummypresentacion.DTOs.GrupoDTO;
 import itson.rummypresentacion.fachada.IFachadaDominio;
+import itson.rummypresentacion.fachada.ResultadoJugada;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-/**
- *
- * @author Dana Chavez
- */
 public class Modelo implements IModelo, ISubject {
-
     private IFachadaDominio fachada;
-    private int numeroTurno;
-    private String idJugador;
     private List<IObserver> observers = new ArrayList<>();
-    EstadoJuego estado = new EstadoJuego();
-    Tablero tablero = new Tablero();
-
+    
+    // Estado interno para la UI
+    private List<String> fichasSeleccionadas = new ArrayList<>();
+    private String ultimoEvento = "INICIALIZADO";
+    private String ultimoError;
+    
     public Modelo(IFachadaDominio fachada) {
         this.fachada = fachada;
     }
 
-    public void terminarTurno(String jugadorId) throws Exception {
-        fachada.terminarTurno(jugadorId);
-        cargarDesdeFachada();
-        notificarObservers();
-    }
+    // Llamadas de control
 
-    public void pasarTurno() throws Exception {
-        fachada.pasarTurno();
-        cargarDesdeFachada();
-        notificarObservers();
-    }
-
-    public void tomarFicha(String jugadorId) throws Exception {
-        fachada.tomarFicha(jugadorId);
-        cargarDesdeFachada();
-        notificarObservers();
-    }
-
-
-    public void iniciarNuevaPartida(List<Jugador> jugadores) throws Exception {
-        if (jugadores.isEmpty()) {
-            throw new Exception("No se pudo iniciar la partida");
-        }
-        estado.getTablero().getGrupos().clear();
-        estado.setJugadores(jugadores);
-        Turno primerTurno = new Turno(1, jugadores.get(0));
-        estado.setTurnoActual(primerTurno);
-    }
-    
-    public GrupoDTO crearGrupo(List<FichaDTO> fichas) throws Exception {
-        GrupoDTO grupo = fachada.crearGrupo(fichas);
-        cargarDesdeFachada();
-        notificarObservers();
-        return grupo;
-    }
-
-    private Jugador getJugador(String jugadorId) throws Exception {
-        if (jugadorId == null || jugadorId.isBlank()) {
-            if (estado.getTurnoActual() != null && estado.getTurnoActual().getJugadorActual() != null) {
-                return estado.getTurnoActual().getJugadorActual();
+    public void colocarFichasEnTablero(String jugadorId, List<FichaDTO> fichas, Point posicion) {
+        try {
+            System.out.println("DEBUG - Modelo.colocarFichasEnTablero:");
+            System.out.println("  Jugador: " + jugadorId);
+            System.out.println("  Fichas: " + fichas.size());
+            System.out.println("  Posición: " + posicion);
+            
+            ResultadoJugada resultado = fachada.colocarFichas(jugadorId, fichas, posicion);
+            
+            if (resultado.esExitoso()) {
+                fichasSeleccionadas.clear();
+                ultimoEvento = "FICHAS_COLOCADAS";
+                ultimoError = null;
+            } else {
+                ultimoError = resultado.getMensaje();
+                ultimoEvento = "ERROR_COLOCACION";
             }
-            throw new Exception("No hay jugador actual y no se proporcionó jugadorId");
+            
+            notificarObservers();
+            
+        } catch (Exception e) {
+            ultimoError = "Error al colocar fichas: " + e.getMessage();
+            ultimoEvento = "ERROR_SISTEMA";
+            notificarObservers();
         }
-        List<Jugador> jugadores = estado.getJugadores();
-        if (jugadores == null || jugadores.isEmpty()) {
-            throw new Exception("La lista de jugadores no está inicializada o está vacía");
-        }
-        for (Jugador j : jugadores) {
-            if (Objects.equals(j.getId(), jugadorId) || Objects.equals(j.getNombre(), jugadorId)) {
-                return j;
-            }
-        }
-        throw new Exception("Jugador no encontrado: " + jugadorId);
     }
 
-    private Grupo getGrupo(String grupoId) throws Exception {
-        if (grupoId == null || grupoId.isBlank()) {
-            throw new Exception("Grupo no especificado (grupoId vacío)");
+   // En otros métodos, solo notificar si hubo cambios reales
+    public void terminarTurno(String jugadorId) {
+        try {
+            fachada.terminarTurno(jugadorId);
+            fichasSeleccionadas.clear(); // Limpiar selecciones al terminar turno
+            ultimoEvento = "TURNO_TERMINADO";
+            ultimoError = null;
+            notificarObservers();
+            
+        } catch (Exception e) {
+            ultimoError = e.getMessage();
+            ultimoEvento = "ERROR_TERMINAR_TURNO";
+            notificarObservers();
         }
-
-        if (estado.getTablero() == null) {
-            estado.setTablero(new Tablero());
-        }
-
-        List<Grupo> grupos = estado.getTablero().getGrupos();
-        if (grupos == null) {
-            grupos = new ArrayList<>();
-            estado.getTablero().setGrupos(grupos);
-        }
-        for (Grupo g : grupos) {
-            if (Objects.equals(g.getId(), grupoId)) {
-                return g;
-            }
-        }
-        throw new Exception("Grupo no encontrado: " + grupoId);
     }
 
-    private void cargarDesdeFachada() {
-        this.numeroTurno = fachada.getNumeroTurno();
-        this.idJugador = fachada.getJugadorActualId();
+    public void tomarFicha(String jugadorId) {
+        try {
+            fachada.tomarFicha(jugadorId);
+            ultimoEvento = "FICHA_TOMADA";
+            ultimoError = null;
+            notificarObservers();
+            
+        } catch (Exception e) {
+            ultimoError = "Error al tomar ficha: " + e.getMessage();
+            ultimoEvento = "ERROR_TOMAR_FICHA";
+            notificarObservers();
+        }
+    }
+
+    public void pasarTurno() {
+        try {
+            fachada.pasarTurno();
+            fichasSeleccionadas.clear();
+            ultimoEvento = "TURNO_CAMBIADO";
+            ultimoError = null;
+            notificarObservers();
+            
+        } catch (Exception e) {
+            ultimoError = "Error al pasar turno: " + e.getMessage();
+            ultimoEvento = "ERROR_CAMBIAR_TURNO";
+            notificarObservers();
+        }
+    }
+
+    public void toggleSeleccionFicha(String fichaId) {
+        // Solo notificar si realmente hubo un cambio
+        boolean cambio = false;
+        if (fichasSeleccionadas.contains(fichaId)) {
+            fichasSeleccionadas.remove(fichaId);
+            cambio = true;
+        } else {
+            fichasSeleccionadas.add(fichaId);
+            cambio = true;
+        }
+        
+        if (cambio) {
+            ultimoEvento = "SELECCION_CAMBIADA";
+            notificarObservers();
+        }
+    }
+
+    public void crearGrupo(List<FichaDTO> fichas) {
+        try {
+            fachada.crearGrupo(fichas);
+            fichasSeleccionadas.clear();
+            ultimoEvento = "GRUPO_CREADO";
+            ultimoError = null;
+            notificarObservers();
+            
+        } catch (Exception e) {
+            ultimoError = "Error al crear grupo: " + e.getMessage();
+            ultimoEvento = "ERROR_CREAR_GRUPO";
+            notificarObservers();
+        }
+    }
+
+    // Inicializacion
+
+    public void inicializarJuego(List<FichaDTO> manoJugador1, List<FichaDTO> manoJugador2, List<FichaDTO> pozoFichas) {
+        try {
+            // Registrar jugadores
+            fachada.registrarJugador("Jugador1");
+            fachada.registrarJugador("Jugador2");
+            
+            // Inicializar juego en la fachada
+            fachada.inicializarJuego(manoJugador1, manoJugador2, pozoFichas);
+            
+            ultimoEvento = "JUEGO_INICIALIZADO";
+            ultimoError = null;
+            notificarObservers();
+            
+        } catch (Exception e) {
+            ultimoError = "Error al inicializar juego: " + e.getMessage();
+            ultimoEvento = "ERROR_INICIALIZACION";
+            notificarObservers();
+        }
+    }
+
+    // IModelo (para pasar a la vista solo lo necesario)
+
+    @Override
+    public String getJugadorActivoId() {
+        return fachada.getJugadorActualId();
     }
 
     @Override
-    public boolean esTurnoDelJugador(String jugadorId) {
+    public List<FichaDTO> getManoJugadorActual() {
+        List<FichaDTO> mano = fachada.obtenerManoJugadorActual();
+        System.out.println("DEBUG - Modelo.getManoJugadorActual(): " + 
+                          (mano != null ? mano.size() : "null") + " fichas");
+        if (mano != null) {
+            for (FichaDTO ficha : mano) {
+                System.out.println("  - " + ficha.getId() + " (" + ficha.getNumero() + ", " + ficha.getColor() + ")");
+            }
+        }
+        return mano;
+    }
+
+    @Override
+    public List<GrupoDTO> getGruposTablero() {
+        return fachada.obtenerGruposTablero();
+    }
+
+    @Override
+    public int getTurnoActual() {
+        return fachada.getNumeroTurno();
+    }
+
+    @Override
+    public boolean esTurnoDe(String jugadorId) {
         return fachada.esTurnoDelJugador(jugadorId);
     }
 
     @Override
-    public String getJugadorActualId() {
-        return idJugador;
+    public List<String> getFichasSeleccionadas() {
+        return new ArrayList<>(fichasSeleccionadas);
     }
 
     @Override
-    public int getTurnoNumero() {
-        return numeroTurno;
+    public String getUltimoEvento() {
+        return ultimoEvento;
+    }
+
+    @Override
+    public String getUltimoError() {
+        return ultimoError;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return System.currentTimeMillis();
+    }
+
+    @Override
+    public boolean isJuegoTerminado() {
+        // TODO
+        return false;
+    }
+
+    @Override
+    public String getGanador() {
+        // TODO
+        return null;
     }
 
     @Override
     public void registrarJugador(String idJugador) {
         fachada.registrarJugador(idJugador);
-        cargarDesdeFachada();
-        notificarObservers();
     }
 
     @Override
     public List<String> getJugadores() {
         return fachada.getJugadores();
     }
-     
+
     // Observer
+
     @Override
     public void suscribir(IObserver observer) {
-        observers.add(observer);
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
     }
 
     @Override
     public void notificar(IObserver observer) {
-        observer.update(this);
+        observer.update(this); 
     }
 
     @Override
@@ -159,5 +250,14 @@ public class Modelo implements IModelo, ISubject {
             observer.update(this);
         }
     }
-
+    
+    // Utils
+    
+    public void limpiarErrores() {
+        this.ultimoError = null;
+    }
+    
+    public void limpiarSeleccion() {
+        this.fichasSeleccionadas.clear();
+    }
 }

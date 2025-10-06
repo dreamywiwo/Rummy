@@ -4,25 +4,48 @@
  */
 package itson.rummypresentacion.DTOs;
 
-/**
- *
- * @author jrasc
- */
+import java.util.Objects;
+
 public class FichaDTO {
-
-    private final int numero;
-    private final java.awt.Color color;
-
-    public FichaDTO(int numero, java.awt.Color color) {
+    private int numero;
+    private String color;
+    private String id;
+    
+    public FichaDTO(int numero, String color, String id) {
         this.numero = numero;
         this.color = color;
+        this.id = id;
     }
 
     public int getNumero() {
         return numero;
     }
 
-    public java.awt.Color getColor() {
+    public String getColor() {
         return color;
+    }
+
+    public String getId() {
+        return id;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        FichaDTO ficha = (FichaDTO) obj;
+        return numero == ficha.numero && 
+               Objects.equals(color, ficha.color) && 
+               Objects.equals(id, ficha.id);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(numero, color, id);
+    }
+    
+    @Override
+    public String toString() {
+        return "FichaDTO{id='" + id + "', numero=" + numero + ", color='" + color + "'}";
     }
 }

@@ -4,6 +4,7 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.DTOs.FichaDTO;
 import itson.rummypresentacion.modelo.IModelo;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -17,25 +18,63 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JToggleButton;
 
-public class UI_Ficha extends JToggleButton implements IComponente{
-    private int numero;
-    private Color color;
+public class UI_Ficha extends JToggleButton implements IComponente {
+    private FichaDTO fichaDTO;
     private boolean puedeSerMovida = true;
-    private String id;
     
+    public UI_Ficha(FichaDTO fichaDTO) {
+        this.fichaDTO = fichaDTO;
+        setPreferredSize(new Dimension(60, 90));
+        setFocusPainted(false);
+        setContentAreaFilled(false);
+        setBorderPainted(false);
+    }
+
     public UI_Ficha(int numero, Color color) {
-        this.numero = numero;
-        this.color = color;
-        
+        String colorStr = convertirColorAString(color);
+        this.fichaDTO = new FichaDTO(numero, colorStr, "temp_" + numero + "_" + colorStr);
         setPreferredSize(new Dimension(60, 90));
         setFocusPainted(false);
         setContentAreaFilled(false);
         setBorderPainted(false);
     }
     
-    public void setPuedeSerMovida(boolean puedeSerMovida) {
-        this.puedeSerMovida = puedeSerMovida;
-        repaint();
+    private String convertirColorAString(Color color) {
+        if (color.equals(Color.RED)) return "rojo";
+        if (color.equals(Color.BLUE)) return "azul";
+        if (color.equals(Color.GREEN)) return "verde";
+        if (color.equals(Color.YELLOW)) return "amarillo";
+        if (color.equals(Color.BLACK)) return "negro";
+        return "gris";
+    }
+    
+    public FichaDTO getFichaDTO() {
+        return fichaDTO;
+    }
+    
+    public int getNumero() {
+        return fichaDTO.getNumero();
+    }
+    
+    public Color getFichaColor() {
+        return convertirColorDTO(fichaDTO.getColor());
+    }
+    
+    private Color convertirColorDTO(String colorDTO) {
+        if (colorDTO == null) return Color.GRAY;
+        switch (colorDTO.toLowerCase()) {
+            case "rojo": return Color.RED;
+            case "azul": return Color.BLUE;
+            case "verde": return Color.GREEN;
+            case "amarillo": return Color.YELLOW;
+            case "negro": return Color.BLACK;
+            default: return Color.GRAY;
+        }
+    }
+    
+    @Override
+    public String getId() {
+        return fichaDTO.getId();
     }
     
     @Override
@@ -45,6 +84,7 @@ public class UI_Ficha extends JToggleButton implements IComponente{
         
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // Fondo
         if (!puedeSerMovida) {
             g2.setColor(new Color(240, 240, 240));
         } else {
@@ -52,45 +92,38 @@ public class UI_Ficha extends JToggleButton implements IComponente{
         }
         g2.fillRoundRect(2, 2, getWidth()-4, getHeight()-4, 12, 12);
 
+        // Borde - MÁS VISIBLE cuando está seleccionado
         if (isSelected()) {
             g2.setColor(Color.RED);
-            g2.setStroke(new BasicStroke(3f));
+            g2.setStroke(new BasicStroke(4f)); // Borde más grueso
+            g2.drawRoundRect(2, 2, getWidth()-4, getHeight()-4, 12, 12);
         } else if (!puedeSerMovida) {
             g2.setColor(Color.DARK_GRAY);
             g2.setStroke(new BasicStroke(1f));
+            g2.drawRoundRect(2, 2, getWidth()-4, getHeight()-4, 12, 12);
         } else {
             g2.setColor(Color.BLACK);
             g2.setStroke(new BasicStroke(2f));
+            g2.drawRoundRect(2, 2, getWidth()-4, getHeight()-4, 12, 12);
         }
-        g2.drawRoundRect(2, 2, getWidth()-4, getHeight()-4, 12, 12);
 
+        // Número
         g2.setFont(new Font("Arial", Font.BOLD, 24));
         FontMetrics fm = g2.getFontMetrics();
-        String text = String.valueOf(numero);
+        String text = String.valueOf(getNumero());
         int textWidth = fm.stringWidth(text);
         int textHeight = fm.getAscent();
         
-        g2.setColor(puedeSerMovida ? color : new Color(
-            color.getRed(), color.getGreen(), color.getBlue(), 150
+        g2.setColor(puedeSerMovida ? getFichaColor() : new Color(
+            getFichaColor().getRed(), getFichaColor().getGreen(), 
+            getFichaColor().getBlue(), 150
         ));
         g2.drawString(text, (getWidth() - textWidth)/2, (getHeight() + textHeight)/2 - 8);
         
         g2.dispose();
     }
     
-    public void setId(String id) {
-        this.id = id;
-    }
-    
-    public int getNumero() {
-        return numero;
-    }
-    
-    public Color getFichaColor() {
-        return color;
-    }
-
-    /* Se definen los metodos de IComponente */
+    // Se definen los metodos de IComponente 
     @Override
     public void mostrar() {
         setVisible(true);
@@ -128,8 +161,4 @@ public class UI_Ficha extends JToggleButton implements IComponente{
         return new ArrayList<>(); 
     }
 
-    @Override
-    public String getId() {
-        return "ficha_" + numero + "_" + color.toString();
-    }
 }

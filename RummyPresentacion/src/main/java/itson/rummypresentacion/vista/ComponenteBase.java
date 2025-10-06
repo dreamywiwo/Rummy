@@ -44,18 +44,20 @@ public abstract class ComponenteBase extends JPanel implements IComponente {
 
     @Override
     public void actualizar(IModelo modelo) {
+        System.out.println("DEBUG - ComponenteBase.actualizar: " + getId() + " con " + componentes.size() + " hijos");
+        
         // Propagar la actualización a todos los componentes hijos
         for (IComponente componente : componentes) {
+            System.out.println("DEBUG - Propagando a hijo: " + componente.getId());
             componente.actualizar(modelo);
         }
-        // Actualización visual específica del componente
-        this.revalidate();
-        this.repaint();
     }
-
+    
     @Override
     public void agregarComponente(IComponente componente) {
         componentes.add(componente);
+        System.out.println("DEBUG - Componente agregado: " + componente.getId() + " a " + getId());
+        System.out.println("DEBUG - Total componentes en " + getId() + ": " + componentes.size());
     }
 
     @Override

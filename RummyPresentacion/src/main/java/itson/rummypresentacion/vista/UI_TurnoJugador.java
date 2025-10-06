@@ -4,14 +4,15 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.DTOs.FichaDTO;
 import itson.rummypresentacion.controlador.ControlTurno;
 import itson.rummypresentacion.modelo.IModelo;
 import itson.rummypresentacion.modelo.IObserver;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -32,35 +33,22 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         inicializarComponentesVisuales();
         bloquearJugador();
     }
-
-    public void registrarEnModelo(Observable modelo) {
-        modelo.addObserver(new java.util.Observer() {
-            @Override
-            public void update(Observable o, Object arg) {
-                if (arg instanceof IModelo) {
-                    UI_TurnoJugador.this.update((IModelo) arg);
-                }
-            }
-        });
-        System.out.println("UI_TurnoJugador registrado como observer del modelo");
-    }
-
     @Override
     public void update(IModelo modelo) {
         SwingUtilities.invokeLater(() -> {
-            System.out.println("UI_TurnoJugador recibió actualización del modelo");
+            System.out.println("UI_TurnoJugador '" + jugadorId + "' recibió actualización del modelo");
             actualizar(modelo);
-            actualizarInformacionTurno(modelo);
-            actualizarEstadoBotones(modelo);
         });
     }
-
+    
     private void inicializarComponentesVisuales() {
         uiGrupoMano = new UI_Grupo("mano_jugador");
         uiTablero = new UI_Tablero("tablero_principal");
 
-        // Agregar componentes al composite
-        agregarComponente(uiGrupoMano);
+        uiTablero.setPadre(this);
+
+        // Agregar componentes al composite 
+        agregarComponente(uiGrupoMano); 
         agregarComponente(uiTablero);
 
         jPanelContenedorMano.setLayout(new BorderLayout());
@@ -69,27 +57,32 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         jPanelContenedorMano.add(uiGrupoMano, BorderLayout.CENTER);
         jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
 
+        // Usar setTablero para compatibilidad
         uiGrupoMano.setTablero(uiTablero);
         uiTablero.setGrupoMano(uiGrupoMano);
 
         configurarBotones();
+
+        System.out.println("Componentes agregados al composite:");
+        System.out.println(" - UI_Grupo (mano): " + uiGrupoMano.getId());
+        System.out.println(" - UI_Tablero: " + uiTablero.getId());
+        System.out.println("Total de componentes hijos: " + componentes.size());
     }
 
-    //TODO: 
     private void configurarBotones() {
         btnTerminarTurno.addActionListener(e -> {
-            try {
+            if (control != null) {
                 control.terminarTurno(jugadorId);
-                mostrarMensaje("El jugador: " + jugadorId + " finalizo su turno");
-            } catch (Exception ex) {
-                mostrarMensaje("Error al terminar turno: " + ex.getMessage());
+            } else {
+                mostrarMensaje("Controlador no configurado");
             }
         });
+        
         btnTomarFicha.addActionListener(e -> {
-            try {
+            if (control != null) {
                 control.tomarFicha(jugadorId);
-            } catch (Exception ex) {
-                mostrarMensaje("Error al tomar ficha: " + ex.getMessage());
+            } else {
+                mostrarMensaje("Controlador no configurado");
             }
         });
     }
@@ -98,19 +91,22 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     @Override
     public void actualizar(IModelo modelo) {
         try {
-            System.out.println("Propagando actualización a componentes hijos...");
+            System.out.println("UI_TurnoJugador '" + jugadorId + "' propagando actualización a " + componentes.size() + " componentes hijos...");
 
-            // 1. Primero actualizar el estado específico de UI_TurnoJugador
+            // 1. Actualizar estado de la UI principal
             actualizarEstadoBotones(modelo);
             actualizarInformacionTurno(modelo);
+            
+            // 2. Manejar eventos especiales (errores, mensajes)
+            manejarEventosEspeciales(modelo);
 
-            // 2. Luego propagar la actualización a todos los componentes hijos
-            // Esto automáticamente actualizará UI_Grupo y UI_Tablero
+            // 3. Propagar la actualización a todos los componentes hijos
             for (IComponente componente : componentes) {
+                System.out.println("Propagando actualización a: " + componente.getId());
                 componente.actualizar(modelo);
             }
 
-            // actualizar este componente
+            // 4. Actualizar este componente
             this.revalidate();
             this.repaint();
 
@@ -122,11 +118,13 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         }
     }
 
-    //TODO:
     private void actualizarEstadoBotones(IModelo modelo) {
-        boolean esMiTurno = modelo.esTurnoDelJugador(jugadorId);
+        boolean esMiTurno = modelo.esTurnoDe(jugadorId);
+        
+        // Actualizar botones
         btnTerminarTurno.setEnabled(esMiTurno);
         btnTomarFicha.setEnabled(esMiTurno);
+        
         if (esMiTurno) {
             btnTerminarTurno.setText("TERMINAR TURNO");
             btnTomarFicha.setText("TOMAR FICHA");
@@ -134,31 +132,131 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
             btnTerminarTurno.setText("ESPERANDO...");
             btnTomarFicha.setText("ESPERANDO...");
         }
+        
+        // Actualizar componentes hijos
         if (uiTablero != null) {
             uiTablero.setEnabled(esMiTurno);
         }
         if (uiGrupoMano != null) {
             uiGrupoMano.setEnabled(esMiTurno);
         }
+        
+        // Actualizar bloqueo de interfaz
         habilitar(esMiTurno);
     }
 
-    //TODO:
     private void actualizarInformacionTurno(IModelo modelo) {
         try {
-            String jugadorActual = modelo.getJugadorActualId();
-            setTitle("Turno de: " + jugadorActual);
+            String jugadorActual = modelo.getJugadorActivoId();
+            int turnoActual = modelo.getTurnoActual();
+            
+            String titulo = String.format("Rummy - Turno %d - Jugador Actual: %s (Tú: %s)", 
+                turnoActual, jugadorActual, jugadorId);
+            setTitle(titulo);
+            
         } catch (Exception e) {
-            System.err.println("Error obteniendo jugador actual: " + e.getMessage());
+            System.err.println("Error obteniendo información del turno: " + e.getMessage());
+        }
+    }
+    
+    private void manejarEventosEspeciales(IModelo modelo) {
+        String ultimoEvento = modelo.getUltimoEvento();
+        String ultimoError = modelo.getUltimoError();
+        
+        // Manejar errores
+        if (ultimoError != null && !ultimoError.isEmpty()) {
+            mostrarMensaje(ultimoError);
+        }
+        
+        // Manejar eventos específicos
+        if (ultimoEvento != null) {
+            switch (ultimoEvento) {
+                case "TURNO_TERMINADO":
+                    if (modelo.esTurnoDe(jugadorId)) {
+                        mostrarMensaje("¡Turno terminado exitosamente!");
+                    }
+                    break;
+                case "FICHA_TOMADA":
+                    mostrarMensaje("Ficha tomada del pozo");
+                    break;
+                case "FICHAS_COLOCADAS":
+                    mostrarMensaje("Fichas colocadas en el tablero");
+                    break;
+                case "GRUPO_CREADO":
+                    mostrarMensaje("Grupo creado exitosamente");
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Método mejorado para manejar clics en el tablero
+     */
+    public void onCeldaTableroClickeada(Point posicion, List<String> fichasSeleccionadasIds) {
+        if (control != null && !fichasSeleccionadasIds.isEmpty()) {
+            List<FichaDTO> fichasDTO = convertirIdsAFichaDTO(fichasSeleccionadasIds);
+            control.colocarFichasEnTablero(jugadorId, fichasDTO, posicion);
+        } else if (fichasSeleccionadasIds.isEmpty()) {
+            mostrarMensaje("Selecciona fichas de tu mano primero");
+        }
+    }
+    
+    /**
+     * Método para recibir notificaciones de selección de fichas desde UI_Tablero
+     */
+    public void onFichasSeleccionadas(List<String> fichasIds) {
+        System.out.println("UI_TurnoJugador: Procesando selección de " + fichasIds.size() + " fichas");
+        
+        if (control != null) {
+            // Toggle cada ficha seleccionada en el controlador
+            for (String fichaId : fichasIds) {
+                control.toggleSeleccionFicha(fichaId);
+            }
+        } else {
+            System.err.println("ERROR: Controlador no configurado en UI_TurnoJugador");
         }
     }
 
+    /**
+     * Convierte IDs de fichas a FichaDTO usando la mano actual
+     */
+    private List<FichaDTO> convertirIdsAFichaDTO(List<String> fichasSeleccionadasIds) {
+        List<FichaDTO> fichasDTO = new ArrayList<>();
+        if (uiGrupoMano != null) {
+            for (UI_Ficha fichaUI : uiGrupoMano.getFichas()) {
+                if (fichasSeleccionadasIds.contains(fichaUI.getId())) {
+                    // Crear FichaDTO a partir de la UI_Ficha
+                    FichaDTO fichaDTO = new FichaDTO(
+                        fichaUI.getNumero(),
+                        convertirColorAString(fichaUI.getFichaColor()),
+                        fichaUI.getId()
+                    );
+                    fichasDTO.add(fichaDTO);
+                }
+            }
+        }
+        return fichasDTO;
+    }
+    
+    /**
+     * Convierte Color de Java a String para el DTO
+     */
+    private String convertirColorAString(Color color) {
+        if (color.equals(Color.RED)) return "rojo";
+        if (color.equals(Color.BLUE)) return "azul";
+        if (color.equals(Color.GREEN)) return "verde";
+        if (color.equals(Color.YELLOW)) return "amarillo";
+        if (color.equals(Color.BLACK)) return "negro";
+        return "gris";
+    }
+    
     public void mostrarMensaje(String msg) {
         JOptionPane.showMessageDialog(this, msg);
     }
 
     public void setControlador(ControlTurno control) {
         this.control = control;
+        System.out.println("Controlador configurado para UI_TurnoJugador '" + jugadorId + "'");
     }
 
     /**
@@ -268,7 +366,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         return id;
     }
 
-    // PRUEBAS
+    // Pruebas
+
     public void agregarFichaAMano(int numero, Color color) {
         if (uiGrupoMano != null) {
             uiGrupoMano.agregarFicha(new UI_Ficha(numero, color));
@@ -282,6 +381,16 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
             uiGrupoMano.limpiarGrupo();
         }
     }
+
+    public UI_Tablero getUITablero() {
+        return uiTablero;
+    }
+
+    public UI_Grupo getUIGrupoMano() {
+        return uiGrupoMano;
+    }
+
+    // Bloqueo / Habilitacion
 
     private void bloquearJugador() {
         if (glassBlocker != null) {
@@ -336,4 +445,20 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
             }
         }
     }
+    //PRUEBAS
+    public void cargarFichasDeEjemploTemporal() {
+        if (uiGrupoMano != null) {
+            // Fichas de ejemplo temporales
+            uiGrupoMano.agregarFicha(new UI_Ficha(1, Color.RED));
+            uiGrupoMano.agregarFicha(new UI_Ficha(2, Color.RED));
+            uiGrupoMano.agregarFicha(new UI_Ficha(3, Color.RED));
+            uiGrupoMano.agregarFicha(new UI_Ficha(7, Color.BLUE));
+            uiGrupoMano.agregarFicha(new UI_Ficha(7, Color.GREEN));
+            uiGrupoMano.agregarFicha(new UI_Ficha(7, Color.YELLOW));
+            
+            System.out.println("Fichas temporales cargadas en la mano");
+        }
+    }
 }
+
+

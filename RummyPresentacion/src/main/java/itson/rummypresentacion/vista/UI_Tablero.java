@@ -24,13 +24,11 @@ public class UI_Tablero extends ComponenteBase {
     private Point ultimaCasillaSeleccionada;
     private List<UI_Grupo> gruposTablero; // Para grupos en el tablero
     
-    public UI_Tablero(String id, IModelo modelo) { 
+    public UI_Tablero(String id) { 
         super(id); 
-        this.modelo = modelo; 
         this.ultimaCasillaSeleccionada = null; 
         this.gruposTablero = new ArrayList<>(); 
         inicializarComponente(); 
-        modelo.suscribir(this); 
     } 
 
 
@@ -66,49 +64,39 @@ public class UI_Tablero extends ComponenteBase {
      * Actualiza los grupos del tablero desde el modelo
      */
     private void actualizarGruposTablero(IModelo modelo) {
-        // Limpiar grupos existentes del tablero (no la mano)
         for (UI_Grupo grupo : gruposTablero) {
             removerComponente(grupo);
-            grupoUI.setEsGrupoDeTablero(true);
             remove(grupo);
         }
         gruposTablero.clear();
-        
-        // Obtener grupos del modelo y crear UI_Grupo para cada uno
         List<GrupoDTO> gruposDTO = modelo.getGruposTablero();
         if (gruposDTO != null) {
-            System.out.println("Pintando " + gruposDTO.size() + " grupos en el tablero");
-            
             int xPos = 10;
             int yPos = 10;
-            
+
             for (int i = 0; i < gruposDTO.size(); i++) {
                 GrupoDTO grupoDTO = gruposDTO.get(i);
-                UI_Grupo grupoUI = new UI_Grupo("grupo_tablero_" + i);
-                grupoUI.setPadre(this); // El tablero es el padre de los grupos del tablero
-                
-                // Posicionar el grupo en el tablero
+                UI_Grupo grupoUI = new UI_Grupo("grupotablero" + i);
+                grupoUI.setPadre(this);
                 grupoUI.setBounds(xPos, yPos, 400, 100);
-                grupoUI.setBackground(new Color(200, 200, 200, 100));
-                
-                // Agregar fichas al grupo
-                for (FichaDTO fichaDTO : grupoDTO.getFichas()) {
-                    UI_Ficha fichaUI = new UI_Ficha(fichaDTO);
-                    grupoUI.agregarFicha(fichaUI);
+                grupoUI.setEsGrupoDeTablero(true);
+                if (grupoDTO.getFichas() != null) {
+                    for (FichaDTO f : grupoDTO.getFichas()) {
+                        UI_Ficha ui = new UI_Ficha(f);
+                        grupoUI.agregarFicha(ui);
+                    }
                 }
-                
-                // Agregar al composite y al panel
+                add(grupoUI);
                 agregarComponente(grupoUI);
                 gruposTablero.add(grupoUI);
-                add(grupoUI);
-                
-                // Actualizar posición para el siguiente grupo
                 xPos += 420;
                 if (xPos > 800) {
                     xPos = 10;
                     yPos += 120;
                 }
             }
+            revalidate();
+            repaint();
         }
     }
 

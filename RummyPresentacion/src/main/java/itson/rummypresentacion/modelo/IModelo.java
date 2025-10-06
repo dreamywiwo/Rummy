@@ -35,4 +35,6 @@ public interface IModelo extends ISubject{
     
     void registrarJugador(String idJugador);
     List<String> getJugadores();
+    
+    List<FichaDTO> getManoDe(String jugadorId);
 }

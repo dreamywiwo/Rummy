@@ -259,4 +259,9 @@ public class Modelo implements IModelo, ISubject {
     public void limpiarSeleccion() {
         this.fichasSeleccionadas.clear();
     }
+
+    @Override
+    public List<FichaDTO> getManoDe(String jugadorId) {
+        return fachada.obtenerManoJugador(jugadorId);
+    }
 }

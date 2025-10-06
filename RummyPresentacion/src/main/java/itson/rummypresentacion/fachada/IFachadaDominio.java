@@ -28,4 +28,5 @@ public interface IFachadaDominio {
     public ResultadoJugada colocarFichas(String jugadorId, List<FichaDTO> fichas, Point posicion) throws Exception;
     public List<FichaDTO> obtenerManoJugadorActual();
     public List<GrupoDTO> obtenerGruposTablero();
+    List<FichaDTO> obtenerManoJugador(String jugadorId);
 }

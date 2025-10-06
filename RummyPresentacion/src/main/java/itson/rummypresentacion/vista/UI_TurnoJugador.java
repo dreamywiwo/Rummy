@@ -27,12 +27,15 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     private String jugadorId;
     private javax.swing.JComponent glassBlocker;
 
-    public UI_TurnoJugador(String jugadorId) {
-        this.jugadorId = jugadorId;
-        this.componentes = new ArrayList<>();
-        initComponents();
-        inicializarComponentesVisuales();
-        bloquearJugador();
+    public UI_TurnoJugador(IModelo modelo, String jugadorId) { 
+        this.jugadorId = jugadorId; 
+        this.modelo = modelo; 
+        this.componentes = new ArrayList<>(); 
+        initComponents(); 
+        inicializarComponentesVisuales(); 
+        bloquearJugador(); 
+        this.modelo.suscribir(this); 
+        this.update(this.modelo); 
     }
     @Override
     public void update(IModelo modelo) {
@@ -43,8 +46,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     }
     
     private void inicializarComponentesVisuales() {
-        uiGrupoMano = new UI_Grupo("mano_jugador");
-        uiTablero = new UI_Tablero("tablero_principal");
+        uiGrupoMano = new UI_Grupo("mano_jugador"); 
+        uiTablero = new UI_Tablero("tablero_principal", modelo);
 
         uiTablero.setPadre(this);
 
@@ -193,15 +196,20 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     /**
      * Método mejorado para manejar clics en el tablero
      */
-    public void onCeldaTableroClickeada(Point posicion, List<String> fichasSeleccionadasIds) {
-        if (control != null && !fichasSeleccionadasIds.isEmpty()) {
-            List<FichaDTO> fichasDTO = convertirIdsAFichaDTO(fichasSeleccionadasIds);
-            control.colocarFichasEnTablero(jugadorId, fichasDTO, posicion);
-        } else if (fichasSeleccionadasIds.isEmpty()) {
-            mostrarMensaje("Selecciona fichas de tu mano primero");
-        }
-    }
-    
+    public void onCeldaTableroClickeada(Point posicion, List<String> fichasSeleccionadasIds) { 
+        if (control != null) { 
+            List<FichaDTO> fichasDTO = uiGrupoMano.getFichasSeleccionadasDTO(); 
+            if (fichasDTO == null || fichasDTO.isEmpty()) { 
+                mostrarMensaje("Selecciona fichas de tu mano primero"); 
+                return; 
+            } 
+            control.colocarFichasEnTablero(jugadorId, fichasDTO, posicion); 
+        } else { 
+            mostrarMensaje("Controlador no configurado"); 
+        } 
+    } 
+ 
+ 
     /**
      * Método para recibir notificaciones de selección de fichas desde UI_Tablero
      */

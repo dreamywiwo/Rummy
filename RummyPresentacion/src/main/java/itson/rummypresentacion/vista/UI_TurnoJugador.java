@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import itson.rummypresentacion.DTOs.JugadorDTO;
 
 public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, IObserver {
 
@@ -27,15 +26,12 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     private String jugadorId;
     private javax.swing.JComponent glassBlocker;
 
-    public UI_TurnoJugador(IModelo modelo, String jugadorId) { 
+    public UI_TurnoJugador(String jugadorId) { 
         this.jugadorId = jugadorId; 
-        this.modelo = modelo; 
         this.componentes = new ArrayList<>(); 
         initComponents(); 
         inicializarComponentesVisuales(); 
         bloquearJugador(); 
-        this.modelo.suscribir(this); 
-        this.update(this.modelo); 
     }
     @Override
     public void update(IModelo modelo) {
@@ -47,7 +43,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     
     private void inicializarComponentesVisuales() {
         uiGrupoMano = new UI_Grupo("mano_jugador"); 
-        uiTablero = new UI_Tablero("tablero_principal", modelo);
+        uiTablero = new UI_Tablero("tablero_principal");
 
         uiTablero.setPadre(this);
 

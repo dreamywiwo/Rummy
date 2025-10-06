@@ -352,7 +352,6 @@ public class FachadaDominio implements IFachadaDominio {
             return true; 
         }
 
-        // Validar que todas las fichas normales tengan el mismo color
         String colorBase = fichasNormales.get(0).getColor();
         for (FichaDTO f : fichasNormales) {
             if (!f.getColor().equals(colorBase)) {
@@ -360,7 +359,6 @@ public class FachadaDominio implements IFachadaDominio {
             }
         }
 
-        // Ordenar y validar secuencia con huecos
         Collections.sort(fichasNormales, (a, b) -> Integer.compare(a.getNumero(), b.getNumero()));
 
         int huecos = 0;
@@ -372,7 +370,6 @@ public class FachadaDominio implements IFachadaDominio {
 
         return huecos <= numComodines;
     }
-
     public boolean validarNumeroIgual(List<FichaDTO> fichas) throws Exception {
         if (fichas == null || fichas.size() < 3) {
             return false;
@@ -389,7 +386,6 @@ public class FachadaDominio implements IFachadaDominio {
             return true; 
         }
 
-        // Validar que todas las fichas normales tengan el mismo número
         int numeroBase = fichasNormales.get(0).getNumero();
         for (FichaDTO f : fichasNormales) {
             if (f.getNumero() != numeroBase) {
@@ -397,7 +393,6 @@ public class FachadaDominio implements IFachadaDominio {
             }
         }
 
-        // Validar que los colores de las fichas normales no se repitan
         List<String> colores = new ArrayList<>();
         for (FichaDTO f : fichasNormales) {
             if (colores.contains(f.getColor())) {
@@ -473,6 +468,7 @@ public class FachadaDominio implements IFachadaDominio {
         return mano != null ? new ArrayList<>(mano) : new ArrayList<>();
     }
     
+    @Override
     public boolean jugadorYaBajo30(String jugadorId) {
         return jugadorBajo30.getOrDefault(jugadorId, false);
 }

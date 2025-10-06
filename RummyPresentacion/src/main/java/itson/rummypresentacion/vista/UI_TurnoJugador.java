@@ -268,14 +268,40 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnTomarFicha = new javax.swing.JButton();
-        btnTerminarTurno = new javax.swing.JButton();
         jPanelContenedorMano = new javax.swing.JPanel();
         jPanelContenedorTablero = new javax.swing.JPanel();
-        jLabelFondo = new javax.swing.JLabel();
+        panelBotones = new javax.swing.JPanel();
+        btnTerminarTurno = new javax.swing.JButton();
+        btnTomarFicha = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanelContenedorMano.setBackground(new java.awt.Color(39, 41, 72));
+        jPanelContenedorMano.setOpaque(false);
+        jPanelContenedorMano.setPreferredSize(new java.awt.Dimension(1418, 235));
+        jPanelContenedorMano.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().add(jPanelContenedorMano, java.awt.BorderLayout.SOUTH);
+
+        jPanelContenedorTablero.setOpaque(false);
+
+        javax.swing.GroupLayout jPanelContenedorTableroLayout = new javax.swing.GroupLayout(jPanelContenedorTablero);
+        jPanelContenedorTablero.setLayout(jPanelContenedorTableroLayout);
+        jPanelContenedorTableroLayout.setHorizontalGroup(
+            jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 2389, Short.MAX_VALUE)
+        );
+        jPanelContenedorTableroLayout.setVerticalGroup(
+            jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 909, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelContenedorTablero, java.awt.BorderLayout.CENTER);
+
+        panelBotones.setOpaque(false);
+        panelBotones.setLayout(new java.awt.GridLayout(2, 1));
+
+        btnTerminarTurno.setText("TERMINAR TURNO");
+        panelBotones.add(btnTerminarTurno);
 
         btnTomarFicha.setText("TOMAR FICHA");
         btnTomarFicha.addActionListener(new java.awt.event.ActionListener() {
@@ -283,31 +309,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
                 btnTomarFichaActionPerformed(evt);
             }
         });
-        getContentPane().add(btnTomarFicha, new org.netbeans.lib.awtextra.AbsoluteConstraints(1610, 790, 100, 80));
+        panelBotones.add(btnTomarFicha);
 
-        btnTerminarTurno.setText("TERMINAR TURNO");
-        getContentPane().add(btnTerminarTurno, new org.netbeans.lib.awtextra.AbsoluteConstraints(1610, 910, 100, 80));
-
-        jPanelContenedorMano.setBackground(new java.awt.Color(39, 41, 72));
-        jPanelContenedorMano.setPreferredSize(new java.awt.Dimension(1418, 235));
-        jPanelContenedorMano.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        getContentPane().add(jPanelContenedorMano, new org.netbeans.lib.awtextra.AbsoluteConstraints(138, 905, 1450, 190));
-
-        javax.swing.GroupLayout jPanelContenedorTableroLayout = new javax.swing.GroupLayout(jPanelContenedorTablero);
-        jPanelContenedorTablero.setLayout(jPanelContenedorTableroLayout);
-        jPanelContenedorTableroLayout.setHorizontalGroup(
-            jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1230, Short.MAX_VALUE)
-        );
-        jPanelContenedorTableroLayout.setVerticalGroup(
-            jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 660, Short.MAX_VALUE)
-        );
-
-        getContentPane().add(jPanelContenedorTablero, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 210, 1230, 660));
-
-        jLabelFondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/UI_TurnoJugador.png"))); // NOI18N
-        getContentPane().add(jLabelFondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        getContentPane().add(panelBotones, java.awt.BorderLayout.EAST);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -320,9 +324,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnTerminarTurno;
     private javax.swing.JButton btnTomarFicha;
-    private javax.swing.JLabel jLabelFondo;
     private javax.swing.JPanel jPanelContenedorMano;
     private javax.swing.JPanel jPanelContenedorTablero;
+    private javax.swing.JPanel panelBotones;
     // End of variables declaration//GEN-END:variables
 
     @Override

@@ -334,48 +334,78 @@ public class FachadaDominio implements IFachadaDominio {
 
     /* Validaciones grupos */
     public boolean validarSecuencia(List<FichaDTO> fichas) throws Exception {
-        if (fichas == null || fichas.isEmpty()) {
-            throw new Exception("La lista está vacía.");
+        if (fichas == null || fichas.size() < 3) {
+            return false;
         }
 
-        String colorBase = fichas.get(0).getColor();
+        List<FichaDTO> fichasNormales = new ArrayList<>();
+        int numComodines = 0;
         for (FichaDTO f : fichas) {
+            if (f.isEsComodin()) {
+                numComodines++;
+            } else {
+                fichasNormales.add(f);
+            }
+        }
+
+        if (fichasNormales.isEmpty()) {
+            return true; 
+        }
+
+        // Validar que todas las fichas normales tengan el mismo color
+        String colorBase = fichasNormales.get(0).getColor();
+        for (FichaDTO f : fichasNormales) {
             if (!f.getColor().equals(colorBase)) {
                 return false;
             }
         }
 
-        List<Integer> numeros = new ArrayList<>();
-        for (FichaDTO f : fichas) {
-            numeros.add(f.getNumero());
+        // Ordenar y validar secuencia con huecos
+        Collections.sort(fichasNormales, (a, b) -> Integer.compare(a.getNumero(), b.getNumero()));
+
+        int huecos = 0;
+        for (int i = 1; i < fichasNormales.size(); i++) {
+            int diff = fichasNormales.get(i).getNumero() - fichasNormales.get(i - 1).getNumero();
+            if (diff == 0) return false; 
+            huecos += diff - 1;
         }
 
-        Collections.sort(numeros);
-        for (int i = 1; i < numeros.size(); i++) {
-            if (numeros.get(i) != numeros.get(i - 1) + 1) {
-                return false;
-            }
-        }
-        return true;
+        return huecos <= numComodines;
     }
 
     public boolean validarNumeroIgual(List<FichaDTO> fichas) throws Exception {
-        if (fichas == null || fichas.isEmpty()) {
-            throw new Exception("La lista está vacía.");
+        if (fichas == null || fichas.size() < 3) {
+            return false;
         }
-        int numeroBase = fichas.get(0).getNumero();
+
+        List<FichaDTO> fichasNormales = new ArrayList<>();
         for (FichaDTO f : fichas) {
+            if (!f.isEsComodin()) {
+                fichasNormales.add(f);
+            }
+        }
+
+        if (fichasNormales.isEmpty()) {
+            return true; 
+        }
+
+        // Validar que todas las fichas normales tengan el mismo número
+        int numeroBase = fichasNormales.get(0).getNumero();
+        for (FichaDTO f : fichasNormales) {
             if (f.getNumero() != numeroBase) {
                 return false;
             }
         }
-        for (int i = 0; i < fichas.size(); i++) {
-            for (int j = i + 1; j < fichas.size(); j++) {
-                if (fichas.get(i).getColor().equals(fichas.get(j).getColor())) {
-                    return false;
-                }
+
+        // Validar que los colores de las fichas normales no se repitan
+        List<String> colores = new ArrayList<>();
+        for (FichaDTO f : fichasNormales) {
+            if (colores.contains(f.getColor())) {
+                return false; 
             }
+            colores.add(f.getColor());
         }
+
         return true;
     }
 

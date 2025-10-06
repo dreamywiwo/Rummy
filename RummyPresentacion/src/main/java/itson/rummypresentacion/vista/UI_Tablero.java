@@ -24,12 +24,15 @@ public class UI_Tablero extends ComponenteBase {
     private Point ultimaCasillaSeleccionada;
     private List<UI_Grupo> gruposTablero; // Para grupos en el tablero
     
-    public UI_Tablero(String id) {
-        super(id);
-        this.ultimaCasillaSeleccionada = null;
-        this.gruposTablero = new ArrayList<>();
-        inicializarComponente();
-    }
+    public UI_Tablero(String id, IModelo modelo) { 
+        super(id); 
+        this.modelo = modelo; 
+        this.ultimaCasillaSeleccionada = null; 
+        this.gruposTablero = new ArrayList<>(); 
+        inicializarComponente(); 
+        modelo.suscribir(this); 
+    } 
+
 
     private void inicializarComponente() {
         setPreferredSize(new Dimension(1230, 660));
@@ -66,6 +69,7 @@ public class UI_Tablero extends ComponenteBase {
         // Limpiar grupos existentes del tablero (no la mano)
         for (UI_Grupo grupo : gruposTablero) {
             removerComponente(grupo);
+            grupoUI.setEsGrupoDeTablero(true);
             remove(grupo);
         }
         gruposTablero.clear();

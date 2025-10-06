@@ -148,7 +148,7 @@ public class UI_Jugador extends ComponenteBase {
         lblNombre.setHorizontalAlignment(SwingConstants.CENTER);
         
         // Información de fichas
-        lblInfo = new JLabel("Fichas: 0");
+        lblInfo = new JLabel("");
         lblInfo.setFont(new Font("Arial", Font.PLAIN, 12));
         lblInfo.setHorizontalAlignment(SwingConstants.CENTER);
         
@@ -199,7 +199,6 @@ public class UI_Jugador extends ComponenteBase {
     
     private int obtenerCantidadFichasOponente(IModelo modelo) {
         // Mock: siempre mostrar 7 fichas para el oponente
-        // En una implementación real, obtendrías esto del modelo
         return 7;
     }
     
@@ -221,6 +220,8 @@ public class UI_Jugador extends ComponenteBase {
         repaint();
     }
 
-
+    public void setTamanoPreferido(int ancho, int alto) {
+        setPreferredSize(new java.awt.Dimension(ancho, alto));
+    }
 }
 

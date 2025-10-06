@@ -242,6 +242,10 @@ public class UI_Tablero extends ComponenteBase {
         }
     }
     
+    public void setTamanoPreferido(int ancho, int alto) {
+        setPreferredSize(new java.awt.Dimension(ancho, alto));
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

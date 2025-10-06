@@ -234,5 +234,8 @@ public class UI_Grupo extends ComponenteBase {
     public void setEsGrupoDeTablero(boolean esTablero) {
         this.esGrupoDeTablero = esTablero;
     }
-
+    
+    public void setTamanoPreferido(int ancho, int alto) {
+        setPreferredSize(new java.awt.Dimension(ancho, alto));
+    }
 }

@@ -15,25 +15,15 @@ import javax.swing.JOptionPane;
 
 public class Main {
     public static void main(String[] args) {
-        try {
+       try {
             IFachadaDominio fachada = new FachadaDominio();
             Modelo modelo = new Modelo(fachada);
 
             UI_TurnoJugador vistaJugador1 = new UI_TurnoJugador("Jugador1");
             UI_TurnoJugador vistaJugador2 = new UI_TurnoJugador("Jugador2");
-            UI_TurnoJugador vistaJugador3 = new UI_TurnoJugador("Jugador3");
 
             ControlTurno controlJugador1 = new ControlTurno(vistaJugador1, modelo);
             ControlTurno controlJugador2 = new ControlTurno(vistaJugador2, modelo);
-            ControlTurno controlJugador3 = new ControlTurno(vistaJugador3, modelo);
-
-            vistaJugador1.setControlador(controlJugador1);
-            vistaJugador2.setControlador(controlJugador2);
-            vistaJugador3.setControlador(controlJugador3);
-
-            controlJugador1.registrarJugador("Jugador1");
-            controlJugador2.registrarJugador("Jugador2");
-            controlJugador3.registrarJugador("Jugador3");
 
             // Configurar controladores y vistas
             vistaJugador1.setControlador(controlJugador1);
@@ -132,6 +122,4 @@ public class Main {
         pozo.add(new FichaDTO(1, "negro", "P5")); // Comodín
         return pozo;
     }
-    
-    
 }

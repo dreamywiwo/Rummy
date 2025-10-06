@@ -16,25 +16,18 @@ import java.util.List;
 
 public interface IModelo extends ISubject{
     
-    // Informacion
     String getJugadorActivoId();
     List<FichaDTO> getManoJugadorActual();
     List<GrupoDTO> getGruposTablero();
     int getTurnoActual();
     boolean esTurnoDe(String jugadorId);
-    
-    // Estado
     List<String> getFichasSeleccionadas();
     String getUltimoEvento();
     String getUltimoError();
     long getTimestamp();
-    
-    // TODO: A futuro (algo que se podria llevar)
     boolean isJuegoTerminado();
     String getGanador();
-    
     void registrarJugador(String idJugador);
     List<String> getJugadores();
-    
     List<FichaDTO> getManoDe(String jugadorId);
 }

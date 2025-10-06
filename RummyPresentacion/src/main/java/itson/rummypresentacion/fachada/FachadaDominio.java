@@ -114,11 +114,6 @@ public class FachadaDominio implements IFachadaDominio {
         if (!manoContieneFichas(jugadorId, fichas)) {
             return new ResultadoJugada(false, "No tienes estas fichas en tu mano");
         }
-        
-        if (this.sumaDeFichas(fichas, jugadorId) < 30 && turnoPropio.get(jugadores.indexOf(jugadorId)) <1) {
-            return new ResultadoJugada(false, "No ha juntado los 30 puntos");
-        }
-        
         GrupoDTO grupoAdyacente = encontrarGrupoAdyacente(posicion);
         
         if (grupoAdyacente != null) {

@@ -53,8 +53,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
 //        uiJugadorOponente = new UI_Jugador("jugador_oponente", oponenteId, false);
         
         // Crear resto de componentes
-        uiGrupoMano = new UI_Grupo("mano_jugador");
-        uiTablero = new UI_Tablero("tablero_principal");
+        uiGrupoMano = new UI_Grupo("mano_" + jugadorId);
+        uiGrupoMano.manoIdJugador(jugadorId);
+
         
         uiTablero.setPadre(this);
 

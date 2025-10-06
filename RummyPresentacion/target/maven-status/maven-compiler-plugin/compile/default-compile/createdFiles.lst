@@ -16,6 +16,7 @@ itson\rummypresentacion\vista\UI_TurnoJugador$3.class
 itson\rummypresentacion\vista\IComponente.class
 itson\rummypresentacion\vista\UI_Grupo.class
 itson\rummypresentacion\controlador\ControlTurno.class
+itson\rummypresentacion\vista\BackgroundPanel.class
 itson\rummypresentacion\DTOs\FichaDTO.class
 itson\rummypresentacion\Main.class
 itson\rummypresentacion\modelo\IModelo.class

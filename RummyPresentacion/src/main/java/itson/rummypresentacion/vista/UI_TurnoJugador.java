@@ -17,22 +17,28 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, IObserver {
-
     private String id = "root";
     private List<IComponente> componentes;
     private UI_Grupo uiGrupoMano;
     private UI_Tablero uiTablero;
+//    private UI_Jugador uiJugadorActual;    // El jugador dueño de esta vista
+//   private UI_Jugador uiJugadorOponente;  // El otro jugador
     private ControlTurno control;
     private String jugadorId;
+    private String oponenteId;             // ID del oponente
     private javax.swing.JComponent glassBlocker;
 
-    public UI_TurnoJugador(String jugadorId) { 
-        this.jugadorId = jugadorId; 
-        this.componentes = new ArrayList<>(); 
-        initComponents(); 
-        inicializarComponentesVisuales(); 
-        bloquearJugador(); 
+    public UI_TurnoJugador(String jugadorId) {
+        this.jugadorId = jugadorId;
+        // Determinar quién es el oponente
+        this.oponenteId = "Jugador1".equals(jugadorId) ? "Jugador2" : "Jugador1";
+        this.componentes = new ArrayList<>();
+        initComponents();
+        inicializarComponentesVisuales();
+        bloquearJugador();
+        
     }
+    
     @Override
     public void update(IModelo modelo) {
         SwingUtilities.invokeLater(() -> {
@@ -42,33 +48,45 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     }
     
     private void inicializarComponentesVisuales() {
-        uiGrupoMano = new UI_Grupo("mano_jugador"); 
+        // Crear componentes de jugador
+//        uiJugadorActual = new UI_Jugador("jugador_actual", jugadorId, true);
+//        uiJugadorOponente = new UI_Jugador("jugador_oponente", oponenteId, false);
+        
+        // Crear resto de componentes
+        uiGrupoMano = new UI_Grupo("mano_jugador");
         uiTablero = new UI_Tablero("tablero_principal");
-
+        
         uiTablero.setPadre(this);
 
-        // Agregar componentes al composite 
-        agregarComponente(uiGrupoMano); 
+        // Agregar componentes al composite
+//        agregarComponente(uiJugadorOponente);  // Oponente primero (se dibuja arriba)
+//        agregarComponente(uiJugadorActual);    // Jugador actual después (se dibuja abajo)
+        agregarComponente(uiGrupoMano);
         agregarComponente(uiTablero);
 
+        // Configurar contenedores
+        jPanelJugadorOponente.setLayout(new BorderLayout());
+        jPanelJugadorActual.setLayout(new BorderLayout());
         jPanelContenedorMano.setLayout(new BorderLayout());
         jPanelContenedorTablero.setLayout(new BorderLayout());
 
+        // Agregar componentes a los paneles
+//        jPanelJugadorOponente.add(uiJugadorOponente, BorderLayout.CENTER);
+//        jPanelJugadorActual.add(uiJugadorActual, BorderLayout.CENTER);
         jPanelContenedorMano.add(uiGrupoMano, BorderLayout.CENTER);
         jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
 
-        // Usar setTablero para compatibilidad
+        // Configurar relaciones
         uiGrupoMano.setTablero(uiTablero);
         uiTablero.setGrupoMano(uiGrupoMano);
 
         configurarBotones();
-
-        System.out.println("Componentes agregados al composite:");
-        System.out.println(" - UI_Grupo (mano): " + uiGrupoMano.getId());
-        System.out.println(" - UI_Tablero: " + uiTablero.getId());
+        
+        System.out.println("Vista configurada para: " + jugadorId);
+        System.out.println("Oponente: " + oponenteId);
         System.out.println("Total de componentes hijos: " + componentes.size());
     }
-
+    
     private void configurarBotones() {
         btnTerminarTurno.addActionListener(e -> {
             if (control != null) {
@@ -274,7 +292,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     private void initComponents() {
 
         jPanelContenedorMano = new javax.swing.JPanel();
+        jPanelJugadorActual = new javax.swing.JPanel();
         jPanelContenedorTablero = new javax.swing.JPanel();
+        jPanelJugadorOponente = new javax.swing.JPanel();
         panelBotones = new javax.swing.JPanel();
         btnTerminarTurno = new javax.swing.JButton();
         btnTomarFicha = new javax.swing.JButton();
@@ -285,19 +305,50 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
         jPanelContenedorMano.setOpaque(false);
         jPanelContenedorMano.setPreferredSize(new java.awt.Dimension(1418, 235));
         jPanelContenedorMano.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        javax.swing.GroupLayout jPanelJugadorActualLayout = new javax.swing.GroupLayout(jPanelJugadorActual);
+        jPanelJugadorActual.setLayout(jPanelJugadorActualLayout);
+        jPanelJugadorActualLayout.setHorizontalGroup(
+            jPanelJugadorActualLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 250, Short.MAX_VALUE)
+        );
+        jPanelJugadorActualLayout.setVerticalGroup(
+            jPanelJugadorActualLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 190, Short.MAX_VALUE)
+        );
+
+        jPanelContenedorMano.add(jPanelJugadorActual, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 250, 190));
+
         getContentPane().add(jPanelContenedorMano, java.awt.BorderLayout.SOUTH);
 
         jPanelContenedorTablero.setOpaque(false);
+
+        javax.swing.GroupLayout jPanelJugadorOponenteLayout = new javax.swing.GroupLayout(jPanelJugadorOponente);
+        jPanelJugadorOponente.setLayout(jPanelJugadorOponenteLayout);
+        jPanelJugadorOponenteLayout.setHorizontalGroup(
+            jPanelJugadorOponenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 254, Short.MAX_VALUE)
+        );
+        jPanelJugadorOponenteLayout.setVerticalGroup(
+            jPanelJugadorOponenteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 188, Short.MAX_VALUE)
+        );
 
         javax.swing.GroupLayout jPanelContenedorTableroLayout = new javax.swing.GroupLayout(jPanelContenedorTablero);
         jPanelContenedorTablero.setLayout(jPanelContenedorTableroLayout);
         jPanelContenedorTableroLayout.setHorizontalGroup(
             jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 2389, Short.MAX_VALUE)
+            .addGroup(jPanelContenedorTableroLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanelJugadorOponente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(2128, Short.MAX_VALUE))
         );
         jPanelContenedorTableroLayout.setVerticalGroup(
             jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 909, Short.MAX_VALUE)
+            .addGroup(jPanelContenedorTableroLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanelJugadorOponente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(715, Short.MAX_VALUE))
         );
 
         getContentPane().add(jPanelContenedorTablero, java.awt.BorderLayout.CENTER);
@@ -331,6 +382,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IComponente, 
     private javax.swing.JButton btnTomarFicha;
     private javax.swing.JPanel jPanelContenedorMano;
     private javax.swing.JPanel jPanelContenedorTablero;
+    private javax.swing.JPanel jPanelJugadorActual;
+    private javax.swing.JPanel jPanelJugadorOponente;
     private javax.swing.JPanel panelBotones;
     // End of variables declaration//GEN-END:variables
 

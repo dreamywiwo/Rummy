@@ -40,12 +40,17 @@ public class Modelo implements IModelo, ISubject {
                 fichasSeleccionadas.clear();
                 ultimoEvento = "FICHAS_COLOCADAS";
                 ultimoError = null;
+                if (resultado.getMensaje().contains("30 puntos")) {
+                    ultimoEvento = "PRIMER_BAJADA";
+                } else {
+                    ultimoEvento = "FICHAS_COLOCADAS";
+                }
             } else {
                 ultimoError = resultado.getMensaje();
                 ultimoEvento = "ERROR_COLOCACION";
             }
-
             notificarObservers();
+
 
         } catch (Exception e) {
             ultimoError = "Error al colocar fichas: " + e.getMessage();

@@ -1,0 +1,441 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
+package itson.rummypresentacion.vista;
+
+import itson.rummydtos.FichaDTO;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
+
+public class UI_Tablero extends javax.swing.JPanel {
+
+    private final UI_TurnoJugador ventanaPrincipal;
+    private Tablero tablero;
+    private List<UI_Grupo> gruposPanels;
+    private JPanel panelLibre;
+
+    private double escalaActual = 1.0; 
+    private static final double ESCALA_MINIMA = 0.5; 
+    private static final double ESCALA_MAXIMA = 1.0; 
+    private static final int MARGEN_BORDE = 20;
+    private static final double REDUCCION_ZOOM = 0.1; 
+
+    public UI_Tablero(Tablero tablero, UI_TurnoJugador ventanaPrincipal) {
+        this.tablero = tablero;
+        this.gruposPanels = new ArrayList<>();
+        this.ventanaPrincipal = ventanaPrincipal;
+
+        configurarPanel();
+        inicializarComponentes();
+        habilitarDragAndDrop();
+    }
+
+    private void configurarPanel() {
+        setLayout(null);
+        setOpaque(false);
+        setPreferredSize(new Dimension(803, 448));
+    }
+
+    private void inicializarComponentes() {
+        panelLibre = new JPanel(null);
+        panelLibre.setOpaque(false);
+        add(panelLibre);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        int centroX = getWidth() / 2;
+        int centroY = getHeight() / 2;
+        
+        g2d.translate(centroX, centroY);
+        g2d.scale(escalaActual, escalaActual);
+        g2d.translate(-centroX, -centroY);
+    }
+
+    private void habilitarDragAndDrop() {
+        new DropTarget(this, new DropTargetAdapter() {
+            @Override
+            public void drop(DropTargetDropEvent event) {
+                try {
+                    event.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+
+                    Object data = null;
+                    ContenedorFichas origen = null;
+                    FichaDTO ficha = null;
+
+                    try {
+                        data = event.getTransferable().getTransferData(FichaTransferable.FICHA_FLAVOR);
+                        if (data instanceof FichaTransferable) {
+                            FichaTransferable ft = (FichaTransferable) data;
+                            ficha = ft.getFicha();
+                            origen = ft.getOrigen();
+                        }
+                    } catch (Exception e) {
+                        try {
+                            data = event.getTransferable().getTransferData(FichaTransferable.FICHA_DTO_FLAVOR);
+                            if (data instanceof FichaDTO) {
+                                ficha = (FichaDTO) data;
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    if (ficha != null) {
+                        if (origen != null) {
+                            int tamañoAntes = origen.size();
+                            origen.remover(ficha);
+                            int tamañoDespues = origen.size();
+
+                            actualizarOrigenUI(origen);
+                        }
+
+                        Point puntoAjustado = convertirPuntoConEscala(event.getLocation());
+                        crearGrupoEnPunto(puntoAjustado, ficha);
+
+                        event.dropComplete(true);
+                    } else {
+                        event.dropComplete(false);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error en drop del tablero: " + e.getMessage());
+                    e.printStackTrace();
+                    event.dropComplete(false);
+                }
+            }
+        });
+    }
+
+    private Point convertirPuntoConEscala(Point puntoOriginal) {
+        int centroX = getWidth() / 2;
+        int centroY = getHeight() / 2;
+        
+        int x = (int) ((puntoOriginal.x - centroX) / escalaActual + centroX);
+        int y = (int) ((puntoOriginal.y - centroY) / escalaActual + centroY);
+        
+        return new Point(x, y);
+    }
+
+    private void actualizarOrigenUI(ContenedorFichas origen) {
+        Container parent = this.getParent();
+        while (parent != null) {
+            buscarYActualizarEnContainer(parent, origen);
+            parent = parent.getParent();
+        }
+
+        buscarYActualizarEnContainer(this, origen);
+    }
+
+    private void buscarYActualizarEnContainer(Container container, ContenedorFichas origen) {
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof UI_Mano) {
+                UI_Mano manoPanel = (UI_Mano) comp;
+                if (manoPanel.getMano() == origen) {
+                    manoPanel.actualizarFichas();
+                    return;
+                }
+            } else if (comp instanceof UI_Grupo) {
+                UI_Grupo grupoPanel = (UI_Grupo) comp;
+                if (grupoPanel.getGrupo() == origen) {
+                    grupoPanel.actualizarFichas();
+                    return;
+                }
+            } else if (comp instanceof Container) {
+                buscarYActualizarEnContainer((Container) comp, origen);
+            }
+        }
+    }
+
+    private void crearGrupoEnPunto(Point punto, FichaDTO ficha) {
+        UI_Grupo grupoCercano = encontrarGrupoCercano(punto);
+        if (grupoCercano != null) {
+            grupoCercano.getGrupo().agregar(ficha);
+            grupoCercano.actualizarFichas();
+            ajustarTamanoGrupo(grupoCercano);
+            
+            Point posicionAjustada = ajustarPosicionDentroDelTablero(
+                grupoCercano.getLocation(),
+                grupoCercano.getWidth(),
+                grupoCercano.getHeight()
+            );
+            grupoCercano.setLocation(posicionAjustada);           
+            
+            if (ventanaPrincipal != null) {
+                ventanaPrincipal.notificarGrupoActualizado(
+                    grupoCercano.getGrupo().getId(), 
+                    grupoCercano.getGrupo().getFichas()
+                );
+            }
+            
+            ajustarZoomSiEsNecesario();
+            return;
+        }
+
+        Grupo nuevoGrupo = new Grupo("grupo_" + tablero.getGrupos().size());
+        tablero.agregarGrupo(nuevoGrupo);
+        nuevoGrupo.agregar(ficha);
+
+        UI_Grupo grupoPanel = new UI_Grupo(nuevoGrupo, gruposPanels.size(), this);
+
+        int anchoFicha = 60;
+        int altoFicha = 80;
+        int margen = 10;
+        int anchoGrupo = anchoFicha + margen * 2;
+        int altoGrupo = altoFicha + margen * 2;
+
+        int x = punto.x - anchoGrupo / 2;
+        int y = punto.y - altoGrupo / 2;
+        Point posicionCentrada = new Point(x, y);
+
+        Point posicionFinal = ajustarPosicionDentroDelTablero(posicionCentrada, anchoGrupo, altoGrupo);
+
+        int intentos = 0;
+        int desplazamiento = 30;
+        while (hayColision(posicionFinal, anchoGrupo, altoGrupo) && intentos < 8) {
+            switch (intentos) {
+                case 0:
+                    posicionFinal.x += desplazamiento;
+                    break; 
+                case 1:
+                    posicionFinal.x -= desplazamiento * 2;
+                    break; 
+                case 2:
+                    posicionFinal.x += desplazamiento;
+                    posicionFinal.y += desplazamiento;
+                    break; 
+                case 3:
+                    posicionFinal.y -= desplazamiento * 2;
+                    break; 
+                case 4:
+                    posicionFinal.x += desplazamiento;
+                    break; 
+                case 5:
+                    posicionFinal.x -= desplazamiento * 2;
+                    break; 
+                case 6:
+                    posicionFinal.x += desplazamiento;
+                    posicionFinal.y += desplazamiento;
+                    break; 
+                case 7:
+                    posicionFinal.x -= desplazamiento;
+                    break; 
+            }
+            posicionFinal = ajustarPosicionDentroDelTablero(posicionFinal, anchoGrupo, altoGrupo);
+            intentos++;
+        }
+
+        grupoPanel.setBounds(posicionFinal.x, posicionFinal.y, anchoGrupo, altoGrupo);
+        grupoPanel.setBorder(new LineBorder(Color.WHITE, 2, true));
+        grupoPanel.setOpaque(true);
+        grupoPanel.setBackground(new Color(60, 160, 60));
+
+        gruposPanels.add(grupoPanel);
+        add(grupoPanel);
+
+        if (ventanaPrincipal != null) {
+            ventanaPrincipal.notificarGrupoCreado(nuevoGrupo.getFichas());
+        }
+
+        ajustarZoomSiEsNecesario();
+
+        repaint();
+    }
+
+    private Point ajustarPosicionDentroDelTablero(Point posicionOriginal, int anchoGrupo, int altoGrupo) {
+        int x = posicionOriginal.x;
+        int y = posicionOriginal.y;
+
+        int anchoTablero = getWidth();
+        int altoTablero = getHeight();
+
+        if (x < MARGEN_BORDE) {
+            x = MARGEN_BORDE;
+        } else if (x + anchoGrupo > anchoTablero - MARGEN_BORDE) {
+            x = anchoTablero - anchoGrupo - MARGEN_BORDE;
+        }
+
+        if (y < MARGEN_BORDE) {
+            y = MARGEN_BORDE;
+        } else if (y + altoGrupo > altoTablero - MARGEN_BORDE) {
+            y = altoTablero - altoGrupo - MARGEN_BORDE;
+        }
+
+        return new Point(x, y);
+    }
+
+    private boolean hayColision(Point posicion, int ancho, int alto) {
+        java.awt.Rectangle nuevaArea = new java.awt.Rectangle(posicion.x, posicion.y, ancho, alto);
+
+        for (UI_Grupo grupo : gruposPanels) {
+            java.awt.Rectangle areaGrupo = grupo.getBounds();
+            areaGrupo.grow(10, 10);
+            if (nuevaArea.intersects(areaGrupo)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private double calcularPorcentajeOcupacion() {
+        if (gruposPanels.isEmpty()) {
+            return 0.0;
+        }
+
+        double areaTablero = getWidth() * getHeight();
+
+        double areaOcupada = 0;
+        for (UI_Grupo grupo : gruposPanels) {
+            areaOcupada += grupo.getWidth() * grupo.getHeight();
+        }
+
+        return (areaOcupada / areaTablero) * 100;
+    }
+
+    private void ajustarZoomSiEsNecesario() {
+        double ocupacion = calcularPorcentajeOcupacion();
+
+        if (ocupacion > 70 && escalaActual > ESCALA_MINIMA) {
+            double nuevaEscala = escalaActual - REDUCCION_ZOOM;
+            if (nuevaEscala < ESCALA_MINIMA) {
+                nuevaEscala = ESCALA_MINIMA;
+            }
+
+            aplicarZoom(nuevaEscala);
+        }
+    }
+
+    private void aplicarZoom(double nuevaEscala) {
+        if (nuevaEscala < ESCALA_MINIMA || nuevaEscala > ESCALA_MAXIMA) {
+            return;
+        }
+
+        escalaActual = nuevaEscala;
+        
+        revalidate();
+        repaint();
+
+    }
+
+    public void hacerZoomOut() {
+        double nuevaEscala = escalaActual - REDUCCION_ZOOM;
+        if (nuevaEscala >= ESCALA_MINIMA) {
+            aplicarZoom(nuevaEscala);
+        } else {
+        }
+    }
+
+    public void hacerZoomIn() {
+        double nuevaEscala = escalaActual + REDUCCION_ZOOM;
+        if (nuevaEscala <= ESCALA_MAXIMA) {
+            aplicarZoom(nuevaEscala);
+        } else {
+        }
+    }
+
+    public void resetearZoom() {
+        aplicarZoom(1.0);
+    }
+
+    public double getEscalaActual() {
+        return escalaActual;
+    }
+
+    private UI_Grupo encontrarGrupoCercano(Point punto) {
+        for (UI_Grupo grupoPanel : gruposPanels) {
+            int gx = grupoPanel.getX();
+            int gy = grupoPanel.getY();
+            int gw = grupoPanel.getWidth();
+            int gh = grupoPanel.getHeight();
+
+            boolean cercaHorizontal = (punto.x >= gx - 40 && punto.x <= gx + gw + 40);
+            boolean cercaVertical = (punto.y >= gy - 20 && punto.y <= gy + gh + 20);
+
+            if (cercaHorizontal && cercaVertical) {
+                return grupoPanel;
+            }
+        }
+        return null;
+    }
+
+    private void ajustarTamanoGrupo(UI_Grupo grupoPanel) {
+        int numFichas = grupoPanel.getGrupo().size();
+        int anchoFicha = 60;
+        int margen = 10;
+
+        int nuevoAncho = (numFichas * anchoFicha) + margen * 2;
+        int nuevoAlto = grupoPanel.getHeight(); 
+
+        grupoPanel.setSize(new Dimension(nuevoAncho, nuevoAlto));
+        grupoPanel.revalidate();
+        grupoPanel.repaint();
+    }
+
+    public void actualizarGrupos() {
+        removeAll();
+        gruposPanels.clear();
+
+        List<Grupo> grupos = tablero.getGrupos();
+        for (int i = 0; i < grupos.size(); i++) {
+            UI_Grupo grupoPanel = new UI_Grupo(grupos.get(i), i, this);
+            grupoPanel.setBounds(50, 50 + (i * 100), 200, 80);
+            gruposPanels.add(grupoPanel);
+            add(grupoPanel);
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    public Tablero getTablero() {
+        return tablero;
+    }
+    
+    public UI_TurnoJugador getVentanaPrincipal() {
+        return ventanaPrincipal;
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        setPreferredSize(new java.awt.Dimension(803, 448));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 803, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 448, Short.MAX_VALUE)
+        );
+    }// </editor-fold>//GEN-END:initComponents
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
+}

@@ -1,0 +1,359 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package itson.rummypresentacion.vista;
+
+import itson.rummypresentacion.controlador.ControladorTurno;
+import itson.rummydtos.FichaDTO;
+import itson.rummypresentacion.modelo.IModelo;
+import itson.rummypresentacion.modelo.IObserver;
+import java.awt.BorderLayout;
+import java.util.List;
+
+/**
+ *
+ * @author Dana Chavez
+ */
+public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {  
+    
+    private UI_Tablero uiTablero;
+    private UI_Mano uiMano;
+    private ControladorTurno controlador;
+    
+    /**
+     * Creates new form UI_TurnoJugador
+     */
+    public UI_TurnoJugador(ControladorTurno controlador) {  
+        initComponents();
+        this.controlador = controlador;
+        
+        inicializarDatosPrueba();
+        setLocationRelativeTo(null);
+
+        jPanelContenedorTablero.setLayout(new BorderLayout());
+        jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
+
+        uiMano = new UI_Mano(uiTablero.getTablero().getManoJugador(), uiTablero);
+        jPanelContenedorMano.setLayout(new BorderLayout());
+        jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
+        
+        jPanelContenedorJugador.setOpaque(false);
+        jPanelContenedorJugador1.setOpaque(false);
+        jPanelContenedorJugador2.setOpaque(false);
+        jPanelContenedorJugador3.setOpaque(false);        
+        jPanelContenedorTablero.setOpaque(false);
+        jPanelSopa.setOpaque(false);
+        
+        configurarEventosBotones();
+        
+    }
+    
+    /**
+     * Configura los listeners de los botones
+     */
+    private void configurarEventosBotones() {
+        jButtonTerminarTurno.addActionListener(e -> {
+            controlador.terminarTurno();
+        });
+        
+        jButtonTomarFicha.addActionListener(e -> {
+            controlador.tomarFicha();
+        });
+        
+        jButtonAbandonar.addActionListener(e -> {
+            controlador.abandonarPartida();
+        });
+    }
+    
+    /**
+     * Notifica al controlador que se creó un grupo
+     * @param fichas Lista de fichas del nuevo grupo
+     */
+    public void notificarGrupoCreado(List<FichaDTO> fichas) {
+        controlador.crearGrupo(fichas);
+    }
+    
+    /**
+     * Notifica al controlador que se actualizó un grupo
+     * @param idGrupo ID del grupo actualizado
+     * @param fichas Lista actualizada de fichas
+     */
+    public void notificarGrupoActualizado(String idGrupo, List<FichaDTO> fichas) {
+        controlador.actualizarGrupo(idGrupo, fichas);
+    }
+    
+    /**
+     * Notifica al controlador que se movió una ficha
+     * @param ficha Ficha movida
+     * @param origen Contenedor de origen
+     * @param destino Contenedor de destino
+     */
+    public void notificarFichaMovida(FichaDTO ficha, String origen, String destino) {
+        controlador.moverFicha(ficha, origen, destino);
+    }
+    
+    /**
+     * Obtiene el tablero UI
+     * @return UI_Tablero
+     */
+    public UI_Tablero getUITablero() {
+        return uiTablero;
+    }
+    
+    /**
+     * Obtiene la mano UI
+     * @return UI_Mano
+     */
+    public UI_Mano getUIMano() {
+        return uiMano;
+    }
+    
+    /**
+     * Obtiene el controlador
+     * @return ControladorTurno
+     */
+    public ControladorTurno getControlador() {
+        return controlador;
+    }
+    
+    private void inicializarDatosPrueba() {
+        Tablero tableroModelo = new Tablero();
+        Mano mano = tableroModelo.getManoJugador();
+
+        mano.agregar(new FichaDTO(1, "ROJO", "r1"));
+        mano.agregar(new FichaDTO(2, "ROJO", "r2"));
+        mano.agregar(new FichaDTO(3, "ROJO", "r3"));
+        mano.agregar(new FichaDTO(4, "ROJO", "r4"));
+
+        mano.agregar(new FichaDTO(5, "AZUL", "a5"));
+        mano.agregar(new FichaDTO(6, "AZUL", "a6"));
+        mano.agregar(new FichaDTO(7, "AZUL", "a7"));
+
+        mano.agregar(new FichaDTO(8, "AMARILLO", "y8"));
+        mano.agregar(new FichaDTO(9, "AMARILLO", "y9"));
+
+        mano.agregar(new FichaDTO(10, "NEGRO", "n10"));
+        mano.agregar(new FichaDTO(11, "NEGRO", "n11"));
+
+        mano.agregar(new FichaDTO(0, "DORADO", "comodin1", true));
+        mano.agregar(new FichaDTO(12, "DORADO", "comodin1", true));
+        mano.agregar(new FichaDTO(13, "DORADO", "comodin1", true));
+        mano.agregar(new FichaDTO(14, "DORADO", "comodin1", true));
+
+        Grupo grupo1 = new Grupo("grupo_0");
+        grupo1.agregar(new FichaDTO(12, "ROJO", "r12"));
+        grupo1.agregar(new FichaDTO(13, "ROJO", "r13"));
+        tableroModelo.agregarGrupo(grupo1);
+
+        uiTablero = new UI_Tablero(tableroModelo, this); 
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanelSopa = new javax.swing.JPanel();
+        jButtonAbandonar = new javax.swing.JButton();
+        jButtonTerminarTurno = new javax.swing.JButton();
+        jButtonTomarFicha = new javax.swing.JButton();
+        jPanelContenedorJugador3 = new javax.swing.JPanel();
+        jPanelContenedorJugador2 = new javax.swing.JPanel();
+        jPanelContenedorJugador1 = new javax.swing.JPanel();
+        jPanelContenedorJugador = new javax.swing.JPanel();
+        jPanelContenedorTablero = new javax.swing.JPanel();
+        jPanelDecoracionMano = new javax.swing.JPanel();
+        jPanelBaseMano = new javax.swing.JPanel();
+        jPanelContenedorMano = new javax.swing.JPanel();
+        jLabelFondo = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(1151, 744));
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanelSopa.setPreferredSize(new java.awt.Dimension(90, 90));
+
+        javax.swing.GroupLayout jPanelSopaLayout = new javax.swing.GroupLayout(jPanelSopa);
+        jPanelSopa.setLayout(jPanelSopaLayout);
+        jPanelSopaLayout.setHorizontalGroup(
+            jPanelSopaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 90, Short.MAX_VALUE)
+        );
+        jPanelSopaLayout.setVerticalGroup(
+            jPanelSopaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 90, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelSopa, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 10, -1, -1));
+
+        jButtonAbandonar.setText("Salir");
+        jButtonAbandonar.setToolTipText("");
+        getContentPane().add(jButtonAbandonar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1069, 10, 70, 70));
+
+        jButtonTerminarTurno.setText("Terminar Turno");
+        getContentPane().add(jButtonTerminarTurno, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 590, 110, 40));
+
+        jButtonTomarFicha.setText("Tomar Ficha");
+        getContentPane().add(jButtonTomarFicha, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 640, 110, 100));
+
+        jPanelContenedorJugador3.setPreferredSize(new java.awt.Dimension(125, 125));
+
+        javax.swing.GroupLayout jPanelContenedorJugador3Layout = new javax.swing.GroupLayout(jPanelContenedorJugador3);
+        jPanelContenedorJugador3.setLayout(jPanelContenedorJugador3Layout);
+        jPanelContenedorJugador3Layout.setHorizontalGroup(
+            jPanelContenedorJugador3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+        jPanelContenedorJugador3Layout.setVerticalGroup(
+            jPanelContenedorJugador3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelContenedorJugador3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 400, -1, -1));
+
+        jPanelContenedorJugador2.setPreferredSize(new java.awt.Dimension(125, 125));
+
+        javax.swing.GroupLayout jPanelContenedorJugador2Layout = new javax.swing.GroupLayout(jPanelContenedorJugador2);
+        jPanelContenedorJugador2.setLayout(jPanelContenedorJugador2Layout);
+        jPanelContenedorJugador2Layout.setHorizontalGroup(
+            jPanelContenedorJugador2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+        jPanelContenedorJugador2Layout.setVerticalGroup(
+            jPanelContenedorJugador2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelContenedorJugador2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 220, -1, -1));
+
+        jPanelContenedorJugador1.setPreferredSize(new java.awt.Dimension(125, 125));
+
+        javax.swing.GroupLayout jPanelContenedorJugador1Layout = new javax.swing.GroupLayout(jPanelContenedorJugador1);
+        jPanelContenedorJugador1.setLayout(jPanelContenedorJugador1Layout);
+        jPanelContenedorJugador1Layout.setHorizontalGroup(
+            jPanelContenedorJugador1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+        jPanelContenedorJugador1Layout.setVerticalGroup(
+            jPanelContenedorJugador1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelContenedorJugador1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, -1, -1));
+
+        jPanelContenedorJugador.setPreferredSize(new java.awt.Dimension(125, 125));
+
+        javax.swing.GroupLayout jPanelContenedorJugadorLayout = new javax.swing.GroupLayout(jPanelContenedorJugador);
+        jPanelContenedorJugador.setLayout(jPanelContenedorJugadorLayout);
+        jPanelContenedorJugadorLayout.setHorizontalGroup(
+            jPanelContenedorJugadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+        jPanelContenedorJugadorLayout.setVerticalGroup(
+            jPanelContenedorJugadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 125, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelContenedorJugador, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 570, -1, -1));
+
+        jPanelContenedorTablero.setPreferredSize(new java.awt.Dimension(803, 448));
+
+        javax.swing.GroupLayout jPanelContenedorTableroLayout = new javax.swing.GroupLayout(jPanelContenedorTablero);
+        jPanelContenedorTablero.setLayout(jPanelContenedorTableroLayout);
+        jPanelContenedorTableroLayout.setHorizontalGroup(
+            jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 803, Short.MAX_VALUE)
+        );
+        jPanelContenedorTableroLayout.setVerticalGroup(
+            jPanelContenedorTableroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 460, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelContenedorTablero, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 120, -1, 460));
+
+        jPanelDecoracionMano.setBackground(new java.awt.Color(22, 24, 54));
+        jPanelDecoracionMano.setPreferredSize(new java.awt.Dimension(739, 46));
+
+        jPanelBaseMano.setBackground(new java.awt.Color(98, 101, 145));
+        jPanelBaseMano.setPreferredSize(new java.awt.Dimension(739, 40));
+
+        javax.swing.GroupLayout jPanelBaseManoLayout = new javax.swing.GroupLayout(jPanelBaseMano);
+        jPanelBaseMano.setLayout(jPanelBaseManoLayout);
+        jPanelBaseManoLayout.setHorizontalGroup(
+            jPanelBaseManoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 750, Short.MAX_VALUE)
+        );
+        jPanelBaseManoLayout.setVerticalGroup(
+            jPanelBaseManoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanelDecoracionManoLayout = new javax.swing.GroupLayout(jPanelDecoracionMano);
+        jPanelDecoracionMano.setLayout(jPanelDecoracionManoLayout);
+        jPanelDecoracionManoLayout.setHorizontalGroup(
+            jPanelDecoracionManoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanelBaseMano, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 750, Short.MAX_VALUE)
+        );
+        jPanelDecoracionManoLayout.setVerticalGroup(
+            jPanelDecoracionManoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelDecoracionManoLayout.createSequentialGroup()
+                .addGap(0, 6, Short.MAX_VALUE)
+                .addComponent(jPanelBaseMano, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        getContentPane().add(jPanelDecoracionMano, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 700, 750, -1));
+
+        jPanelContenedorMano.setBackground(new java.awt.Color(39, 41, 72));
+        jPanelContenedorMano.setPreferredSize(new java.awt.Dimension(739, 110));
+
+        javax.swing.GroupLayout jPanelContenedorManoLayout = new javax.swing.GroupLayout(jPanelContenedorMano);
+        jPanelContenedorMano.setLayout(jPanelContenedorManoLayout);
+        jPanelContenedorManoLayout.setHorizontalGroup(
+            jPanelContenedorManoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 750, Short.MAX_VALUE)
+        );
+        jPanelContenedorManoLayout.setVerticalGroup(
+            jPanelContenedorManoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 110, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanelContenedorMano, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 590, 750, -1));
+
+        jLabelFondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/mesadejuego.png"))); // NOI18N
+        getContentPane().add(jLabelFondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonAbandonar;
+    private javax.swing.JButton jButtonTerminarTurno;
+    private javax.swing.JButton jButtonTomarFicha;
+    private javax.swing.JLabel jLabelFondo;
+    private javax.swing.JPanel jPanelBaseMano;
+    private javax.swing.JPanel jPanelContenedorJugador;
+    private javax.swing.JPanel jPanelContenedorJugador1;
+    private javax.swing.JPanel jPanelContenedorJugador2;
+    private javax.swing.JPanel jPanelContenedorJugador3;
+    private javax.swing.JPanel jPanelContenedorMano;
+    private javax.swing.JPanel jPanelContenedorTablero;
+    private javax.swing.JPanel jPanelDecoracionMano;
+    private javax.swing.JPanel jPanelSopa;
+    // End of variables declaration//GEN-END:variables
+
+    /**
+     * Método del Observer - Se llama cuando el Modelo cambia
+     * Actualiza toda la vista con el nuevo estado
+     */
+    @Override
+    public void update(IModelo modelo) {
+
+    }
+    
+}

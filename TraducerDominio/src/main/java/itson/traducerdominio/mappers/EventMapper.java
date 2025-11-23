@@ -4,6 +4,7 @@
  */
 package itson.traducerdominio.mappers;
 
+import itson.dominiorummy.facade.IDominio;
 import itson.rummyeventos.acciones.FichaTomadaEvent;
 import itson.rummyeventos.acciones.GrupoActualizadoEvent;
 import itson.rummyeventos.acciones.GrupoCreadoEvent;
@@ -21,14 +22,14 @@ import java.util.function.BiConsumer;
 public class EventMapper {
 
     private final ISerializer serializer;
-//    private final IDominio dominio;
+    private final IDominio dominio;
 
     private final Map<String, BiConsumer<String, ISerializer>> handlers = new HashMap<>();
 
     //agregar IDominio al constructor
-    public EventMapper(ISerializer serializer) {
+    public EventMapper(ISerializer serializer, IDominio dominio) {
         this.serializer = serializer;
-//        this.dominio = dominio;
+        this.dominio = dominio;
 
         // Registrar handlers
         register("grupo.creado", this::handleGrupoCreado);
@@ -67,7 +68,7 @@ public class EventMapper {
     private void handleGrupoActualizado(String rawPayload, ISerializer serializer) {
         try {
             GrupoActualizadoEvent event = serializer.deserialize(rawPayload, GrupoActualizadoEvent.class);
-//            dominio.actualizarGrupo(event.getGrupoId(), event.getFichas());
+            dominio.actualizarGrupo(event.getGrupoId(), event.getNuevasFichas());
 
         } catch (Exception e) {
             e.printStackTrace();

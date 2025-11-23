@@ -29,7 +29,7 @@ public class EstadoJuegoEmitter {
 
     public void emitirTableroActualizadoEvent(TableroDTO snapshotTablero) {
         TableroActualizadoEvent event = new TableroActualizadoEvent(snapshotTablero);
-        String json = jsonSerializer.serialize(event);        
+        String json = jsonSerializer.serialize(event);  
 //        connectionOutbound.send(json);
     }
 

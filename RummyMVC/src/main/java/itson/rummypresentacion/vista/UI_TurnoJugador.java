@@ -6,6 +6,7 @@ package itson.rummypresentacion.vista;
 
 import itson.rummypresentacion.controlador.ControladorTurno;
 import itson.rummydtos.FichaDTO;
+import itson.rummydtos.GrupoDTO;
 import itson.rummypresentacion.modelo.IModelo;
 import itson.rummypresentacion.modelo.IObserver;
 import java.awt.BorderLayout;
@@ -15,19 +16,19 @@ import java.util.List;
  *
  * @author Dana Chavez
  */
-public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {  
-    
+public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
+
     private UI_Tablero uiTablero;
     private UI_Mano uiMano;
     private ControladorTurno controlador;
-    
+
     /**
      * Creates new form UI_TurnoJugador
      */
-    public UI_TurnoJugador(ControladorTurno controlador) {  
+    public UI_TurnoJugador(ControladorTurno controlador) {
         initComponents();
         this.controlador = controlador;
-        
+
         inicializarDatosPrueba();
         setLocationRelativeTo(null);
 
@@ -37,18 +38,18 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         uiMano = new UI_Mano(uiTablero.getTablero().getManoJugador(), uiTablero);
         jPanelContenedorMano.setLayout(new BorderLayout());
         jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
-        
+
         jPanelContenedorJugador.setOpaque(false);
         jPanelContenedorJugador1.setOpaque(false);
         jPanelContenedorJugador2.setOpaque(false);
-        jPanelContenedorJugador3.setOpaque(false);        
+        jPanelContenedorJugador3.setOpaque(false);
         jPanelContenedorTablero.setOpaque(false);
         jPanelSopa.setOpaque(false);
-        
+
         configurarEventosBotones();
-        
+
     }
-    
+
     /**
      * Configura los listeners de los botones
      */
@@ -56,35 +57,38 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         jButtonTerminarTurno.addActionListener(e -> {
             controlador.terminarTurno();
         });
-        
+
         jButtonTomarFicha.addActionListener(e -> {
             controlador.tomarFicha();
         });
-        
+
         jButtonAbandonar.addActionListener(e -> {
             controlador.abandonarPartida();
         });
     }
-    
+
     /**
      * Notifica al controlador que se creó un grupo
+     *
      * @param fichas Lista de fichas del nuevo grupo
      */
     public void notificarGrupoCreado(List<FichaDTO> fichas) {
         controlador.crearGrupo(fichas);
     }
-    
+
     /**
      * Notifica al controlador que se actualizó un grupo
+     *
      * @param idGrupo ID del grupo actualizado
      * @param fichas Lista actualizada de fichas
      */
     public void notificarGrupoActualizado(String idGrupo, List<FichaDTO> fichas) {
         controlador.actualizarGrupo(idGrupo, fichas);
     }
-    
+
     /**
      * Notifica al controlador que se movió una ficha
+     *
      * @param ficha Ficha movida
      * @param origen Contenedor de origen
      * @param destino Contenedor de destino
@@ -92,63 +96,68 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     public void notificarFichaMovida(FichaDTO ficha, String origen, String destino) {
         controlador.moverFicha(ficha, origen, destino);
     }
-    
+
     /**
      * Obtiene el tablero UI
+     *
      * @return UI_Tablero
      */
     public UI_Tablero getUITablero() {
         return uiTablero;
     }
-    
+
     /**
      * Obtiene la mano UI
+     *
      * @return UI_Mano
      */
     public UI_Mano getUIMano() {
         return uiMano;
     }
-    
+
     /**
      * Obtiene el controlador
+     *
      * @return ControladorTurno
      */
     public ControladorTurno getControlador() {
         return controlador;
     }
-    
+
     private void inicializarDatosPrueba() {
         Tablero tableroModelo = new Tablero();
         Mano mano = tableroModelo.getManoJugador();
 
-        mano.agregar(new FichaDTO(1, "ROJO", "r1"));
-        mano.agregar(new FichaDTO(2, "ROJO", "r2"));
-        mano.agregar(new FichaDTO(3, "ROJO", "r3"));
-        mano.agregar(new FichaDTO(4, "ROJO", "r4"));
+        mano.agregar(new FichaDTO("r1", 1, "ROJO", false));
+        mano.agregar(new FichaDTO("r2", 2, "ROJO", false));
+        mano.agregar(new FichaDTO("r3", 3, "ROJO", false));
+        mano.agregar(new FichaDTO("r4", 4, "ROJO", false));
 
-        mano.agregar(new FichaDTO(5, "AZUL", "a5"));
-        mano.agregar(new FichaDTO(6, "AZUL", "a6"));
-        mano.agregar(new FichaDTO(7, "AZUL", "a7"));
+        mano.agregar(new FichaDTO("a5", 5, "AZUL", false));
+        mano.agregar(new FichaDTO("a6", 6, "AZUL", false));
+        mano.agregar(new FichaDTO("a7", 7, "AZUL", false));
 
-        mano.agregar(new FichaDTO(8, "AMARILLO", "y8"));
-        mano.agregar(new FichaDTO(9, "AMARILLO", "y9"));
+        mano.agregar(new FichaDTO("y8", 8, "AMARILLO", false));
+        mano.agregar(new FichaDTO("y9", 9, "AMARILLO", false));
 
-        mano.agregar(new FichaDTO(10, "NEGRO", "n10"));
-        mano.agregar(new FichaDTO(11, "NEGRO", "n11"));
+        mano.agregar(new FichaDTO("n10", 10, "NEGRO", false));
+        mano.agregar(new FichaDTO("n11", 11, "NEGRO", false));
 
-        mano.agregar(new FichaDTO(0, "DORADO", "comodin1", true));
-        mano.agregar(new FichaDTO(12, "DORADO", "comodin1", true));
-        mano.agregar(new FichaDTO(13, "DORADO", "comodin1", true));
-        mano.agregar(new FichaDTO(14, "DORADO", "comodin1", true));
+        // Comodines (true = es comodín)
+        mano.agregar(new FichaDTO("comodin1", 0, "DORADO", true));
+        mano.agregar(new FichaDTO("comodin2", 0, "DORADO", true));
+        mano.agregar(new FichaDTO("comodin3", 0, "DORADO", true));
+        mano.agregar(new FichaDTO("comodin4", 0, "DORADO", true));
 
+        // Grupo de ejemplo en tablero
         Grupo grupo1 = new Grupo("grupo_0");
-        grupo1.agregar(new FichaDTO(12, "ROJO", "r12"));
-        grupo1.agregar(new FichaDTO(13, "ROJO", "r13"));
+        grupo1.agregar(new FichaDTO("r12", 12, "ROJO", false));
+        grupo1.agregar(new FichaDTO("r13", 13, "ROJO", false));
         tableroModelo.agregarGrupo(grupo1);
 
-        uiTablero = new UI_Tablero(tableroModelo, this); 
+        uiTablero = new UI_Tablero(tableroModelo, this);
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -348,12 +357,38 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Método del Observer - Se llama cuando el Modelo cambia
-     * Actualiza toda la vista con el nuevo estado
+     * Método del Observer - Se llama cuando el Modelo cambia Actualiza toda la
+     * vista con el nuevo estado
      */
     @Override
     public void update(IModelo modelo) {
+        Tablero tablero = uiTablero.getTablero();
+        tablero.getGrupos().clear();
+        List<GrupoDTO> grupos = modelo.getGruposEnTablero();
+        if (grupos != null) {
+            for (GrupoDTO grupoDTO : grupos) {
+                Grupo grupoTablero = new Grupo(grupoDTO.getId());
+                for (FichaDTO ficha : grupoDTO.getFichas()) {
+                    grupoTablero.agregar(ficha);
+                }
+                tablero.agregarGrupo(grupoTablero);
+            }
+        }
+        Mano manoTablero = uiMano.getMano();
+        manoTablero.getFichas().clear();
+        List<FichaDTO> fichasMano = modelo.getFichasMano();
+        if (fichasMano != null) {
+            for (FichaDTO fichaDTO : fichasMano) {
+                manoTablero.agregar(fichaDTO);
+            }
+        }
 
+        uiTablero.actualizarGrupos();
+        uiTablero.revalidate();
+        uiTablero.repaint();
+        uiMano.actualizarFichas();
+        uiMano.revalidate();
+        uiMano.repaint();
     }
-    
+
 }

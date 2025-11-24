@@ -4,11 +4,20 @@
  */
 package itson.rummypresentacion.modelo;
 
+import itson.rummydtos.FichaDTO;
+import itson.rummydtos.TableroDTO;
+import itson.rummyeventos.actualizaciones.TurnoTerminadoEvent;
+import java.util.List;
+
 /**
  *
  * @author Dana Chavez
  */
 public interface IListener {
-    // interfaz que conocera el traducerjugador para poder actualizar el modelo
-    // desde fuera
+
+    public void terminoTurno(TurnoTerminadoEvent event);
+    public void recibirTablero(TableroDTO tableroDTO);
+    public void recibirMano(List<FichaDTO> mano);
+    public void recibirSopa(int cantidad);
+    public void recibirError(String mensaje);
 }

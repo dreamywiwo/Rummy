@@ -78,7 +78,9 @@ public class UI_Grupo extends JPanel {
                             origenId = "Mano";
                         }
                     }
-
+                    
+                    grupo.agregar(ficha);
+                    
                     actualizarFichas();
 
                     if (origen != null) {
@@ -97,6 +99,7 @@ public class UI_Grupo extends JPanel {
                         if (ventana != null) {
                             ventana.notificarGrupoActualizado(grupo.getId(), grupo.getFichas());
                         }
+                        tableroPanel.repaint();
                     }
 
                     evt.dropComplete(true);

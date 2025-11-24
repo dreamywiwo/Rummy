@@ -21,6 +21,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     private UI_Tablero uiTablero;
     private UI_Mano uiMano;
     private ControladorTurno controlador;
+    private Mano mano;
+    private Tablero tableroModelo;
 
     /**
      * Creates new form UI_TurnoJugador
@@ -125,7 +127,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     }
 
     private void inicializarDatosPrueba() {
-
+        tableroModelo = new Tablero();              
+        mano = tableroModelo.getManoJugador();
+        
         mano.agregar(new FichaDTO("r1", 1, "ROJO", false));
         mano.agregar(new FichaDTO("r2", 2, "ROJO", false));
         mano.agregar(new FichaDTO("r3", 3, "ROJO", false));

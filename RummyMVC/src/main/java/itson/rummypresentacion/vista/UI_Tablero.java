@@ -168,7 +168,7 @@ public class UI_Tablero extends javax.swing.JPanel {
         if (grupoCercano != null) {
             grupoCercano.getGrupo().agregar(ficha);
             grupoCercano.actualizarFichas();
-            ajustarTamanoGrupo(grupoCercano);
+            // ajustarTamanoGrupo(grupoCercano);
             
             Point posicionAjustada = ajustarPosicionDentroDelTablero(
                 grupoCercano.getLocation(),
@@ -185,6 +185,7 @@ public class UI_Tablero extends javax.swing.JPanel {
             }
             
             ajustarZoomSiEsNecesario();
+            repaint();
             return;
         }
 

@@ -16,11 +16,13 @@ import java.util.List;
 public class ControladorTurno {
     
     private Modelo modelo;
-    
-    public ControladorTurno(Modelo modelo) {
+    private IProducerJugador producerJugador;
+
+    public ControladorTurno(Modelo modelo, IProducerJugador producerJugador) {
         this.modelo = modelo;
+        this.producerJugador = producerJugador;
     }
-    
+     
     /**
      * Maneja la creación de un nuevo grupo
      * @param fichas Lista de fichas del nuevo grupo
@@ -58,6 +60,7 @@ public class ControladorTurno {
      */
     public void terminarTurno() {
         modelo.terminarTurno();
+        producerJugador.terminarTurno();
     }
     
     /**

@@ -9,8 +9,12 @@ package itson.rummyeventos.base;
  * @author Dana Chavez
  */
 public class EventBase implements Event {
+
     private String topic;
     private String eventType;
+
+    public EventBase() {
+    }
 
     public EventBase(String topic, String eventType) {
         this.topic = topic;
@@ -26,5 +30,5 @@ public class EventBase implements Event {
     public String getTopic() {
         return topic;
     }
-     
+
 }

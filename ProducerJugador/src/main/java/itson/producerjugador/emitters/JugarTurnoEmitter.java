@@ -4,6 +4,7 @@
  */
 package itson.producerjugador.emitters;
 
+import interfaces.IDispatcher;
 import itson.rummydtos.FichaDTO;
 import itson.rummyeventos.acciones.FichaTomadaEvent;
 import itson.rummyeventos.acciones.GrupoActualizadoEvent;
@@ -17,37 +18,42 @@ import java.util.List;
  * @author Dana Chavez
  */
 public class JugarTurnoEmitter {
-    private final JsonSerializer jsonSerializer;
-//    private final IDispatcher connectionOutbound;
 
-    public JugarTurnoEmitter(JsonSerializer jsonSerializer) {
+    private final JsonSerializer jsonSerializer;
+    private final IDispatcher dispatcher;
+    private final String brokerIp;
+    private final int brokerPort;
+
+    public JugarTurnoEmitter(JsonSerializer jsonSerializer, IDispatcher dispatcher, String brokerIp, int brokerPort) {
         this.jsonSerializer = jsonSerializer;
-    }   
-    
+        this.dispatcher = dispatcher;
+        this.brokerIp = brokerIp;
+        this.brokerPort = brokerPort;
+    }
+
     public void emitirGrupoCreadoEvent(List<FichaDTO> fichas) {
         GrupoCreadoEvent event = new GrupoCreadoEvent(fichas);
         String json = jsonSerializer.serialize(event);
         System.out.println("hasta aqui llego el grupo creado" + fichas);
-        System.out.println(json);
-//        connectionOutbound.send(json);
+        dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
     public void emitirGrupoActualizadoEvent(String grupoId, List<FichaDTO> fichasNuevas) {
         GrupoActualizadoEvent event = new GrupoActualizadoEvent(grupoId, fichasNuevas);
         String json = jsonSerializer.serialize(event);
-//      connectionOutbound.send(json);
+        dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
     public void emitirFichaTomadaEvent() {
         FichaTomadaEvent event = new FichaTomadaEvent();
         String json = jsonSerializer.serialize(event);
-//      connectionOutbound.send(json);
+        dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
     public void emitirTerminoTurnoEvent() {
         TerminoTurnoEvent event = new TerminoTurnoEvent();
         String json = jsonSerializer.serialize(event);
-//      connectionOutbound.send(json);
+        dispatcher.enviar(json, brokerPort, brokerIp);
     }
-    
+
 }

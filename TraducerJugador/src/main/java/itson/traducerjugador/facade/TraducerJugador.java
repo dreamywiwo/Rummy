@@ -4,6 +4,7 @@
  */
 package itson.traducerjugador.facade;
 
+import interfaces.IReceptorComponente;
 import itson.rummyeventos.base.EventBase;
 import itson.serializer.interfaces.ISerializer;
 import itson.traducerjugador.mappers.EventMapper;
@@ -12,13 +13,19 @@ import itson.traducerjugador.mappers.EventMapper;
  *
  * @author Dana Chavez
  */
-public class TraducerJugador implements ITraducerJugador {
+public class TraducerJugador implements ITraducerJugador, IReceptorComponente {
+
     private final ISerializer serializer;
     private final EventMapper mapper;
-    
+
     public TraducerJugador(ISerializer serializer, EventMapper mapper) {
         this.serializer = serializer;
         this.mapper = mapper;
+    }
+
+    @Override
+    public void recibirMensaje(String json) {
+        onMessage("broker", json);
     }
 
     @Override
@@ -35,5 +42,5 @@ public class TraducerJugador implements ITraducerJugador {
             e.printStackTrace();
         }
     }
-    
+
 }

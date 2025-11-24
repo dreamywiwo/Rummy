@@ -48,7 +48,7 @@ public class Dominio implements IDominio {
 
         List<FichaPlaced> fichasAInsertar = new ArrayList<>();
 
-        // 1. Procesar cada fichaDTO: mano → tablero → error
+        // 1. Procesar cada fichaDTO:
         for (FichaDTO dto : fichasDTO) {
             String fichaId = dto.getId();
 
@@ -75,7 +75,7 @@ public class Dominio implements IDominio {
         }
 
         // 2. Crear grupo usando la factory del tablero
-        //    NOTA: este método determina automáticamente si es
+        //    Este método determina automáticamente si es
         //    GrupoNumero o GrupoSecuencia
         Grupo grupoNuevo = tablero.crearGrupoDesdeFichasPlaced(fichasAInsertar);
 

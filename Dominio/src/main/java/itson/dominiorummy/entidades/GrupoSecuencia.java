@@ -23,12 +23,10 @@ public class GrupoSecuencia extends Grupo {
 
         if (normales.isEmpty()) return true;
 
-        // Todos del mismo color
         String color = normales.get(0).getColor();
         for (Ficha f : normales)
             if (!f.getColor().equals(color)) return false;
 
-        // Ordenar por valor
         normales.sort(Comparator.comparingInt(Ficha::getNumero));
 
         int comodines = base.size() - normales.size();

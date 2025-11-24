@@ -18,10 +18,9 @@ public class Jugador {
 
     private final Mano mano;
 
-    // Reglas específicas del Rummy
-    private boolean yaBajo30;       // si ya cumplió su primer bajada de 30 puntos
-    private boolean haTerminado;    // si ya terminó la partida
-    private boolean enTurno;        // si es el jugador activo (la UI puede bloquear/desbloquear)
+    private boolean yaBajo30;       
+    private boolean haTerminado;   
+    private boolean enTurno;       
 
     public Jugador(String nombre) {
         this.id = UUID.randomUUID().toString();
@@ -40,10 +39,6 @@ public class Jugador {
         this.haTerminado = false;
         this.enTurno = false;
     }
-
-    // ==========================================================
-    // GETTERS
-    // ==========================================================
 
     public String getId() {
         return id;
@@ -69,10 +64,6 @@ public class Jugador {
         return enTurno;
     }
 
-    // ==========================================================
-    // SETTERS / ESTADOS DEL JUGADOR
-    // ==========================================================
-
     public void marcarPrimerBajada30Completada() {
         this.yaBajo30 = true;
     }
@@ -84,11 +75,7 @@ public class Jugador {
     public void setEnTurno(boolean enTurno) {
         this.enTurno = enTurno;
     }
-
-    // ==========================================================
-    // LÓGICA DE APOYO
-    // ==========================================================
-
+    
     /**
      * Calcula los puntos de la mano actual (sirve para final de partida).
      */

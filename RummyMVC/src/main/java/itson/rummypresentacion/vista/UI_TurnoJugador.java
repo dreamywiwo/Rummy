@@ -118,35 +118,8 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     }
     
     private void inicializarDatosPrueba() {
-        Tablero tableroModelo = new Tablero();
-        Mano mano = tableroModelo.getManoJugador();
 
-        mano.agregar(new FichaDTO(1, "ROJO", "r1"));
-        mano.agregar(new FichaDTO(2, "ROJO", "r2"));
-        mano.agregar(new FichaDTO(3, "ROJO", "r3"));
-        mano.agregar(new FichaDTO(4, "ROJO", "r4"));
 
-        mano.agregar(new FichaDTO(5, "AZUL", "a5"));
-        mano.agregar(new FichaDTO(6, "AZUL", "a6"));
-        mano.agregar(new FichaDTO(7, "AZUL", "a7"));
-
-        mano.agregar(new FichaDTO(8, "AMARILLO", "y8"));
-        mano.agregar(new FichaDTO(9, "AMARILLO", "y9"));
-
-        mano.agregar(new FichaDTO(10, "NEGRO", "n10"));
-        mano.agregar(new FichaDTO(11, "NEGRO", "n11"));
-
-        mano.agregar(new FichaDTO(0, "DORADO", "comodin1", true));
-        mano.agregar(new FichaDTO(12, "DORADO", "comodin1", true));
-        mano.agregar(new FichaDTO(13, "DORADO", "comodin1", true));
-        mano.agregar(new FichaDTO(14, "DORADO", "comodin1", true));
-
-        Grupo grupo1 = new Grupo("grupo_0");
-        grupo1.agregar(new FichaDTO(12, "ROJO", "r12"));
-        grupo1.agregar(new FichaDTO(13, "ROJO", "r13"));
-        tableroModelo.agregarGrupo(grupo1);
-
-        uiTablero = new UI_Tablero(tableroModelo, this); 
     }
     
     /**

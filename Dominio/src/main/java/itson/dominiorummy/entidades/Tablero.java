@@ -156,9 +156,6 @@ public class Tablero {
      * Restaura una ficha al grupo en el que estaba originalmente (si está
      * registrado). Si el grupo original ya no existe, se crea un nuevo grupo
      * con id generado y se agrega la ficha ahí para que no se pierda.
-     *
-     * NOTA: normalmente removedOrigin debería contener el grupo original si la
-     * ficha se removió previamente mediante removerFichaGlobal(...).
      */
     public void restaurarFicha(FichaPlaced fp) {
         if (fp == null) {
@@ -179,8 +176,7 @@ public class Tablero {
         // Si no tenemos origen registrado o el grupo ya no existe,
         // creamos un nuevo grupo con id generado y agregamos la ficha.
         // Preferimos crear un GrupoSecuencia como contenedor neutral;
-        // si quieres otra política (p. ej. GrupoNumero o deducir por la ficha),
-        // cámbialo aquí.
+
         List<FichaPlaced> lista = new ArrayList<>();
         lista.add(fp);
         String nuevoId = generarIdGrupo();

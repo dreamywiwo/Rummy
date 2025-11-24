@@ -12,8 +12,31 @@ import java.util.List;
  */
 public class JugadorDTO {
 
-    public List<FichaDTO> getFichasMano() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private String id;
+    private List<FichaDTO> fichasMano;
+
+    public JugadorDTO() {
     }
-    
+
+    public JugadorDTO(String id, List<FichaDTO> fichasMano) {
+        this.id = id;
+        this.fichasMano = fichasMano;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public List<FichaDTO> getFichasMano() {
+        return fichasMano;
+    }
+
+    public void setFichasMano(List<FichaDTO> fichasMano) {
+        this.fichasMano = fichasMano;
+    }
+
 }

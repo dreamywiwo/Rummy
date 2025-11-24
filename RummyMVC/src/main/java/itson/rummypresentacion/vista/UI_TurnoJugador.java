@@ -143,13 +143,11 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         mano.agregar(new FichaDTO("n10", 10, "NEGRO", false));
         mano.agregar(new FichaDTO("n11", 11, "NEGRO", false));
 
-        // Comodines (true = es comodín)
         mano.agregar(new FichaDTO("comodin1", 0, "DORADO", true));
         mano.agregar(new FichaDTO("comodin2", 0, "DORADO", true));
         mano.agregar(new FichaDTO("comodin3", 0, "DORADO", true));
         mano.agregar(new FichaDTO("comodin4", 0, "DORADO", true));
-
-        // Grupo de ejemplo en tablero
+        
         Grupo grupo1 = new Grupo("grupo_0");
         grupo1.agregar(new FichaDTO("r12", 12, "ROJO", false));
         grupo1.agregar(new FichaDTO("r13", 13, "ROJO", false));

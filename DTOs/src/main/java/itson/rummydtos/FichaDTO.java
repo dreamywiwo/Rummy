@@ -5,22 +5,15 @@ import java.util.Objects;
 
 public class FichaDTO implements Serializable {
 
+    private String id;
     private int numero;
     private String color;
-    private String id;
     private boolean esComodin;
 
-    public FichaDTO(int numero, String color, String id) {
+    public FichaDTO(String id, int numero, String color, boolean esComodin) {
+        this.id = id;
         this.numero = numero;
         this.color = color;
-        this.id = id;
-        this.esComodin = false;
-    }
-
-    public FichaDTO(int numero, String color, String id, boolean esComodin) {
-        this.numero = numero;
-        this.color = color;
-        this.id = id;
         this.esComodin = esComodin;
     }
 

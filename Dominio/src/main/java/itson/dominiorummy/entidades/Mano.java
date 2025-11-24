@@ -4,8 +4,11 @@
  */
 package itson.dominiorummy.entidades;
 
+import itson.rummydtos.FichaDTO;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -14,25 +17,54 @@ import java.util.List;
 
 public class Mano {
 
-    private final List<Ficha> fichas;
+    private final List<Ficha> fichas = new ArrayList<>();
 
-    public Mano() {
-        this.fichas = new ArrayList<>();
-    }
-
-    public boolean contieneFichas(List<Ficha> fichasABajar) {
-        return this.fichas.containsAll(fichasABajar);
-    }
-
-    public void removerFichas(List<Ficha> fichasABajar) {
-        this.fichas.removeAll(fichasABajar);
-    }
-
-    public void agregarFicha(Ficha ficha) {
-        this.fichas.add(ficha);
-    }
+    public Mano() {}
 
     public List<Ficha> getFichas() {
         return fichas;
     }
+
+    public void agregarFicha(Ficha f) {
+        if (f != null) fichas.add(f);
+    }
+
+    public boolean tieneFicha(String fichaId) {
+        return fichas.stream().anyMatch(f -> f.getId().equals(fichaId));
+    }
+
+    /**
+     * Quita la primera ocurrencia con id y la retorna. Retorna null si no existe.
+     */
+    public Ficha quitarFicha(String fichaId) {
+        Iterator<Ficha> it = fichas.iterator();
+        while (it.hasNext()) {
+            Ficha f = it.next();
+            if (f.getId().equals(fichaId)) {
+                it.remove();
+                return f;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Clona el contenido (deep copy de fichas para snapshot/rollback).
+     */
+    public List<Ficha> clonarContenido() {
+        return fichas.stream()
+                .map(Ficha::clonar)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Restaurar la mano a un estado (lista de fichas copiada).
+     */
+    public void restaurar(List<Ficha> estadoOriginal) {
+        fichas.clear();
+        if (estadoOriginal != null) {
+            estadoOriginal.forEach(f -> fichas.add(f.clonar()));
+        }
+    }
+
 }

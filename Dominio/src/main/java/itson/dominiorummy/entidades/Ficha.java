@@ -13,11 +13,17 @@ public class Ficha {
     private final String id;
     private final int numero;
     private final String color;
+    private final boolean esComodin;
 
-    public Ficha(String id, int numero, String color) {
+    public Ficha(String id, int numero, String color, boolean esComodin) {
         this.id = id;
         this.numero = numero;
         this.color = color;
+        this.esComodin = esComodin;
+    }
+
+    public boolean isEsComodin() {
+        return esComodin;
     }
 
     public String getId() {
@@ -30,6 +36,10 @@ public class Ficha {
 
     public String getColor() {
         return color;
+    }
+    
+    public Ficha clonar(){
+        return new Ficha(id, numero, color, esComodin);
     }
     
     @Override

@@ -4,38 +4,117 @@
  */
 package itson.dominiorummy.entidades;
 
+import java.util.List;
+import java.util.UUID;
+
 /**
  *
  * @author victoria
  */
 
 public class Jugador {
-    
     private final String id;
     private final String nombre;
+
     private final Mano mano;
-    private boolean primerGrupoBajado;
+
+    // Reglas específicas del Rummy
+    private boolean yaBajo30;       // si ya cumplió su primer bajada de 30 puntos
+    private boolean haTerminado;    // si ya terminó la partida
+    private boolean enTurno;        // si es el jugador activo (la UI puede bloquear/desbloquear)
+
+    public Jugador(String nombre) {
+        this.id = UUID.randomUUID().toString();
+        this.nombre = nombre;
+        this.mano = new Mano();
+        this.yaBajo30 = false;
+        this.haTerminado = false;
+        this.enTurno = false;
+    }
 
     public Jugador(String id, String nombre) {
         this.id = id;
         this.nombre = nombre;
         this.mano = new Mano();
-        this.primerGrupoBajado = false;
+        this.yaBajo30 = false;
+        this.haTerminado = false;
+        this.enTurno = false;
     }
+
+    // ==========================================================
+    // GETTERS
+    // ==========================================================
 
     public String getId() {
         return id;
+    }
+
+    public String getNombre() {
+        return nombre;
     }
 
     public Mano getMano() {
         return mano;
     }
 
-    public boolean isPrimerGrupoBajado() {
-        return primerGrupoBajado;
+    public boolean yaBajo30() {
+        return yaBajo30;
     }
 
-    public void setPrimerGrupoBajado(boolean primerGrupoBajado) {
-        this.primerGrupoBajado = primerGrupoBajado;
+    public boolean haTerminado() {
+        return haTerminado;
+    }
+
+    public boolean isEnTurno() {
+        return enTurno;
+    }
+
+    // ==========================================================
+    // SETTERS / ESTADOS DEL JUGADOR
+    // ==========================================================
+
+    public void marcarPrimerBajada30Completada() {
+        this.yaBajo30 = true;
+    }
+
+    public void marcarTerminado() {
+        this.haTerminado = true;
+    }
+
+    public void setEnTurno(boolean enTurno) {
+        this.enTurno = enTurno;
+    }
+
+    // ==========================================================
+    // LÓGICA DE APOYO
+    // ==========================================================
+
+    /**
+     * Calcula los puntos de la mano actual (sirve para final de partida).
+     */
+    public int calcularPuntosEnMano() {
+        return mano.getFichas().stream()
+                .mapToInt(f -> f.getNumero())
+                .sum();
+    }
+
+    /**
+     * Calcula puntos de una lista de fichas bajadas (para validar primer turno 30pts).
+     */
+    public static int calcularPuntos(List<Ficha> fichas) {
+        return fichas.stream()
+                .mapToInt(Ficha::getNumero)
+                .sum();
+    }
+
+    @Override
+    public String toString() {
+        return "Jugador{" +
+                "id='" + id + '\'' +
+                ", nombre='" + nombre + '\'' +
+                ", fichasEnMano=" + mano.getFichas().size() +
+                ", yaBajo30=" + yaBajo30 +
+                ", enTurno=" + enTurno +
+                '}';
     }
 }

@@ -18,7 +18,7 @@ public class FichaMapper {
     }
     
     public static Ficha toEntidad(FichaDTO dto) {
-        return new Ficha(dto.getId(), dto.getNumero(), dto.getColor()); 
+        return new Ficha(dto.getId(), dto.getNumero(), dto.getColor(), dto.isEsComodin()); 
     }
     
     public static TableroDTO toDTO(Tablero tablero) {
@@ -26,7 +26,7 @@ public class FichaMapper {
     }
     
     public static FichaDTO toDTO(Ficha ficha) {
-        return new FichaDTO(ficha.getNumero(), ficha.getColor(), ficha.getId()); 
+        return new FichaDTO(ficha.getId(), ficha.getNumero(), ficha.getColor(), ficha.isEsComodin()); 
     }
     
     public static List<FichaDTO> toDTO(List<Ficha> fichas) {

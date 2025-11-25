@@ -179,10 +179,8 @@ public class UI_Tablero extends javax.swing.JPanel {
                 grupoCercano.getGrupo().agregar(f);
             }
 
-            // Actualizar visualmente (esto redimensiona el panel automáticamente)
             grupoCercano.actualizarFichas();
 
-            // Asegurar que el grupo no se salga del tablero al crecer
             Point posicionAjustada = ajustarPosicionDentroDelTablero(
                     grupoCercano.getLocation(),
                     grupoCercano.getWidth(),
@@ -190,7 +188,6 @@ public class UI_Tablero extends javax.swing.JPanel {
             );
             grupoCercano.setLocation(posicionAjustada);
 
-            // Notificar al controlador que el grupo cambió
             if (ventanaPrincipal != null) {
                 ventanaPrincipal.notificarGrupoActualizado(
                         grupoCercano.getGrupo().getId(),
@@ -203,89 +200,57 @@ public class UI_Tablero extends javax.swing.JPanel {
             return;
         }
 
-        // 2. CREAR UN NUEVO GRUPO
+        int anchoFicha = 60;
+        int altoFicha = 80;
+        int margen = 10;
+        int espacio = 5;
+        int anchoGrupo = (fichas.size() * anchoFicha) + ((fichas.size() - 1) * espacio) + (margen * 2);
+        int altoGrupo = altoFicha + (margen * 2) + 20;
+
+        int x = punto.x - anchoGrupo / 2;
+        int y = punto.y - altoGrupo / 2;
+        Point posicionDeseada = new Point(x, y);
+
+        // 3. BUSCAR POSICIÓN CON GESTIÓN DE ZOOM AUTOMÁTICO
+        Point posicionFinal = buscarPosicionLibre(posicionDeseada, anchoGrupo, altoGrupo);
+
+        if (posicionFinal == null) {
+            if (escalaActual > ESCALA_MINIMA) {
+                System.out.println("Tablero lleno, haciendo Zoom Out...");
+                hacerZoomOut(); // Reducimos la escala
+
+                // RECURSIVIDAD: Volvemos a intentar crear el grupo.
+                // Como la escala cambió, 'ajustarPosicionDentroDelTablero' permitirá
+                // coordenadas más lejanas en el siguiente intento.
+                crearGrupoEnPunto(punto, fichas);
+                return; 
+            } else {
+                // Si ya estamos en el zoom mínimo y sigue sin caber se encima jeje
+                posicionFinal = ajustarPosicionDentroDelTablero(posicionDeseada, anchoGrupo, altoGrupo);
+            }
+        }
+
+        // 4. Crear el grupo visualmente 
         Grupo nuevoGrupo = new Grupo("grupo_" + tablero.getGrupos().size());
         tablero.agregarGrupo(nuevoGrupo);
-
-        // Agregar todas las fichas al nuevo modelo
         for (FichaDTO f : fichas) {
             nuevoGrupo.agregar(f);
         }
 
         UI_Grupo grupoPanel = new UI_Grupo(nuevoGrupo, gruposPanels.size(), this);
-
-        // Calcular dimensiones iniciales estimadas para calcular colisiones
-        int anchoFicha = 60;
-        int altoFicha = 80;
-        int margen = 10;
-        int espacio = 5;
-
-        // El ancho depende de cuántas fichas estamos bajando
-        int anchoGrupo = (fichas.size() * anchoFicha) + ((fichas.size() - 1) * espacio) + (margen * 2);
-        int altoGrupo = altoFicha + (margen * 2) + 20; // +20 por el título del borde
-
-        // Centrar el grupo en el mouse
-        int x = punto.x - anchoGrupo / 2;
-        int y = punto.y - altoGrupo / 2;
-        Point posicionCentrada = new Point(x, y);
-
-        // Ajustar para que no se salga de los bordes
-        Point posicionFinal = ajustarPosicionDentroDelTablero(posicionCentrada, anchoGrupo, altoGrupo);
-
-        // Lógica de anti-colisión (buscar espacio libre)
-        int intentos = 0;
-        int desplazamiento = 30;
-        while (hayColision(posicionFinal, anchoGrupo, altoGrupo) && intentos < 8) {
-            switch (intentos) {
-                case 0:
-                    posicionFinal.x += desplazamiento;
-                    break;
-                case 1:
-                    posicionFinal.x -= desplazamiento * 2;
-                    break;
-                case 2:
-                    posicionFinal.x += desplazamiento;
-                    posicionFinal.y += desplazamiento;
-                    break;
-                case 3:
-                    posicionFinal.y -= desplazamiento * 2;
-                    break;
-                case 4:
-                    posicionFinal.x += desplazamiento;
-                    break;
-                case 5:
-                    posicionFinal.x -= desplazamiento * 2;
-                    break;
-                case 6:
-                    posicionFinal.x += desplazamiento;
-                    posicionFinal.y += desplazamiento;
-                    break;
-                case 7:
-                    posicionFinal.x -= desplazamiento;
-                    break;
-            }
-            posicionFinal = ajustarPosicionDentroDelTablero(posicionFinal, anchoGrupo, altoGrupo);
-            intentos++;
-        }
-
-        // Configurar y añadir el panel
         grupoPanel.setBounds(posicionFinal.x, posicionFinal.y, anchoGrupo, altoGrupo);
         grupoPanel.setBorder(new LineBorder(Color.WHITE, 2, true));
         grupoPanel.setOpaque(true);
         grupoPanel.setBackground(new Color(60, 160, 60));
-
-        // UI_Grupo calcula su tamaño exacto al crearse, pero forzamos un update para asegurar
         grupoPanel.actualizarFichas();
 
         gruposPanels.add(grupoPanel);
         add(grupoPanel);
 
-        // Notificar creación al controlador
         if (ventanaPrincipal != null) {
             ventanaPrincipal.notificarGrupoCreado(nuevoGrupo.getFichas());
         }
 
-        ajustarZoomSiEsNecesario();
         repaint();
     }
 
@@ -293,19 +258,19 @@ public class UI_Tablero extends javax.swing.JPanel {
         int x = posicionOriginal.x;
         int y = posicionOriginal.y;
 
-        int anchoTablero = getWidth();
-        int altoTablero = getHeight();
+        int anchoLogico = (int) (getWidth() / escalaActual);
+        int altoLogico = (int) (getHeight() / escalaActual);
 
         if (x < MARGEN_BORDE) {
             x = MARGEN_BORDE;
-        } else if (x + anchoGrupo > anchoTablero - MARGEN_BORDE) {
-            x = anchoTablero - anchoGrupo - MARGEN_BORDE;
+        } else if (x + anchoGrupo > anchoLogico - MARGEN_BORDE) {
+            x = anchoLogico - anchoGrupo - MARGEN_BORDE;
         }
 
         if (y < MARGEN_BORDE) {
             y = MARGEN_BORDE;
-        } else if (y + altoGrupo > altoTablero - MARGEN_BORDE) {
-            y = altoTablero - altoGrupo - MARGEN_BORDE;
+        } else if (y + altoGrupo > altoLogico - MARGEN_BORDE) {
+            y = altoLogico - altoGrupo - MARGEN_BORDE;
         }
 
         return new Point(x, y);
@@ -406,17 +371,42 @@ public class UI_Tablero extends javax.swing.JPanel {
         return null;
     }
 
-    private void ajustarTamanoGrupo(UI_Grupo grupoPanel) {
-        int numFichas = grupoPanel.getGrupo().size();
-        int anchoFicha = 60;
-        int margen = 10;
+    /**
+     * Busca una posición libre usando un algoritmo de espiral. Empieza en el
+     * punto deseado y se aleja circularmente hasta encontrar hueco.
+     */
+    private Point buscarPosicionLibre(Point puntoDeseado, int ancho, int alto) {
+        Point pCandidato = ajustarPosicionDentroDelTablero(puntoDeseado, ancho, alto);
+        if (!hayColision(pCandidato, ancho, alto)) {
+            return pCandidato;
+        }
 
-        int nuevoAncho = (numFichas * anchoFicha) + margen * 2;
-        int nuevoAlto = grupoPanel.getHeight();
+        double angulo = 0;
+        int radio = 10;
+        int incrementoRadio = 5;
+        int maxIteraciones = 800;
 
-        grupoPanel.setSize(new Dimension(nuevoAncho, nuevoAlto));
-        grupoPanel.revalidate();
-        grupoPanel.repaint();
+        for (int i = 0; i < maxIteraciones; i++) {
+            // Fórmula polar: x = r * cos(a), y = r * sin(a)
+            int x = puntoDeseado.x + (int) (radio * Math.cos(angulo));
+            int y = puntoDeseado.y + (int) (radio * Math.sin(angulo));
+
+            pCandidato = new Point(x, y);
+
+            pCandidato = ajustarPosicionDentroDelTablero(pCandidato, ancho, alto);
+
+            if (!hayColision(pCandidato, ancho, alto)) {
+                return pCandidato;
+            }
+
+            angulo += 0.5;
+            if (angulo >= Math.PI * 2) {
+                angulo = 0;
+                radio += incrementoRadio;
+            }
+        }
+
+        return null;
     }
 
     public void actualizarGrupos() {

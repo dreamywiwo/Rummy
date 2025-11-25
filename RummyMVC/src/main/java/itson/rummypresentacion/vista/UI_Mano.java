@@ -21,7 +21,6 @@ public class UI_Mano extends JPanel {
     private Mano mano;
     private UI_Tablero tableroPanel;
 
-    // Lista visual de lo que el usuario ha seleccionado con clic
     private List<UI_Ficha> fichasSeleccionadasVisualmente = new ArrayList<>();
 
     public UI_Mano(Mano mano, UI_Tablero tableroPanel) {

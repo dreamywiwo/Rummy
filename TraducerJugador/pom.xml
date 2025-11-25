@@ -18,12 +18,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>conexion</artifactId>
+            <artifactId>RummyMVC</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>RummyMVC</artifactId>
+            <artifactId>ConexionInterfaces</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

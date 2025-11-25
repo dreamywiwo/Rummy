@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>conexion</artifactId>
+            <artifactId>ConexionInterfaces</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -1,6 +1,7 @@
 package itson.rummypresentacion.vista;
 
 import itson.rummydtos.FichaDTO;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -13,89 +14,145 @@ import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceAdapter;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.border.EmptyBorder;
 
 public class UI_Ficha extends JLabel {
+
     private FichaDTO ficha;
     private ContenedorFichas contenedor;
     private static final int RADIO_BORDE = 15;
-    
+
+    private boolean seleccionada = false;
+
     public UI_Ficha(FichaDTO ficha) {
-        this.ficha = ficha;
-        this.contenedor = null;
-        configurarComponente();
+        this(ficha, null);
     }
-    
+
     public UI_Ficha(FichaDTO ficha, ContenedorFichas contenedor) {
         this.ficha = ficha;
         this.contenedor = contenedor;
         configurarComponente();
         habilitarDragAndDrop();
+        habilitarSeleccion(); 
     }
-    
+
     private void configurarComponente() {
-        setOpaque(false); 
+        setOpaque(false);
         setHorizontalAlignment(CENTER);
         setVerticalAlignment(CENTER);
         setPreferredSize(new Dimension(60, 80));
         setBorder(new EmptyBorder(5, 5, 5, 5));
         actualizarVisual();
     }
-    
+
+    // 1. DETECTAR EL CLIC
+    private void habilitarSeleccion() {
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Solo permitimos seleccionar si la ficha está en la Mano del jugador
+                if (getParent() instanceof UI_Mano) {
+                    toggleSeleccion();
+                }
+            }
+        });
+    }
+
+    public void toggleSeleccion() {
+        this.seleccionada = !this.seleccionada;
+
+        // Avisar a la mano que esta ficha cambió de estado
+        if (getParent() instanceof UI_Mano) {
+            ((UI_Mano) getParent()).notificarSeleccion(this);
+        }
+        repaint(); 
+    }
+
+    public void setSeleccionada(boolean seleccionada) {
+        this.seleccionada = seleccionada;
+        repaint();
+    }
+
+    public boolean isSeleccionada() {
+        return seleccionada;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
-        
+
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        
+
         int width = getWidth();
         int height = getHeight();
-        
+
         g2d.setColor(new Color(0, 0, 0, 30));
         g2d.fill(new RoundRectangle2D.Float(3, 3, width - 3, height - 3, RADIO_BORDE, RADIO_BORDE));
-        
+
         g2d.setColor(obtenerColorFondo());
         g2d.fill(new RoundRectangle2D.Float(0, 0, width - 3, height - 3, RADIO_BORDE, RADIO_BORDE));
-        
-        g2d.setColor(obtenerColorBorde());
-        g2d.setStroke(new java.awt.BasicStroke(2));
+
+        // 2. DIBUJAR BORDE VERDE SI ESTÁ SELECCIONADA
+        if (seleccionada) {
+            g2d.setColor(new Color(50, 205, 50)); 
+            g2d.setStroke(new BasicStroke(4f)); 
+        } else {
+            g2d.setColor(obtenerColorBorde());
+            g2d.setStroke(new BasicStroke(2f));
+        }
+
         g2d.draw(new RoundRectangle2D.Float(1, 1, width - 4, height - 4, RADIO_BORDE, RADIO_BORDE));
-        
+
         g2d.dispose();
-        
+
         super.paintComponent(g);
     }
-    
+
     private void habilitarDragAndDrop() {
         DragSource ds = new DragSource();
         ds.createDefaultDragGestureRecognizer(
-            this,
-            DnDConstants.ACTION_MOVE,
-            new DragGestureListener() {
-                @Override
-                public void dragGestureRecognized(DragGestureEvent dge) {
-                    
-                    FichaTransferable transferable = new FichaTransferable(ficha, contenedor);
-                    dge.startDrag(
+                this,
+                DnDConstants.ACTION_MOVE,
+                new DragGestureListener() {
+            @Override
+            public void dragGestureRecognized(DragGestureEvent dge) {
+
+                FichaTransferable transferable;
+
+                // 3. LOGICA INTELIGENTE DE ARRASTRE
+                // Si estamos en la mano, preguntamos qué fichas mover
+                if (getParent() instanceof UI_Mano) {
+                    UI_Mano mano = (UI_Mano) getParent();
+                    List<FichaDTO> listaParaMover = mano.obtenerFichasParaMover(UI_Ficha.this);
+                    transferable = new FichaTransferable(listaParaMover, contenedor);
+                } else {
+                    List<FichaDTO> sola = new ArrayList<>();
+                    sola.add(ficha);
+                    transferable = new FichaTransferable(sola, contenedor);
+                }
+
+                dge.startDrag(
                         Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),
                         transferable,
-                        new DragSourceAdapter() {}
-                    );
+                        new DragSourceAdapter() {
                 }
+                );
             }
+        }
         );
     }
-    
+
     public void setContenedor(ContenedorFichas contenedor) {
         this.contenedor = contenedor;
-        if (contenedor != null) {
-            habilitarDragAndDrop();
-        }
     }
-    
+
     private void actualizarVisual() {
         if (ficha.isEsComodin()) {
             setText("O");
@@ -108,41 +165,40 @@ public class UI_Ficha extends JLabel {
         }
         setToolTipText(ficha.toString());
     }
-    
+
     private Color obtenerColorFondo() {
         if (ficha.isEsComodin()) {
-            return new Color(255, 228, 181); 
+            return new Color(255, 228, 181);
         }
-        
         switch (ficha.getColor().toUpperCase()) {
             case "ROJO":
-                return new Color(255, 250, 240); 
+                return new Color(255, 250, 240);
             case "AZUL":
-                return new Color(245, 248, 255); 
+                return new Color(245, 248, 255);
             case "AMARILLO":
-                return new Color(255, 253, 240); 
+                return new Color(255, 253, 240);
             case "NEGRO":
-                return new Color(250, 250, 245); 
+                return new Color(250, 250, 245);
             default:
                 return new Color(255, 253, 240);
         }
     }
-    
+
     private Color obtenerColorTexto() {
         switch (ficha.getColor().toUpperCase()) {
             case "ROJO":
-                return new Color(220, 140, 90); 
+                return new Color(220, 140, 90);
             case "AZUL":
                 return new Color(100, 149, 237);
             case "AMARILLO":
-                return new Color(218, 165, 32); 
+                return new Color(218, 165, 32);
             case "NEGRO":
                 return new Color(105, 105, 105);
             default:
                 return new Color(139, 69, 19);
         }
     }
-    
+
     private Color obtenerColorBorde() {
         switch (ficha.getColor().toUpperCase()) {
             case "ROJO":
@@ -157,7 +213,7 @@ public class UI_Ficha extends JLabel {
                 return new Color(200, 200, 200, 150);
         }
     }
-    
+
     public FichaDTO getFicha() {
         return ficha;
     }

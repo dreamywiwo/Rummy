@@ -28,11 +28,11 @@ public class UI_Tablero extends javax.swing.JPanel {
     private List<UI_Grupo> gruposPanels;
     private JPanel panelLibre;
 
-    private double escalaActual = 1.0; 
-    private static final double ESCALA_MINIMA = 0.5; 
-    private static final double ESCALA_MAXIMA = 1.0; 
+    private double escalaActual = 1.0;
+    private static final double ESCALA_MINIMA = 0.5;
+    private static final double ESCALA_MAXIMA = 1.0;
     private static final int MARGEN_BORDE = 20;
-    private static final double REDUCCION_ZOOM = 0.1; 
+    private static final double REDUCCION_ZOOM = 0.1;
 
     public UI_Tablero(Tablero tablero, UI_TurnoJugador ventanaPrincipal) {
         this.tablero = tablero;
@@ -63,7 +63,7 @@ public class UI_Tablero extends javax.swing.JPanel {
 
         int centroX = getWidth() / 2;
         int centroY = getHeight() / 2;
-        
+
         g2d.translate(centroX, centroY);
         g2d.scale(escalaActual, escalaActual);
         g2d.translate(-centroX, -centroY);
@@ -76,46 +76,38 @@ public class UI_Tablero extends javax.swing.JPanel {
                 try {
                     event.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
-                    Object data = null;
-                    ContenedorFichas origen = null;
-                    FichaDTO ficha = null;
+                    // Obtener datos
+                    FichaTransferable ft = (FichaTransferable) event.getTransferable().getTransferData(FichaTransferable.FICHA_FLAVOR);
+                    List<FichaDTO> fichas = ft.getFichas();
+                    ContenedorFichas origen = ft.getOrigen();
 
-                    try {
-                        data = event.getTransferable().getTransferData(FichaTransferable.FICHA_FLAVOR);
-                        if (data instanceof FichaTransferable) {
-                            FichaTransferable ft = (FichaTransferable) data;
-                            ficha = ft.getFicha();
-                            origen = ft.getOrigen();
-                        }
-                    } catch (Exception e) {
-                        try {
-                            data = event.getTransferable().getTransferData(FichaTransferable.FICHA_DTO_FLAVOR);
-                            if (data instanceof FichaDTO) {
-                                ficha = (FichaDTO) data;
-                            }
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-
-                    if (ficha != null) {
+                    if (fichas != null && !fichas.isEmpty()) {
+                        // 1. Remover del origen (Mano o Grupo)
                         if (origen != null) {
-                            int tamañoAntes = origen.size();
-                            origen.remover(ficha);
-                            int tamañoDespues = origen.size();
-
+                            for (FichaDTO f : fichas) {
+                                origen.remover(f);
+                            }
                             actualizarOrigenUI(origen);
+
+                            // Si venía de la mano, limpiar la selección visual
+                            if (origen instanceof Mano) {
+                                // Necesitamos acceder a la UI_Mano para limpiar selección
+                                // Puedes buscarla en los componentes o pasarla como referencia
+                                buscarYLimpiarSeleccionMano();
+                            }
                         }
 
+                        // 2. Crear el grupo en el punto donde se soltó
                         Point puntoAjustado = convertirPuntoConEscala(event.getLocation());
-                        crearGrupoEnPunto(puntoAjustado, ficha);
+
+                        // Modificamos crearGrupoEnPunto para aceptar lista
+                        crearGrupoEnPunto(puntoAjustado, fichas);
 
                         event.dropComplete(true);
                     } else {
                         event.dropComplete(false);
                     }
                 } catch (Exception e) {
-                    System.out.println("Error en drop del tablero: " + e.getMessage());
                     e.printStackTrace();
                     event.dropComplete(false);
                 }
@@ -123,13 +115,19 @@ public class UI_Tablero extends javax.swing.JPanel {
         });
     }
 
+    private void buscarYLimpiarSeleccionMano() {
+        if (ventanaPrincipal != null && ventanaPrincipal.getUIMano() != null) {
+            ventanaPrincipal.getUIMano().limpiarSeleccion();
+        }
+    }
+
     private Point convertirPuntoConEscala(Point puntoOriginal) {
         int centroX = getWidth() / 2;
         int centroY = getHeight() / 2;
-        
+
         int x = (int) ((puntoOriginal.x - centroX) / escalaActual + centroX);
         int y = (int) ((puntoOriginal.y - centroY) / escalaActual + centroY);
-        
+
         return new Point(x, y);
     }
 
@@ -163,99 +161,131 @@ public class UI_Tablero extends javax.swing.JPanel {
         }
     }
 
-    private void crearGrupoEnPunto(Point punto, FichaDTO ficha) {
+    /**
+     * Crea un grupo o agrega fichas a uno existente en el punto especificado.
+     * Soporta recibir una lista de fichas para la multiselección.
+     */
+    private void crearGrupoEnPunto(Point punto, List<FichaDTO> fichas) {
+        if (fichas == null || fichas.isEmpty()) {
+            return;
+        }
+
+        // 1. Verificar si se soltó sobre o muy cerca de un grupo existente
         UI_Grupo grupoCercano = encontrarGrupoCercano(punto);
+
         if (grupoCercano != null) {
-            grupoCercano.getGrupo().agregar(ficha);
+            // AGREGAR A GRUPO EXISTENTE
+            for (FichaDTO f : fichas) {
+                grupoCercano.getGrupo().agregar(f);
+            }
+
+            // Actualizar visualmente (esto redimensiona el panel automáticamente)
             grupoCercano.actualizarFichas();
-            // ajustarTamanoGrupo(grupoCercano);
-            
+
+            // Asegurar que el grupo no se salga del tablero al crecer
             Point posicionAjustada = ajustarPosicionDentroDelTablero(
-                grupoCercano.getLocation(),
-                grupoCercano.getWidth(),
-                grupoCercano.getHeight()
+                    grupoCercano.getLocation(),
+                    grupoCercano.getWidth(),
+                    grupoCercano.getHeight()
             );
-            grupoCercano.setLocation(posicionAjustada);           
-            
+            grupoCercano.setLocation(posicionAjustada);
+
+            // Notificar al controlador que el grupo cambió
             if (ventanaPrincipal != null) {
                 ventanaPrincipal.notificarGrupoActualizado(
-                    grupoCercano.getGrupo().getId(), 
-                    grupoCercano.getGrupo().getFichas()
+                        grupoCercano.getGrupo().getId(),
+                        grupoCercano.getGrupo().getFichas()
                 );
             }
-            
+
             ajustarZoomSiEsNecesario();
             repaint();
             return;
         }
 
+        // 2. CREAR UN NUEVO GRUPO
         Grupo nuevoGrupo = new Grupo("grupo_" + tablero.getGrupos().size());
         tablero.agregarGrupo(nuevoGrupo);
-        nuevoGrupo.agregar(ficha);
+
+        // Agregar todas las fichas al nuevo modelo
+        for (FichaDTO f : fichas) {
+            nuevoGrupo.agregar(f);
+        }
 
         UI_Grupo grupoPanel = new UI_Grupo(nuevoGrupo, gruposPanels.size(), this);
 
+        // Calcular dimensiones iniciales estimadas para calcular colisiones
         int anchoFicha = 60;
         int altoFicha = 80;
         int margen = 10;
-        int anchoGrupo = anchoFicha + margen * 2;
-        int altoGrupo = altoFicha + margen * 2;
+        int espacio = 5;
 
+        // El ancho depende de cuántas fichas estamos bajando
+        int anchoGrupo = (fichas.size() * anchoFicha) + ((fichas.size() - 1) * espacio) + (margen * 2);
+        int altoGrupo = altoFicha + (margen * 2) + 20; // +20 por el título del borde
+
+        // Centrar el grupo en el mouse
         int x = punto.x - anchoGrupo / 2;
         int y = punto.y - altoGrupo / 2;
         Point posicionCentrada = new Point(x, y);
 
+        // Ajustar para que no se salga de los bordes
         Point posicionFinal = ajustarPosicionDentroDelTablero(posicionCentrada, anchoGrupo, altoGrupo);
 
+        // Lógica de anti-colisión (buscar espacio libre)
         int intentos = 0;
         int desplazamiento = 30;
         while (hayColision(posicionFinal, anchoGrupo, altoGrupo) && intentos < 8) {
             switch (intentos) {
                 case 0:
                     posicionFinal.x += desplazamiento;
-                    break; 
+                    break;
                 case 1:
                     posicionFinal.x -= desplazamiento * 2;
-                    break; 
+                    break;
                 case 2:
                     posicionFinal.x += desplazamiento;
                     posicionFinal.y += desplazamiento;
-                    break; 
+                    break;
                 case 3:
                     posicionFinal.y -= desplazamiento * 2;
-                    break; 
+                    break;
                 case 4:
                     posicionFinal.x += desplazamiento;
-                    break; 
+                    break;
                 case 5:
                     posicionFinal.x -= desplazamiento * 2;
-                    break; 
+                    break;
                 case 6:
                     posicionFinal.x += desplazamiento;
                     posicionFinal.y += desplazamiento;
-                    break; 
+                    break;
                 case 7:
                     posicionFinal.x -= desplazamiento;
-                    break; 
+                    break;
             }
             posicionFinal = ajustarPosicionDentroDelTablero(posicionFinal, anchoGrupo, altoGrupo);
             intentos++;
         }
 
+        // Configurar y añadir el panel
         grupoPanel.setBounds(posicionFinal.x, posicionFinal.y, anchoGrupo, altoGrupo);
         grupoPanel.setBorder(new LineBorder(Color.WHITE, 2, true));
         grupoPanel.setOpaque(true);
         grupoPanel.setBackground(new Color(60, 160, 60));
 
+        // UI_Grupo calcula su tamaño exacto al crearse, pero forzamos un update para asegurar
+        grupoPanel.actualizarFichas();
+
         gruposPanels.add(grupoPanel);
         add(grupoPanel);
 
+        // Notificar creación al controlador
         if (ventanaPrincipal != null) {
             ventanaPrincipal.notificarGrupoCreado(nuevoGrupo.getFichas());
         }
 
         ajustarZoomSiEsNecesario();
-
         repaint();
     }
 
@@ -329,7 +359,7 @@ public class UI_Tablero extends javax.swing.JPanel {
         }
 
         escalaActual = nuevaEscala;
-        
+
         revalidate();
         repaint();
 
@@ -382,7 +412,7 @@ public class UI_Tablero extends javax.swing.JPanel {
         int margen = 10;
 
         int nuevoAncho = (numFichas * anchoFicha) + margen * 2;
-        int nuevoAlto = grupoPanel.getHeight(); 
+        int nuevoAlto = grupoPanel.getHeight();
 
         grupoPanel.setSize(new Dimension(nuevoAncho, nuevoAlto));
         grupoPanel.revalidate();
@@ -408,11 +438,11 @@ public class UI_Tablero extends javax.swing.JPanel {
     public Tablero getTablero() {
         return tablero;
     }
-    
+
     public UI_TurnoJugador getVentanaPrincipal() {
         return ventanaPrincipal;
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

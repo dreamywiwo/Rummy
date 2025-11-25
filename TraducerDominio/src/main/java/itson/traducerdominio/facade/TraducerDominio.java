@@ -22,7 +22,7 @@ public class TraducerDominio implements ITraducerDominio {
     }
 
     @Override
-    public void onMessage(String topic, String payload) {
+    public void onMessage(String payload) {
         try {
             EventBase base = serializer.deserialize(payload, EventBase.class);
             if (base == null || base.getEventType() == null) {

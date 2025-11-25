@@ -15,6 +15,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
@@ -56,9 +57,11 @@ public class UI_Grupo extends JPanel {
                     evt.acceptDrop(DnDConstants.ACTION_MOVE);
 
                     Transferable t = evt.getTransferable();
+
                     FichaTransferable fichaT = (FichaTransferable) t.getTransferData(FichaTransferable.FICHA_FLAVOR);
 
-                    FichaDTO ficha = fichaT.getFicha();
+                    // 1. Obtenemos la LISTA de fichas, no solo una
+                    List<FichaDTO> fichasRecibidas = fichaT.getFichas();
                     ContenedorFichas origen = fichaT.getOrigen();
 
                     if (origen == grupo) {
@@ -67,47 +70,49 @@ public class UI_Grupo extends JPanel {
                     }
 
                     String origenId = null;
+
+                    // 2. Procesar remoción del origen para TODAS las fichas
                     if (origen != null) {
-                        int tamañoAntes = origen.size();
-                        origen.remover(ficha);
-                        int tamañoDespues = origen.size();
+                        for (FichaDTO ficha : fichasRecibidas) {
+                            origen.remover(ficha);
+                        }
 
                         if (origen instanceof Grupo) {
                             origenId = ((Grupo) origen).getId();
                         } else if (origen instanceof Mano) {
                             origenId = "Mano";
+                            // Si viene de la mano, limpiamos la selección visual
+                            limpiarSeleccionMano();
                         }
                     }
-                    
-                    grupo.agregar(ficha);
-                    
+
+                    // 3. Agregar todas las fichas a este grupo
+                    for (FichaDTO ficha : fichasRecibidas) {
+                        grupo.agregar(ficha);
+                    }
+
+                    // 4. Actualizar visualmente este grupo
                     actualizarFichas();
 
+                    // 5. Actualizar visualmente el origen
                     if (origen != null) {
                         actualizarOrigenUI(origen);
                     }
 
-                    if (origen != null && origenId != null && tableroPanel != null) {
-                        UI_TurnoJugador ventana = tableroPanel.getVentanaPrincipal();
-                        if (ventana != null) {
-                            ventana.notificarGrupoActualizado(origenId, origen.getFichas());
-                        }
-                    }
-
+                    // 6. Notificaciones al controlador 
                     if (tableroPanel != null) {
                         UI_TurnoJugador ventana = tableroPanel.getVentanaPrincipal();
                         if (ventana != null) {
+                            // Notificar actualización del origen (Mano u otro Grupo)
+                            if (origen != null && origenId != null) {
+                                ventana.notificarGrupoActualizado(origenId, origen.getFichas());
+                            }
                             ventana.notificarGrupoActualizado(grupo.getId(), grupo.getFichas());
                         }
                         tableroPanel.repaint();
                     }
 
                     evt.dropComplete(true);
-
-                    setBorder(BorderFactory.createTitledBorder(
-                        BorderFactory.createLineBorder(Color.BLUE, 2),
-                        "Grupo " + (indiceGrupo + 1) + " (" + grupo.size() + " fichas)"
-                    ));
 
                 } catch (Exception ex) {
                     System.out.println("ERROR en drop: " + ex.getMessage());
@@ -119,19 +124,28 @@ public class UI_Grupo extends JPanel {
             @Override
             public synchronized void dragOver(DropTargetDragEvent dtde) {
                 setBorder(BorderFactory.createTitledBorder(
-                    BorderFactory.createLineBorder(Color.GREEN, 3),
-                    "Grupo " + (indiceGrupo + 1) + " - Soltar aquí"
+                        BorderFactory.createLineBorder(Color.GREEN, 3),
+                        "Grupo " + (indiceGrupo + 1) + " - Soltar aquí"
                 ));
             }
 
             @Override
             public synchronized void dragExit(DropTargetEvent dte) {
                 setBorder(BorderFactory.createTitledBorder(
-                    BorderFactory.createLineBorder(Color.BLUE, 2),
-                    "Grupo " + (indiceGrupo + 1) + " (" + grupo.size() + " fichas)"
+                        BorderFactory.createLineBorder(Color.BLUE, 2),
+                        "Grupo " + (indiceGrupo + 1) + " (" + grupo.size() + " fichas)"
                 ));
             }
         });
+    }
+
+    private void limpiarSeleccionMano() {
+        if (tableroPanel != null && tableroPanel.getVentanaPrincipal() != null) {
+            UI_Mano uiMano = tableroPanel.getVentanaPrincipal().getUIMano();
+            if (uiMano != null) {
+                uiMano.limpiarSeleccion();
+            }
+        }
     }
 
     public void actualizarFichas() {
@@ -145,7 +159,7 @@ public class UI_Grupo extends JPanel {
         grupo.ordenar();
 
         for (FichaDTO ficha : grupo.getFichas()) {
-            UI_Ficha fichaComp = new UI_Ficha(ficha, grupo); 
+            UI_Ficha fichaComp = new UI_Ficha(ficha, grupo);
             fichaComp.setBounds(x, y, anchoFicha, altoFicha);
             add(fichaComp);
             x += anchoFicha + espacio;
@@ -157,8 +171,8 @@ public class UI_Grupo extends JPanel {
         setSize(nuevoAncho, nuevoAlto);
 
         setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(Color.BLUE, 2),
-            "Grupo " + (indiceGrupo + 1) + " (" + grupo.size() + " fichas)"
+                BorderFactory.createLineBorder(Color.BLUE, 2),
+                "Grupo " + (indiceGrupo + 1) + " (" + grupo.size() + " fichas)"
         ));
 
         revalidate();

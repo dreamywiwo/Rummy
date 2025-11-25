@@ -24,12 +24,12 @@ public class TraducerJugador implements ITraducerJugador, IReceptorComponente {
     }
 
     @Override
-    public void recibirMensaje(String json) {
-        onMessage("broker", json);
+    public void recibirMensaje(String payload) {
+        onMessage(payload);
     }
 
     @Override
-    public void onMessage(String topic, String payload) {
+    public void onMessage(String payload) {
         try {
             EventBase base = serializer.deserialize(payload, EventBase.class);
             if (base == null || base.getEventType() == null) {

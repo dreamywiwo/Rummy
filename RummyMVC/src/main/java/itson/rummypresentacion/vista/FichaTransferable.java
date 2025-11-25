@@ -4,44 +4,59 @@ import itson.rummydtos.FichaDTO;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FichaTransferable implements Transferable {
-    public static final DataFlavor FICHA_FLAVOR = new DataFlavor(FichaTransferable.class, "Ficha");
-    public static final DataFlavor FICHA_DTO_FLAVOR = new DataFlavor(FichaDTO.class, "FichaDTO");
+
+    public static final DataFlavor FICHA_FLAVOR = new DataFlavor(FichaTransferable.class, "Fichas Rummy");
     
-    private FichaDTO ficha;
+    // Ahora transportamos una lista
+    private List<FichaDTO> fichas; 
     private ContenedorFichas origen;
-    
+
+    // Constructor para una sola ficha 
     public FichaTransferable(FichaDTO ficha, ContenedorFichas origen) {
-        this.ficha = ficha;
+        this.fichas = new ArrayList<>();
+        this.fichas.add(ficha);
         this.origen = origen;
     }
-    
-    @Override
-    public DataFlavor[] getTransferDataFlavors() {
-        return new DataFlavor[]{FICHA_FLAVOR, FICHA_DTO_FLAVOR};
+
+    // Constructor para múltiples fichas
+    public FichaTransferable(List<FichaDTO> fichas, ContenedorFichas origen) {
+        this.fichas = fichas;
+        this.origen = origen;
+    }
+
+    // Método principal para obtener los datos
+    public List<FichaDTO> getFichas() {
+        return fichas;
     }
     
-    @Override
-    public boolean isDataFlavorSupported(DataFlavor flavor) {
-        return FICHA_FLAVOR.equals(flavor) || FICHA_DTO_FLAVOR.equals(flavor);
+    // Helper por si solo necesitamos la primera 
+    public FichaDTO getFichaPrincipal() {
+        return fichas.isEmpty() ? null : fichas.get(0);
     }
-    
-    @Override
-    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
-        if (FICHA_FLAVOR.equals(flavor)) {
-            return this;
-        } else if (FICHA_DTO_FLAVOR.equals(flavor)) {
-            return ficha;
-        }
-        throw new UnsupportedFlavorException(flavor);
-    }
-    
-    public FichaDTO getFicha() {
-        return ficha;
-    }
-    
+
     public ContenedorFichas getOrigen() {
         return origen;
+    }
+
+    @Override
+    public DataFlavor[] getTransferDataFlavors() {
+        return new DataFlavor[]{FICHA_FLAVOR};
+    }
+
+    @Override
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+        return flavor.equals(FICHA_FLAVOR);
+    }
+
+    @Override
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+        if (!isDataFlavorSupported(flavor)) {
+            throw new UnsupportedFlavorException(flavor);
+        }
+        return this;
     }
 }

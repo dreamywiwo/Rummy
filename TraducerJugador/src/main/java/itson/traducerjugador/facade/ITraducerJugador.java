@@ -10,6 +10,6 @@ package itson.traducerjugador.facade;
  */
 public interface ITraducerJugador {
     
-    public abstract void onMessage(String topic, String payload);
+    public abstract void onMessage(String json);
 
 }

@@ -36,7 +36,6 @@ public abstract class Grupo {
         return fichas.isEmpty();
     }
 
-    /** Validación de estructura (no valida tamaño mínimo) */
     public abstract boolean validarReglas();
     
     @Override

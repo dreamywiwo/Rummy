@@ -9,7 +9,7 @@ import ClaseDispatcher.SocketOut;
 import claseReceptor.ColaReceptor;
 import claseReceptor.Receptor;
 import claseReceptor.SocketIN;
-import interfaces.IDispatcher;
+import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.producerjugador.emitters.JugarTurnoEmitter;
 import itson.producerjugador.facade.IProducerJugador;
 import itson.producerjugador.facade.ProducerJugador;

@@ -4,7 +4,7 @@
  */
 package itson.producerjugador.emitters;
 
-import interfaces.IDispatcher;
+import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.rummydtos.FichaDTO;
 import itson.rummyeventos.acciones.FichaTomadaEvent;
 import itson.rummyeventos.acciones.GrupoActualizadoEvent;

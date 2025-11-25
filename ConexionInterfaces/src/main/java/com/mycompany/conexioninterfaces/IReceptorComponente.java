@@ -1,14 +1,14 @@
-/*
+ /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package interfaces;
+package com.mycompany.conexioninterfaces;
 
 /**
  *
  * @author jrasc
  */
-public interface IDispatcher {
+public interface IReceptorComponente {
 
-    public void enviar(String json, int port, String ip);
+    public void recibirMensaje(String json);
 }

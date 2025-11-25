@@ -4,7 +4,7 @@
  */
 package ClaseDispatcher;
 
-import interfaces.IDispatcher;
+import com.mycompany.conexioninterfaces.IDispatcher;
 
 /**
  *

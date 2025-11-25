@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
-package com.mycompany.broker;
+package main.server;
 
 import ClaseDispatcher.ColaDispatcher;
 import ClaseDispatcher.Dispatcher;
@@ -10,7 +10,8 @@ import ClaseDispatcher.SocketOut;
 import claseReceptor.ColaReceptor;
 import claseReceptor.Receptor;
 import claseReceptor.SocketIN;
-import interfaces.IDispatcher;
+import com.mycompany.broker.Broker;
+import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.directorio.implementacion.Directorio;
 import itson.serializer.implementacion.JsonSerializer;
 import itson.serializer.interfaces.ISerializer;
@@ -19,7 +20,7 @@ import itson.serializer.interfaces.ISerializer;
  *
  * @author jrasc
  */
-public class NewMain {
+public class broker {
 
     /**
      * @param args the command line arguments

@@ -4,7 +4,7 @@
  */
 package itson.traducerjugador.facade;
 
-import interfaces.IReceptorComponente;
+import com.mycompany.conexioninterfaces.IReceptorComponente;
 import itson.rummyeventos.base.EventBase;
 import itson.serializer.interfaces.ISerializer;
 import itson.traducerjugador.mappers.EventMapper;

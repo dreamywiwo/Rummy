@@ -4,14 +4,14 @@
  */
 package claseReceptor;
 
-import interfaces.IReceptorComponente;
+import com.mycompany.conexioninterfaces.IReceptorComponente;
 import interfaces.IReceptorObserver;
 
 /**
  *
  * @author jrasc
  */
-public class Receptor<T> implements IReceptorObserver {
+public class Receptor implements IReceptorObserver {
     
     private final IReceptorComponente componente;
     

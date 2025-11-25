@@ -11,8 +11,10 @@ import itson.dominiorummy.entidades.Jugador;
 import itson.dominiorummy.entidades.Mano;
 import itson.dominiorummy.entidades.Tablero;
 import itson.dominiorummy.entidades.Turno;
+import itson.dominiorummy.mappers.FichaMapper;
 import itson.producerdominio.facade.IProducerDominio;
 import itson.rummydtos.FichaDTO;
+import itson.rummydtos.TableroDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -198,5 +200,56 @@ public class Dominio implements IDominio {
 
         jugador.getMano().restaurar(estadoOriginalMano);
     }
+    
+
+    public void terminarTurno(String jugadorId) {
+        try {
+            if (!turno.esTurnoDelJugador(jugadorId)) {
+                producer.mostrarError("No puedes terminar el turno si no es el tuyo.");
+                return;
+            }
+
+            Jugador jugadorActual = jugadores.get(jugadorId);
+
+            for (Grupo grupo : tablero.getGruposEnMesa()) { 
+                if (!grupo.validarReglas()) { 
+                    producer.mostrarError("No puedes terminar el turno. Hay un grupo inválido en la mesa (requiere 3+ fichas válidas).");
+                    return;
+                }
+            }
+
+            if (!jugadorActual.yaBajo30()) {
+
+                int puntosTotalesBajados = 0;
+                for (Grupo grupo : tablero.getGruposEnMesa()) {
+                    puntosTotalesBajados += grupo.getFichas().stream().mapToInt(fp -> fp.getFicha().getNumero()).sum();
+                }
+
+                final int PUNTOS_MINIMOS = 30; 
+
+                if (puntosTotalesBajados < PUNTOS_MINIMOS) {
+                    producer.mostrarError("Tu primer descarte debe sumar al menos " + PUNTOS_MINIMOS + " puntos. Total actual: " + puntosTotalesBajados);
+                    return;
+                }
+
+                jugadorActual.marcarPrimerBajada30Completada(); 
+            }
+
+            tablero.marcarFichasConfirmadas(jugadorId);
+
+            Jugador siguienteJugador = turno.avanzarTurno(); 
+            String siguienteJugadorId = siguienteJugador.getId();
+
+            TableroDTO tableroActualizado = FichaMapper.toDTO(tablero);
+            producer.actualizarTablero(tableroActualizado);
+            producer.actualizarTurno(siguienteJugadorId); 
+
+        } catch (Exception e) {
+            LOG.severe("Error al terminar el turno: " + e.getMessage());
+            producer.mostrarError("Ocurrió un error inesperado al finalizar el turno.");
+        }
+    }
+    
+    
 
 }

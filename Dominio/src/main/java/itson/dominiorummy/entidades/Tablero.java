@@ -200,5 +200,13 @@ public class Tablero {
         sb.append("================\n");
         return sb.toString();
     }
+    
+    public List<Grupo> getGruposEnMesa() {
+        return new ArrayList<>(grupos.values()); 
+    }
+    
+    public void marcarFichasConfirmadas(String jugadorId) {
+        this.removedOrigin.clear(); 
+    } 
 
 }

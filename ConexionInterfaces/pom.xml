@@ -5,6 +5,7 @@
         <groupId>com.mycompany</groupId>
         <artifactId>RummyMain</artifactId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../RummyMain/pom.xml</relativePath> 
     </parent>
     <artifactId>ConexionInterfaces</artifactId>
     <packaging>jar</packaging>

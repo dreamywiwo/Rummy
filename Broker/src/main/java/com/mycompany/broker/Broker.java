@@ -11,11 +11,9 @@ import itson.directorio.implementacion.ConnectionEndpoint;
 import itson.directorio.implementacion.Directorio;
 import itson.rummyeventos.base.EventBase;
 import itson.serializer.interfaces.ISerializer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  *
@@ -49,7 +47,7 @@ public class Broker implements IReceptorComponente, IBroker {
         if (base == null || base.getEventType() == null) {
             return;
         }
-        String topic = base.getEventType();
+        String topic = base.getTopic();
 
         List<String> clientesID = registry.getSuscriptores(topic);
         List<ConnectionEndpoint> endpoints = directorio.getEndpoints(clientesID);

@@ -4,6 +4,7 @@
  */
 package itson.traducerjugador.mappers;
 
+import itson.rummydtos.TableroDTO;
 import itson.rummyeventos.actualizaciones.ErrorEvent;
 import itson.rummyeventos.actualizaciones.ManoActualizadaEvent;
 import itson.rummyeventos.actualizaciones.SopaActualizadaEvent;
@@ -62,7 +63,7 @@ public class EventMapper {
         try {
             TableroActualizadoEvent event = serializer.deserialize(rawPayload, TableroActualizadoEvent.class);
             if (listener != null) {
-                
+                listener.recibirTablero(event.getTableroSnapshot());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,6 +73,9 @@ public class EventMapper {
     private void handleManoActualizada(String rawPayload, ISerializer serializer) {
         try {
             ManoActualizadaEvent event = serializer.deserialize(rawPayload, ManoActualizadaEvent.class);
+            if (listener != null) {
+                listener.recibirMano(event.getManoSnapshot());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,6 +84,9 @@ public class EventMapper {
     private void handleSopaActualizada(String rawPayload, ISerializer serializer) {
         try {
             SopaActualizadaEvent event = serializer.deserialize(rawPayload, SopaActualizadaEvent.class);
+            if (listener != null) {
+                listener.recibirSopa(event.getNumFichasRestantes());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

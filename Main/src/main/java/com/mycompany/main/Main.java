@@ -29,7 +29,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        int miPuerto = 9001;
+        int miPuerto = 9002;
         String brokerIp = "192.168.100.4";
         int brokerPort = 9999;
 

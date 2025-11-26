@@ -62,12 +62,12 @@ public class ControladorTurno {
         modelo.terminarTurno();
         producerJugador.terminarTurno();
     }
-    
+ 
     /**
      * Maneja la acción de tomar una ficha del pozo
      */
     public void tomarFicha() {
-        modelo.tomarFicha();
+        producerJugador.tomarFicha();
     }
     
     /**

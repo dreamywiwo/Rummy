@@ -47,6 +47,7 @@ public class Dominio implements IDominio {
         this.sopa = new Sopa(fichas);
     }
 
+    @Override
     public void crearGrupo(String jugadorId, List<FichaDTO> fichasDTO) {
 
         Jugador jugador = turno.getJugadorActual();
@@ -109,6 +110,7 @@ public class Dominio implements IDominio {
         producer.actualizarTablero(TableroMapper.toDTO(tablero));
     }
 
+    @Override
     public void actualizarGrupo(String grupoId, List<FichaDTO> fichasNuevasDTO) {
 
         Jugador jugador = turno.getJugadorActual();
@@ -185,6 +187,7 @@ public class Dominio implements IDominio {
         producer.actualizarTablero(TableroMapper.toDTO(tablero));
     }
 
+    @Override
     public void tomarFicha(String jugadorId) {
         try {
             if (!turno.esTurnoDelJugador(jugadorId)) {
@@ -214,6 +217,7 @@ public class Dominio implements IDominio {
 
     }
 
+    @Override
     public void agregarJugador(Jugador jugador) {
         jugadores.put(jugador.getId(), jugador);
     }
@@ -233,6 +237,7 @@ public class Dominio implements IDominio {
         jugador.getMano().restaurar(estadoOriginalMano);
     }
 
+    @Override
     public void terminarTurno(String jugadorId) {
         try {
             if (!turno.esTurnoDelJugador(jugadorId)) {

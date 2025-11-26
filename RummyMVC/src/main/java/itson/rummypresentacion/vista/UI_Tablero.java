@@ -170,23 +170,40 @@ public class UI_Tablero extends javax.swing.JPanel {
             return;
         }
 
-        // 1. Verificar si se soltó sobre o muy cerca de un grupo existente
         UI_Grupo grupoCercano = encontrarGrupoCercano(punto);
 
         if (grupoCercano != null) {
-            // AGREGAR A GRUPO EXISTENTE
             for (FichaDTO f : fichas) {
                 grupoCercano.getGrupo().agregar(f);
             }
 
             grupoCercano.actualizarFichas();
 
-            Point posicionAjustada = ajustarPosicionDentroDelTablero(
-                    grupoCercano.getLocation(),
-                    grupoCercano.getWidth(),
-                    grupoCercano.getHeight()
-            );
-            grupoCercano.setLocation(posicionAjustada);
+            if (hayColision(grupoCercano.getLocation(), grupoCercano.getWidth(), grupoCercano.getHeight(), grupoCercano)) {
+
+                Point nuevaPos = buscarPosicionLibre(
+                        grupoCercano.getLocation(),
+                        grupoCercano.getWidth(),
+                        grupoCercano.getHeight(),
+                        grupoCercano
+                );
+
+                if (nuevaPos != null) {
+                    grupoCercano.setLocation(nuevaPos);
+                } else {
+                    // Si no cabe ni moviéndose -> Zoom Out
+                    if (escalaActual > ESCALA_MINIMA) {
+                        hacerZoomOut();
+                    }
+                }
+            } else {
+                Point posSegura = ajustarPosicionDentroDelTablero(
+                        grupoCercano.getLocation(),
+                        grupoCercano.getWidth(),
+                        grupoCercano.getHeight()
+                );
+                grupoCercano.setLocation(posSegura);
+            }
 
             if (ventanaPrincipal != null) {
                 ventanaPrincipal.notificarGrupoActualizado(
@@ -195,7 +212,6 @@ public class UI_Tablero extends javax.swing.JPanel {
                 );
             }
 
-            ajustarZoomSiEsNecesario();
             repaint();
             return;
         }
@@ -211,26 +227,19 @@ public class UI_Tablero extends javax.swing.JPanel {
         int y = punto.y - altoGrupo / 2;
         Point posicionDeseada = new Point(x, y);
 
-        // 3. BUSCAR POSICIÓN CON GESTIÓN DE ZOOM AUTOMÁTICO
-        Point posicionFinal = buscarPosicionLibre(posicionDeseada, anchoGrupo, altoGrupo);
+        Point posicionFinal = buscarPosicionLibre(posicionDeseada, anchoGrupo, altoGrupo, null);
 
         if (posicionFinal == null) {
             if (escalaActual > ESCALA_MINIMA) {
-                System.out.println("Tablero lleno, haciendo Zoom Out...");
-                hacerZoomOut(); // Reducimos la escala
-
-                // RECURSIVIDAD: Volvemos a intentar crear el grupo.
-                // Como la escala cambió, 'ajustarPosicionDentroDelTablero' permitirá
-                // coordenadas más lejanas en el siguiente intento.
-                crearGrupoEnPunto(punto, fichas);
-                return; 
+                System.out.println("No cabe nuevo grupo, Zoom Out...");
+                hacerZoomOut();
+                crearGrupoEnPunto(punto, fichas); // Reintento recursivo
+                return;
             } else {
-                // Si ya estamos en el zoom mínimo y sigue sin caber se encima jeje
                 posicionFinal = ajustarPosicionDentroDelTablero(posicionDeseada, anchoGrupo, altoGrupo);
             }
         }
 
-        // 4. Crear el grupo visualmente 
         Grupo nuevoGrupo = new Grupo("grupo_" + tablero.getGrupos().size());
         tablero.agregarGrupo(nuevoGrupo);
         for (FichaDTO f : fichas) {
@@ -241,7 +250,7 @@ public class UI_Tablero extends javax.swing.JPanel {
         grupoPanel.setBounds(posicionFinal.x, posicionFinal.y, anchoGrupo, altoGrupo);
         grupoPanel.setBorder(new LineBorder(Color.WHITE, 2, true));
         grupoPanel.setOpaque(true);
-        grupoPanel.setBackground(new Color(60, 160, 60));
+        grupoPanel.setBackground(new Color(60, 160, 60)); // Color temporal de debug/fondo
         grupoPanel.actualizarFichas();
 
         gruposPanels.add(grupoPanel);
@@ -276,17 +285,26 @@ public class UI_Tablero extends javax.swing.JPanel {
         return new Point(x, y);
     }
 
+    // Método base (usado para grupos nuevos que aún no están en la lista)
     private boolean hayColision(Point posicion, int ancho, int alto) {
-        java.awt.Rectangle nuevaArea = new java.awt.Rectangle(posicion.x, posicion.y, ancho, alto);
+        return hayColision(posicion, ancho, alto, null);
+    }
 
-        for (UI_Grupo grupo : gruposPanels) {
-            java.awt.Rectangle areaGrupo = grupo.getBounds();
-            areaGrupo.grow(10, 10);
-            if (nuevaArea.intersects(areaGrupo)) {
+    // Sobrecarga: permite ignorar un grupo específico 
+    private boolean hayColision(Point posicion, int ancho, int alto, UI_Grupo grupoAIgnorar) {
+        java.awt.Rectangle nuevaArea = new java.awt.Rectangle(posicion.x, posicion.y, ancho, alto);
+        // Padding para que no queden pegados
+        nuevaArea.grow(10, 10);
+
+        for (UI_Grupo otroGrupo : gruposPanels) {
+            if (otroGrupo == grupoAIgnorar) {
+                continue;
+            }
+
+            if (nuevaArea.intersects(otroGrupo.getBounds())) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -375,9 +393,10 @@ public class UI_Tablero extends javax.swing.JPanel {
      * Busca una posición libre usando un algoritmo de espiral. Empieza en el
      * punto deseado y se aleja circularmente hasta encontrar hueco.
      */
-    private Point buscarPosicionLibre(Point puntoDeseado, int ancho, int alto) {
+    private Point buscarPosicionLibre(Point puntoDeseado, int ancho, int alto, UI_Grupo grupoAIgnorar) {
         Point pCandidato = ajustarPosicionDentroDelTablero(puntoDeseado, ancho, alto);
-        if (!hayColision(pCandidato, ancho, alto)) {
+
+        if (!hayColision(pCandidato, ancho, alto, grupoAIgnorar)) {
             return pCandidato;
         }
 
@@ -387,15 +406,13 @@ public class UI_Tablero extends javax.swing.JPanel {
         int maxIteraciones = 800;
 
         for (int i = 0; i < maxIteraciones; i++) {
-            // Fórmula polar: x = r * cos(a), y = r * sin(a)
             int x = puntoDeseado.x + (int) (radio * Math.cos(angulo));
             int y = puntoDeseado.y + (int) (radio * Math.sin(angulo));
 
             pCandidato = new Point(x, y);
-
             pCandidato = ajustarPosicionDentroDelTablero(pCandidato, ancho, alto);
 
-            if (!hayColision(pCandidato, ancho, alto)) {
+            if (!hayColision(pCandidato, ancho, alto, grupoAIgnorar)) {
                 return pCandidato;
             }
 
@@ -405,7 +422,6 @@ public class UI_Tablero extends javax.swing.JPanel {
                 radio += incrementoRadio;
             }
         }
-
         return null;
     }
 

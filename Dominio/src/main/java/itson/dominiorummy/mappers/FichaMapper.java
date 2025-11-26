@@ -26,8 +26,8 @@ public class FichaMapper {
     }
     
     public static FichaDTO toDTO(Ficha ficha) {
-        return new FichaDTO(ficha.getId(), ficha.getNumero(), ficha.getColor(), ficha.isEsComodin()); 
-    }
+        return new FichaDTO(ficha.getNumero(), ficha.getColor(), ficha.getId(), ficha.isEsComodin()); 
+    }    
     
     public static List<FichaDTO> toDTO(List<Ficha> fichas) {
         return fichas.stream().map(ficha -> FichaMapper.toDTO(ficha)).collect(Collectors.toList());

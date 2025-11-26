@@ -14,17 +14,11 @@ import java.util.List;
  */
 public class FichaTomadaEvent extends EventBase {
 
-    private String jugadorId;
     public static final String TOPIC = "acciones.jugador";
     public static final String EVENT_TYPE = "ficha.tomada";
 
-    public FichaTomadaEvent(String jugadorId) {
+    public FichaTomadaEvent() {
         super(TOPIC, EVENT_TYPE);
-        this.jugadorId = jugadorId;
-    }
-
-    public String getJugadorId() {
-        return jugadorId;
     }
 
 }

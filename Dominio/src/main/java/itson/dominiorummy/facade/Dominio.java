@@ -48,7 +48,7 @@ public class Dominio implements IDominio {
     }
 
     @Override
-    public void crearGrupo(String jugadorId, List<FichaDTO> fichasDTO) {
+    public void crearGrupo(List<FichaDTO> fichasDTO) {
 
         Jugador jugador = turno.getJugadorActual();
         Mano mano = jugador.getMano();
@@ -90,7 +90,7 @@ public class Dominio implements IDominio {
         if (grupoNuevo == null) {
             // restaurar mano si ya se quitó fichas
             for (FichaPlaced fp : fichasAInsertar) {
-                if (fp.getPlacedBy().equals(jugadorId)
+                if (fp.getPlacedBy().equals(jugador.getId())
                         && fp.getPlacedInTurn() == turnoActual) {
 
                     mano.agregarFicha(fp.getFicha());
@@ -188,7 +188,10 @@ public class Dominio implements IDominio {
     }
 
     @Override
-    public void tomarFicha(String jugadorId) {
+    public void tomarFicha() {
+        Jugador jugador = turno.getJugadorActual();
+        String jugadorId = jugador.getId();
+        
         try {
             if (!turno.esTurnoDelJugador(jugadorId)) {
                 producer.mostrarError("No es tu turno de juego.");
@@ -199,7 +202,6 @@ public class Dominio implements IDominio {
             producer.mostrarError("Error interno al procesar el grupo.");
         }
 
-        Jugador jugador = jugadores.get(jugadorId);
         if (jugador == null) {
             producer.mostrarError("Jugador no encontrado.");
             return;
@@ -238,7 +240,10 @@ public class Dominio implements IDominio {
     }
 
     @Override
-    public void terminarTurno(String jugadorId) {
+    public void terminarTurno() {
+        Jugador jugador = turno.getJugadorActual();
+        String jugadorId = jugador.getId();
+        
         try {
             if (!turno.esTurnoDelJugador(jugadorId)) {
                 producer.mostrarError("No puedes terminar el turno si no es el tuyo.");

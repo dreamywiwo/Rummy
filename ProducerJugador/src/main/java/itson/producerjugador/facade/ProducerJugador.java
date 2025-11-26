@@ -15,16 +15,14 @@ import java.util.List;
 public class ProducerJugador implements IProducerJugador {
 
     private final JugarTurnoEmitter jugarTurnoEmitter;
-    private final String jugadorId;
 
     public ProducerJugador(JugarTurnoEmitter jugarTurnoEmitter, String jugadorId) {
         this.jugarTurnoEmitter = jugarTurnoEmitter;
-        this.jugadorId = jugadorId;
     }
 
     @Override
     public void crearGrupo(List<FichaDTO> fichas) {
-        jugarTurnoEmitter.emitirGrupoCreadoEvent(jugadorId, fichas);
+        jugarTurnoEmitter.emitirGrupoCreadoEvent(fichas);
     }
 
     @Override
@@ -34,12 +32,12 @@ public class ProducerJugador implements IProducerJugador {
 
     @Override
     public void tomarFicha() {
-        jugarTurnoEmitter.emitirFichaTomadaEvent(jugadorId);
+        jugarTurnoEmitter.emitirFichaTomadaEvent();
     }
 
     @Override
     public void terminarTurno() {
-        jugarTurnoEmitter.emitirTerminoTurnoEvent(jugadorId);
+        jugarTurnoEmitter.emitirTerminoTurnoEvent();
     }
 
 }

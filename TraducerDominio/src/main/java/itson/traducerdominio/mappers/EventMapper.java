@@ -59,7 +59,7 @@ public class EventMapper {
     private void handleGrupoCreado(String rawPayload, ISerializer serializer) {
         try {
             GrupoCreadoEvent event = serializer.deserialize(rawPayload, GrupoCreadoEvent.class);
-            dominio.crearGrupo(event.getJugadorId(), event.getFichas());
+            dominio.crearGrupo(event.getFichas());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,7 +78,7 @@ public class EventMapper {
     private void handleFichaTomada(String rawPayload, ISerializer serializer) {
         try {
             FichaTomadaEvent event = serializer.deserialize(rawPayload, FichaTomadaEvent.class);
-            dominio.tomarFicha(event.getJugadorId());
+            dominio.tomarFicha();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,7 +87,7 @@ public class EventMapper {
     private void handleTerminoTurno(String rawPayload, ISerializer serializer) {
         try {
             TerminoTurnoEvent event = serializer.deserialize(rawPayload, TerminoTurnoEvent.class);
-            dominio.terminarTurno(event.getJugadorId());
+            dominio.terminarTurno();
         } catch (Exception e) {
             e.printStackTrace();
         }

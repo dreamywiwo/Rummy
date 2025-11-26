@@ -12,17 +12,11 @@ import itson.rummyeventos.base.EventBase;
  */
 public class TerminoTurnoEvent extends EventBase {
 
-    private String jugadorId;
     public static final String TOPIC = "acciones.jugador";
     public static final String EVENT_TYPE = "termino.turno";
 
-    public TerminoTurnoEvent(String jugadorId) {
+    public TerminoTurnoEvent() {
         super(TOPIC, EVENT_TYPE);
-        this.jugadorId = jugadorId;
-    }
-
-    public String getJugadorId() {
-        return jugadorId;
     }
 
 }

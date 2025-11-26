@@ -59,7 +59,7 @@ public class EventMapper {
     private void handleGrupoCreado(String rawPayload, ISerializer serializer) {
         try {
             GrupoCreadoEvent event = serializer.deserialize(rawPayload, GrupoCreadoEvent.class);
-//            dominio.crearGrupo(event.getFichas());
+
         } catch (Exception e) {
             e.printStackTrace();
         }

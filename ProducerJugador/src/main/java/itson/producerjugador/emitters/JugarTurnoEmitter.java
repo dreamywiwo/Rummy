@@ -31,8 +31,8 @@ public class JugarTurnoEmitter {
         this.brokerPort = brokerPort;
     }
 
-    public void emitirGrupoCreadoEvent(List<FichaDTO> fichas) {
-        GrupoCreadoEvent event = new GrupoCreadoEvent(fichas);
+    public void emitirGrupoCreadoEvent(String jugadorId, List<FichaDTO> fichas) {
+        GrupoCreadoEvent event = new GrupoCreadoEvent(fichas, jugadorId);
         String json = jsonSerializer.serialize(event);
         System.out.println("hasta aqui llego el grupo creado" + fichas);
         dispatcher.enviar(json, brokerPort, brokerIp);
@@ -44,14 +44,14 @@ public class JugarTurnoEmitter {
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
-    public void emitirFichaTomadaEvent() {
-        FichaTomadaEvent event = new FichaTomadaEvent();
+    public void emitirFichaTomadaEvent(String jugadorId) {
+        FichaTomadaEvent event = new FichaTomadaEvent(jugadorId);
         String json = jsonSerializer.serialize(event);
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
-    public void emitirTerminoTurnoEvent() {
-        TerminoTurnoEvent event = new TerminoTurnoEvent();
+    public void emitirTerminoTurnoEvent(String jugadorId) {
+        TerminoTurnoEvent event = new TerminoTurnoEvent(jugadorId);
         String json = jsonSerializer.serialize(event);
         dispatcher.enviar(json, brokerPort, brokerIp);
     }

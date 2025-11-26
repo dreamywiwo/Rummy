@@ -10,5 +10,5 @@ package itson.traducerdominio.facade;
  */
 public interface ITraducerDominio {
     
-    public abstract void onMessage(String payload);
+    public abstract void recibeMensaje(String payload);
 }

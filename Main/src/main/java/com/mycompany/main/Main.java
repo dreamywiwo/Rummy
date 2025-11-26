@@ -41,7 +41,8 @@ public class Main {
         colaDispatcher.attach(socketOut);
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
         JugarTurnoEmitter emitter = new JugarTurnoEmitter(jsonSerializer, dispatcher, brokerIp, brokerPort);
-        IProducerJugador producer = new ProducerJugador(emitter);
+        String miId = "Jugador1";
+        IProducerJugador producer = new ProducerJugador(emitter, miId);
         Modelo modelo = new Modelo(producer);
         ControladorTurno controlador = new ControladorTurno(modelo, producer);
 

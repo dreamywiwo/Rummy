@@ -4,6 +4,7 @@
  */
 package itson.traducerdominio.facade;
 
+import com.mycompany.conexioninterfaces.IReceptorComponente;
 import itson.rummyeventos.base.EventBase;
 import itson.serializer.interfaces.ISerializer;
 import itson.traducerdominio.mappers.EventMapper;
@@ -12,7 +13,8 @@ import itson.traducerdominio.mappers.EventMapper;
  *
  * @author Dana Chavez
  */
-public class TraducerDominio implements ITraducerDominio {
+public class TraducerDominio implements ITraducerDominio, IReceptorComponente {
+
     private final ISerializer serializer;
     private final EventMapper mapper;
 
@@ -22,7 +24,7 @@ public class TraducerDominio implements ITraducerDominio {
     }
 
     @Override
-    public void onMessage(String payload) {
+    public void recibeMensaje(String payload) {
         try {
             EventBase base = serializer.deserialize(payload, EventBase.class);
             if (base == null || base.getEventType() == null) {
@@ -35,5 +37,10 @@ public class TraducerDominio implements ITraducerDominio {
             e.printStackTrace();
         }
     }
-    
+
+    @Override
+    public void recibirMensaje(String json) {
+        recibeMensaje(json);
+    }
+
 }

@@ -13,18 +13,25 @@ import java.util.List;
  * @author Dana Chavez
  */
 public class GrupoCreadoEvent extends EventBase {
-    
+
     private List<FichaDTO> fichas;
+    private String jugadorId;
 
     public static final String TOPIC = "acciones.jugador";
     public static final String EVENT_TYPE = "grupo.creado";
 
-    public GrupoCreadoEvent(List<FichaDTO> fichas) {
+    public GrupoCreadoEvent(List<FichaDTO> fichas, String jugadorId) {
         super(TOPIC, EVENT_TYPE);
         this.fichas = fichas;
+        this.jugadorId = jugadorId;
     }
 
     public List<FichaDTO> getFichas() {
         return fichas;
     }
+
+    public String getJugadorId() {
+        return jugadorId;
+    }
+
 }

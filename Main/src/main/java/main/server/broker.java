@@ -48,9 +48,9 @@ public class broker {
         Directorio directorio = new Directorio();
         SubscriptionRegistry registry = new SubscriptionRegistry();
         directorio.registerClient("Jugador1", ipJ1, 9001);
-        registry.addSuscriptor("actualizaciones.estado", "jugador1");
+        registry.addSuscriptor("actualizaciones.estado", "Jugador1");
         directorio.registerClient("Jugador2", ipJ2, 9002);
-        registry.addSuscriptor("actualizaciones.estado", "jugador2");
+        registry.addSuscriptor("actualizaciones.estado", "Jugador2");
 
         SocketOut socketOut = new SocketOut();
         socketOut.start();

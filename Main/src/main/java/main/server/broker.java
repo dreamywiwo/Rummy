@@ -40,6 +40,9 @@ public class broker {
      */
     public static void main(String[] args) {
         int puertoBroker = 9999;
+        String brokerIp = "192.168.100.4";
+        String ipJ1 = "192.168.100.95";
+        String ipJ2 = "192.168.100.4";
 
         JsonSerializer serializer = new JsonSerializer();
         Directorio directorio = new Directorio();
@@ -50,13 +53,17 @@ public class broker {
         ColaDispatcher colaDispatcher = new ColaDispatcher();
         colaDispatcher.attach(socketOut);
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
+        directorio.registerClient("jugador1", ipJ1, 9001);
+        registry.addSuscriptor("actualizaciones.estado", "jugador1");
+        directorio.registerClient("jugador2", ipJ2, 9002);
+        registry.addSuscriptor("actualizaciones.estado", "jugador2");
 
         List<Ficha> fichasJuego = generarFichasRummy();
         Sopa sopa = new Sopa(fichasJuego);
         Tablero tablero = new Tablero();
         Turno turno = new Turno(new ArrayList<>(), 0);
 
-        EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(serializer, dispatcher, "localhost", puertoBroker);
+        EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(serializer, dispatcher, brokerIp, puertoBroker);
         IProducerDominio producerDominio = new ProducerDominio(estadoEmitter);
 
         IDominio dominio = new Dominio(tablero, producerDominio, turno, sopa, fichasJuego);

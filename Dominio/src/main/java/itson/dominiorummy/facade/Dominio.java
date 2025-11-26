@@ -13,6 +13,7 @@ import itson.dominiorummy.entidades.Sopa;
 import itson.dominiorummy.entidades.Tablero;
 import itson.dominiorummy.entidades.Turno;
 import itson.dominiorummy.mappers.FichaMapper;
+import itson.dominiorummy.mappers.TableroMapper;
 import itson.producerdominio.facade.IProducerDominio;
 import itson.rummydtos.FichaDTO;
 import itson.rummydtos.TableroDTO;
@@ -105,8 +106,7 @@ public class Dominio implements IDominio {
         // 3. Registrar el grupo en el tablero
         tablero.agregarGrupo(grupoNuevo);
 
-        // 4. Actualizar UI
-        // producer.actualizarTablero(TableroMapper.toDTO(tablero));
+        producer.actualizarTablero(TableroMapper.toDTO(tablero));
     }
 
     public void actualizarGrupo(String grupoId, List<FichaDTO> fichasNuevasDTO) {
@@ -182,8 +182,7 @@ public class Dominio implements IDominio {
             tablero.removerGrupo(grupoId);
         }
 
-        // 4. Actualizar UI
-        //       producer.actualizarTablero(TableroMapper.toDTO(tablero));
+        producer.actualizarTablero(TableroMapper.toDTO(tablero));
     }
 
     public void tomarFicha(String jugadorId) {
@@ -207,7 +206,7 @@ public class Dominio implements IDominio {
         jugador.getMano().agregarFicha(ficha);
         List<Ficha> fichasJugador = jugador.getMano().getFichas();
         producer.actualizarManoJugador(FichaMapper.toDTO(fichasJugador));
-        
+
         TableroDTO tableroActualizado = FichaMapper.toDTO(tablero);
         producer.actualizarTablero(tableroActualizado);
 

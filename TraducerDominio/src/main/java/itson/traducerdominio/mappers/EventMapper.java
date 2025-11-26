@@ -20,10 +20,10 @@ import java.util.function.BiConsumer;
  * @author Dana Chavez
  */
 public class EventMapper {
-
+    
     private final ISerializer serializer;
     private final IDominio dominio;
-
+    
     private final Map<String, BiConsumer<String, ISerializer>> handlers = new HashMap<>();
 
     //agregar IDominio al constructor
@@ -37,21 +37,21 @@ public class EventMapper {
         register("ficha.tomada", this::handleFichaTomada);
         register("termino.turno", this::handleTerminoTurno);
     }
-
+    
     public void register(String eventType, BiConsumer<String, ISerializer> handler) {
         handlers.put(eventType, handler);
     }
-
+    
     public void route(EventBase base, String rawPayload) {
         String et = base.getEventType();
-
+        
         BiConsumer<String, ISerializer> handler = handlers.get(et);
-
+        
         if (handler == null) {
             System.out.println("No existe handler para " + et);
             return;
         }
-
+        
         handler.accept(rawPayload, serializer);
     }
 
@@ -59,7 +59,7 @@ public class EventMapper {
     private void handleGrupoCreado(String rawPayload, ISerializer serializer) {
         try {
             GrupoCreadoEvent event = serializer.deserialize(rawPayload, GrupoCreadoEvent.class);
-
+            dominio.crearGrupo(event.getJugadorId(), event.getFichas());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,7 +69,7 @@ public class EventMapper {
         try {
             GrupoActualizadoEvent event = serializer.deserialize(rawPayload, GrupoActualizadoEvent.class);
             dominio.actualizarGrupo(event.getGrupoId(), event.getNuevasFichas());
-
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,8 +78,7 @@ public class EventMapper {
     private void handleFichaTomada(String rawPayload, ISerializer serializer) {
         try {
             FichaTomadaEvent event = serializer.deserialize(rawPayload, FichaTomadaEvent.class);
-//            dominio.tomarFicha();
-
+            dominio.tomarFicha(event.getJugadorId());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,8 +87,7 @@ public class EventMapper {
     private void handleTerminoTurno(String rawPayload, ISerializer serializer) {
         try {
             TerminoTurnoEvent event = serializer.deserialize(rawPayload, TerminoTurnoEvent.class);
-//            dominio.terminarTurno();
-
+            dominio.terminarTurno(event.getJugadorId());
         } catch (Exception e) {
             e.printStackTrace();
         }

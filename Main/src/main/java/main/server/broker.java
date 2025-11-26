@@ -47,16 +47,16 @@ public class broker {
         JsonSerializer serializer = new JsonSerializer();
         Directorio directorio = new Directorio();
         SubscriptionRegistry registry = new SubscriptionRegistry();
+        directorio.registerClient("Jugador1", ipJ1, 9001);
+        registry.addSuscriptor("actualizaciones.estado", "jugador1");
+        directorio.registerClient("Jugador2", ipJ2, 9002);
+        registry.addSuscriptor("actualizaciones.estado", "jugador2");
 
         SocketOut socketOut = new SocketOut();
         socketOut.start();
         ColaDispatcher colaDispatcher = new ColaDispatcher();
         colaDispatcher.attach(socketOut);
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
-        directorio.registerClient("Jugador1", ipJ1, 9001);
-        registry.addSuscriptor("actualizaciones.estado", "jugador1");
-        directorio.registerClient("Jugador2", ipJ2, 9002);
-        registry.addSuscriptor("actualizaciones.estado", "jugador2");
 
         List<Ficha> fichasJuego = generarFichasRummy();
         Sopa sopa = new Sopa(fichasJuego);

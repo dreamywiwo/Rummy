@@ -32,6 +32,7 @@ public class Main {
         int miPuerto = 9002;
         String brokerIp = "192.168.100.4";
         int brokerPort = 9999;
+        String miId = "Jugador2";
 
         JsonSerializer jsonSerializer = new JsonSerializer();
 
@@ -41,7 +42,6 @@ public class Main {
         colaDispatcher.attach(socketOut);
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
         JugarTurnoEmitter emitter = new JugarTurnoEmitter(jsonSerializer, dispatcher, brokerIp, brokerPort);
-        String miId = "Jugador2";
         IProducerJugador producer = new ProducerJugador(emitter, miId);
         Modelo modelo = new Modelo(producer);
         ControladorTurno controlador = new ControladorTurno(modelo, producer);

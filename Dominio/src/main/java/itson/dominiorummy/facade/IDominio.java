@@ -15,6 +15,8 @@ import java.util.List;
 public interface IDominio {
     public void crearGrupo(String jugadorId, List<FichaDTO> fichasDTO);
 
+    public void tomarFicha(String jugadorId);
+    
     public void actualizarGrupo(String grupoId, List<FichaDTO> nuevasFichas);
         
     public void agregarJugador(Jugador jugador);  

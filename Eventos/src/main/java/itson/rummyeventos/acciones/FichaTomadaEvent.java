@@ -4,7 +4,9 @@
  */
 package itson.rummyeventos.acciones;
 
+import itson.rummydtos.FichaDTO;
 import itson.rummyeventos.base.EventBase;
+import java.util.List;
 
 /**
  *

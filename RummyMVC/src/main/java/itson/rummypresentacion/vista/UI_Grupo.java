@@ -53,6 +53,10 @@ public class UI_Grupo extends JPanel {
         setDropTarget(new DropTarget() {
             @Override
             public synchronized void drop(DropTargetDropEvent evt) {
+                if (!isEnabled()) {
+                    evt.rejectDrop();
+                    return;
+                }
                 try {
                     evt.acceptDrop(DnDConstants.ACTION_MOVE);
 
@@ -150,9 +154,9 @@ public class UI_Grupo extends JPanel {
 
     public void actualizarFichas() {
         removeAll();
-        
-        double escala = (tableroPanel != null) ? tableroPanel.getEscalaActual(): 1.0;
-        
+
+        double escala = (tableroPanel != null) ? tableroPanel.getEscalaActual() : 1.0;
+
         int x = (int) (10 * escala);
         int y = (int) (20 * escala);
         int anchoFicha = (int) (60 * escala);

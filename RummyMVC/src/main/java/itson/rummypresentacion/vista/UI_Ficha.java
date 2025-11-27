@@ -27,7 +27,7 @@ public class UI_Ficha extends JLabel {
     private FichaDTO ficha;
     private ContenedorFichas contenedor;
     private static final int RADIO_BORDE = 15;
-    
+
     private double escalaActual = 1.0;
 
     private boolean seleccionada = false;
@@ -35,7 +35,7 @@ public class UI_Ficha extends JLabel {
     public UI_Ficha(FichaDTO ficha) {
         this(ficha, null, 1.0);
     }
-    
+
     public UI_Ficha(FichaDTO ficha, ContenedorFichas contenedor) {
         this(ficha, contenedor, 1.0);
     }
@@ -46,7 +46,7 @@ public class UI_Ficha extends JLabel {
         this.escalaActual = escalaActual;
         configurarComponente();
         habilitarDragAndDrop();
-        habilitarSeleccion(); 
+        habilitarSeleccion();
     }
 
     private void configurarComponente() {
@@ -78,7 +78,7 @@ public class UI_Ficha extends JLabel {
         if (getParent() instanceof UI_Mano) {
             ((UI_Mano) getParent()).notificarSeleccion(this);
         }
-        repaint(); 
+        repaint();
     }
 
     public void setSeleccionada(boolean seleccionada) {
@@ -99,7 +99,7 @@ public class UI_Ficha extends JLabel {
 
         int width = getWidth();
         int height = getHeight();
-        
+
         int radioBordeEscalado = (int) (RADIO_BORDE * escalaActual);
         float grosorBorde = (float) (2f * escalaActual);
 
@@ -111,8 +111,8 @@ public class UI_Ficha extends JLabel {
 
         // 2. DIBUJAR BORDE VERDE SI ESTÁ SELECCIONADA
         if (seleccionada) {
-            g2d.setColor(new Color(50, 205, 50)); 
-            g2d.setStroke(new BasicStroke((float) (4f * escalaActual))); 
+            g2d.setColor(new Color(50, 205, 50));
+            g2d.setStroke(new BasicStroke((float) (4f * escalaActual)));
         } else {
             g2d.setColor(obtenerColorBorde());
             g2d.setStroke(new BasicStroke(grosorBorde));
@@ -133,7 +133,9 @@ public class UI_Ficha extends JLabel {
                 new DragGestureListener() {
             @Override
             public void dragGestureRecognized(DragGestureEvent dge) {
-
+                if (!isEnabled() || (getParent() != null && !getParent().isEnabled())) {
+                    return;
+                }
                 FichaTransferable transferable;
 
                 // 3. LOGICA INTELIGENTE DE ARRASTRE
@@ -167,7 +169,7 @@ public class UI_Ficha extends JLabel {
         // Calculamos el tamaño de fuente escalado
         int tamanoFuenteBase = ficha.isEsComodin() ? 36 : 32;
         int tamanoFuenteEscalado = (int) (tamanoFuenteBase * escalaActual);
-        
+
         // Aseguramos un mínimo para que no desaparezca
         if (tamanoFuenteEscalado < 8) {
             tamanoFuenteEscalado = 8;
@@ -175,7 +177,7 @@ public class UI_Ficha extends JLabel {
 
         if (ficha.isEsComodin()) {
             setText("O");
-            setFont(new Font("Arial", Font.BOLD, tamanoFuenteEscalado)); 
+            setFont(new Font("Arial", Font.BOLD, tamanoFuenteEscalado));
             setForeground(new Color(139, 69, 19));
         } else {
             setText(String.valueOf(ficha.getNumero()));

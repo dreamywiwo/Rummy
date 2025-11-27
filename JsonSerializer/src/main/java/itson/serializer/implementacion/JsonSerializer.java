@@ -2,6 +2,7 @@ package itson.serializer.implementacion;
 
 import itson.serializer.interfaces.ISerializer;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class JsonSerializer implements ISerializer {
 
     public JsonSerializer() {
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override

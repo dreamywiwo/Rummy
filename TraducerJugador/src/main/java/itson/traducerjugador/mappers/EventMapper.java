@@ -34,7 +34,7 @@ public class EventMapper {
         register("tablero.actualizado", this::handleTableroActualizado);
         register("mano.actualizada", this::handleManoActualizada);
         register("sopa.actualizada", this::handleSopaActualizada);
-        register("termino.turno", this::handleTurnoTerminado);
+        register("turno.terminado", this::handleTurnoTerminado);
         register("mensaje.error", this::handleError);
     }
 

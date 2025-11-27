@@ -16,11 +16,9 @@ import java.util.List;
 public class ControladorTurno {
     
     private Modelo modelo;
-    private IProducerJugador producerJugador;
 
     public ControladorTurno(Modelo modelo, IProducerJugador producerJugador) {
         this.modelo = modelo;
-        this.producerJugador = producerJugador;
     }
      
     /**
@@ -60,14 +58,13 @@ public class ControladorTurno {
      */
     public void terminarTurno() {
         modelo.terminarTurno();
-        producerJugador.terminarTurno();
     }
  
     /**
      * Maneja la acción de tomar una ficha del pozo
      */
     public void tomarFicha() {
-        producerJugador.tomarFicha();
+        modelo.tomarFicha();
     }
     
     /**

@@ -5,7 +5,6 @@
 package itson.rummyeventos.acciones;
 
 import itson.rummydtos.FichaDTO;
-import static itson.rummyeventos.acciones.FichaTomadaEvent.TOPIC;
 import itson.rummyeventos.base.EventBase;
 import java.util.List;
 
@@ -20,6 +19,10 @@ public class GrupoActualizadoEvent extends EventBase {
     
     public static final String TOPIC = "acciones.jugador";
     public static final String EVENT_TYPE = "grupo.actualizado";
+
+    public GrupoActualizadoEvent() {
+        super();
+    }
 
     public GrupoActualizadoEvent(String grupoId, List<FichaDTO> nuevasFichas) {
         super(TOPIC, EVENT_TYPE);

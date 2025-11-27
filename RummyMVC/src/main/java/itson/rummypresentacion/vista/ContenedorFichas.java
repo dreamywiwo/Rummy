@@ -34,6 +34,10 @@ public class ContenedorFichas implements Serializable {
         return new ArrayList<>(fichas);
     }
     
+    public void limpiar(){
+        this.fichas.clear();
+    }
+    
     public String getId() {
         return id;
     }

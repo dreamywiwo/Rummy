@@ -1,2 +1,16 @@
 /Dominio/target/
 /RummyMain/ConexionInterfaces/target/
+/Broker/target/
+/conexion/target/
+/ConexionInterfaces/target/
+/Directorio/target/
+/DTOs/target/
+/Eventos/target/
+/JsonSerializer/target/
+/Main/target/
+/ProducerDominio/target/
+/ProducerJugador/target/
+/RummyMVC/target/
+/RummyPresentacion/target/
+/TraducerDominio/target/
+/TraducerJugador/target/

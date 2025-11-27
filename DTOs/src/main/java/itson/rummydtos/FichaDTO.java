@@ -10,6 +10,9 @@ public class FichaDTO implements Serializable {
     private String color;
     private boolean esComodin;
 
+    public FichaDTO() {
+    }
+
     public FichaDTO(String id, int numero, String color, boolean esComodin) {
         this.id = id;
         this.numero = numero;

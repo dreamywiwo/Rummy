@@ -11,11 +11,15 @@ import itson.rummyeventos.base.EventBase;
  * @author Dana Chavez
  */
 public class TurnoTerminadoEvent extends EventBase {
-    
+
     private String nuevoTurnoJugador;
-    
+
     public static final String TOPIC = "actualizaciones.estado";
     public static final String EVENT_TYPE = "turno.terminado";
+
+    public TurnoTerminadoEvent() {
+        super();
+    }
 
     public TurnoTerminadoEvent(String nuevoTurnoJugador) {
         super(TOPIC, EVENT_TYPE);
@@ -29,5 +33,5 @@ public class TurnoTerminadoEvent extends EventBase {
     public void setNuevoTurnoJugador(String nuevoTurnoJugador) {
         this.nuevoTurnoJugador = nuevoTurnoJugador;
     }
-    
+
 }

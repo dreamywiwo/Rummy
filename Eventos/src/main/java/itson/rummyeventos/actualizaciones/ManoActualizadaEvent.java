@@ -13,12 +13,16 @@ import java.util.List;
  * @author Dana Chavez
  */
 public class ManoActualizadaEvent extends EventBase {
-    
+
     private List<FichaDTO> manoSnapshot;
-    
+
     public static final String TOPIC = "actualizaciones.estado";
     public static final String EVENT_TYPE = "mano.actualizada";
-    
+
+    public ManoActualizadaEvent() {
+        super();
+    }
+
     public ManoActualizadaEvent(List<FichaDTO> manoSnapshot) {
         super(TOPIC, EVENT_TYPE);
         this.manoSnapshot = manoSnapshot;
@@ -31,5 +35,5 @@ public class ManoActualizadaEvent extends EventBase {
     public void setManoSnapshot(List<FichaDTO> manoSnapshot) {
         this.manoSnapshot = manoSnapshot;
     }
-        
+
 }

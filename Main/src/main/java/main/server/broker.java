@@ -15,6 +15,7 @@ import com.mycompany.broker.SubscriptionRegistry;
 import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.directorio.implementacion.Directorio;
 import itson.dominiorummy.entidades.Ficha;
+import itson.dominiorummy.entidades.Jugador;
 import itson.dominiorummy.entidades.Sopa;
 import itson.dominiorummy.entidades.Turno;
 import itson.dominiorummy.facade.Dominio;
@@ -44,6 +45,13 @@ public class broker {
         String ipJ1 = "192.168.100.95";
         String ipJ2 = "192.168.100.4";
 
+        Jugador j1 = new Jugador("Jugador1", "Daniel");
+        Jugador j2 = new Jugador("Jugador2", "Gael");
+
+        List<Jugador> listaJugadores = new ArrayList<>();
+        listaJugadores.add(j1);
+        listaJugadores.add(j2);
+
         JsonSerializer serializer = new JsonSerializer();
         Directorio directorio = new Directorio();
         SubscriptionRegistry registry = new SubscriptionRegistry();
@@ -61,12 +69,14 @@ public class broker {
         List<Ficha> fichasJuego = generarFichasRummy();
         Sopa sopa = new Sopa(fichasJuego);
         Tablero tablero = new Tablero();
-        Turno turno = new Turno(new ArrayList<>(), 0);
+        Turno turno = new Turno(listaJugadores, 0);
 
         EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(serializer, dispatcher, brokerIp, puertoBroker);
         IProducerDominio producerDominio = new ProducerDominio(estadoEmitter);
 
         IDominio dominio = new Dominio(tablero, producerDominio, turno, sopa, fichasJuego);
+        dominio.agregarJugador(j1);
+        dominio.agregarJugador(j2);
 
         EventMapper mapperDominio = new EventMapper(serializer, dominio);
         TraducerDominio traducerDominio = new TraducerDominio(serializer, mapperDominio);
@@ -74,10 +84,8 @@ public class broker {
         Broker brokerLogic = new Broker(directorio, dispatcher, serializer, registry);
 
         ColaReceptor colaReceptor = new ColaReceptor();
-
-        colaReceptor.attach(new Receptor(brokerLogic));
-
         colaReceptor.attach(new Receptor(traducerDominio));
+        colaReceptor.attach(new Receptor(brokerLogic));
 
         SocketIN socketIN = new SocketIN(puertoBroker, colaReceptor);
         socketIN.start();

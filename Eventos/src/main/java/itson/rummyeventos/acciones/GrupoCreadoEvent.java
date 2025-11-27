@@ -19,6 +19,10 @@ public class GrupoCreadoEvent extends EventBase {
     public static final String TOPIC = "acciones.jugador";
     public static final String EVENT_TYPE = "grupo.creado";
 
+    public GrupoCreadoEvent() {
+        super();
+    }
+
     public GrupoCreadoEvent(List<FichaDTO> fichas) {
         super(TOPIC, EVENT_TYPE);
         this.fichas = fichas;
@@ -27,6 +31,5 @@ public class GrupoCreadoEvent extends EventBase {
     public List<FichaDTO> getFichas() {
         return fichas;
     }
-
 
 }

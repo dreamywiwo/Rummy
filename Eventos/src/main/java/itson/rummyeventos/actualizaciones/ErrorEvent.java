@@ -11,12 +11,16 @@ import itson.rummyeventos.base.EventBase;
  * @author Dana Chavez
  */
 public class ErrorEvent extends EventBase {
-    
+
     private String mensajeError;
-    
+
     public static final String TOPIC = "actualizaciones.estado";
     public static final String EVENT_TYPE = "mensaje.error";
-    
+
+    public ErrorEvent() {
+        super();
+    }
+
     public ErrorEvent(String mensajeError) {
         super(TOPIC, EVENT_TYPE);
         this.mensajeError = mensajeError;
@@ -29,5 +33,5 @@ public class ErrorEvent extends EventBase {
     public void setMensajeError(String mensajeError) {
         this.mensajeError = mensajeError;
     }
-    
+
 }

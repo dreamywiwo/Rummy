@@ -48,37 +48,15 @@ public class Modelo implements IModelo, ISubject, IListener {
     }
 
     public void actualizarGrupo(String idGrupo, List<FichaDTO> fichas) {
+        producer.actualizarGrupo(idGrupo, fichas);
     }
 
     public void terminarTurno() {
+        producer.terminarTurno();
     }
 
     public void tomarFicha() {
-    }
-
-    // ACTUALIZACION DESDE TRADUCER
-    /**
-     * Configurar listener para recibir actualizaciones del Traducer
-     */
-    private void configurarTraducerListener() {
-        // Cuando el Traducer reciba cambios del dominio, llamará a este método
-
-        // Ejemplo (dependiendo de la implementacion del Traducer):
-        // traducer.onEstadoActualizado((estadoDominio) -> {
-        //     actualizarDesdeTraducer(estadoDominio);
-        // });
-    }
-
-    /**
-     * Actualizar el modelo desde el estado del dominio (Traducer) Este método
-     * se llama cuando el Traducer recibe actualizaciones
-     */
-    public void actualizarDesdeTraducer() {
-
-        // Podemos manejar separada la actualizacion get
-        // para cada tipo de evento o en si actualizar todo
-        // Notificar a la vista (UI_TurnoJugador)
-        notificarObservers();
+        producer.tomarFicha();
     }
 
     // Implementacion de IModelo
@@ -94,7 +72,7 @@ public class Modelo implements IModelo, ISubject, IListener {
 
     @Override
     public List<FichaDTO> getFichasMano() {
-        return jugadorActual != null ? jugadorActual.getFichasMano() : new ArrayList<>();
+        return new ArrayList<>(this.fichasMano);
     }
 
     @Override

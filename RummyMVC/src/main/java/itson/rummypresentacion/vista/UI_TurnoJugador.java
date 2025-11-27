@@ -11,6 +11,7 @@ import itson.rummypresentacion.modelo.IModelo;
 import itson.rummypresentacion.modelo.IObserver;
 import java.awt.BorderLayout;
 import java.util.List;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -30,11 +31,12 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     public UI_TurnoJugador(ControladorTurno controlador) {
         initComponents();
         this.controlador = controlador;
-
-        inicializarDatosPrueba();
+        tableroModelo = new Tablero();
+        uiTablero = new UI_Tablero(tableroModelo, this);
         setLocationRelativeTo(null);
 
         jPanelContenedorTablero.setLayout(new BorderLayout());
+        System.out.println(this.uiTablero);
         jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
 
         uiMano = new UI_Mano(uiTablero.getTablero().getManoJugador(), uiTablero);
@@ -124,38 +126,6 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
      */
     public ControladorTurno getControlador() {
         return controlador;
-    }
-
-    private void inicializarDatosPrueba() {
-        tableroModelo = new Tablero();              
-        mano = tableroModelo.getManoJugador();
-        
-        mano.agregar(new FichaDTO("r1", 1, "ROJO", false));
-        mano.agregar(new FichaDTO("r2", 2, "ROJO", false));
-        mano.agregar(new FichaDTO("r3", 3, "ROJO", false));
-        mano.agregar(new FichaDTO("r4", 4, "ROJO", false));
-
-        mano.agregar(new FichaDTO("a5", 5, "AZUL", false));
-        mano.agregar(new FichaDTO("a6", 6, "AZUL", false));
-        mano.agregar(new FichaDTO("a7", 7, "AZUL", false));
-
-        mano.agregar(new FichaDTO("y8", 8, "AMARILLO", false));
-        mano.agregar(new FichaDTO("y9", 9, "AMARILLO", false));
-
-        mano.agregar(new FichaDTO("n10", 10, "NEGRO", false));
-        mano.agregar(new FichaDTO("n11", 11, "NEGRO", false));
-
-        mano.agregar(new FichaDTO("comodin1", 0, "DORADO", true));
-        mano.agregar(new FichaDTO("comodin2", 0, "DORADO", true));
-        mano.agregar(new FichaDTO("comodin3", 0, "DORADO", true));
-        mano.agregar(new FichaDTO("comodin4", 0, "DORADO", true));
-        
-        Grupo grupo1 = new Grupo("grupo_0");
-        grupo1.agregar(new FichaDTO("r12", 12, "ROJO", false));
-        grupo1.agregar(new FichaDTO("r13", 13, "ROJO", false));
-        tableroModelo.agregarGrupo(grupo1);
-
-        uiTablero = new UI_Tablero(tableroModelo, this);
     }
 
     /**
@@ -362,33 +332,37 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
      */
     @Override
     public void update(IModelo modelo) {
-        Tablero tablero = uiTablero.getTablero();
-        tablero.getGrupos().clear();
-        List<GrupoDTO> grupos = modelo.getGruposEnTablero();
-        if (grupos != null) {
-            for (GrupoDTO grupoDTO : grupos) {
-                Grupo grupoTablero = new Grupo(grupoDTO.getId());
-                for (FichaDTO ficha : grupoDTO.getFichas()) {
-                    grupoTablero.agregar(ficha);
+
+        SwingUtilities.invokeLater(() -> {
+
+            Tablero tablero = uiTablero.getTablero();
+            tablero.getGrupos().clear();
+            List<GrupoDTO> grupos = modelo.getGruposEnTablero();
+            if (grupos != null) {
+                for (GrupoDTO grupoDTO : grupos) {
+                    Grupo grupoTablero = new Grupo(grupoDTO.getId());
+                    for (FichaDTO ficha : grupoDTO.getFichas()) {
+                        grupoTablero.agregar(ficha);
+                    }
+                    tablero.agregarGrupo(grupoTablero);
                 }
-                tablero.agregarGrupo(grupoTablero);
             }
-        }
-        Mano manoTablero = uiMano.getMano();
-        manoTablero.getFichas().clear();
-        List<FichaDTO> fichasMano = modelo.getFichasMano();
-        if (fichasMano != null) {
-            for (FichaDTO fichaDTO : fichasMano) {
-                manoTablero.agregar(fichaDTO);
+            Mano manoTablero = uiMano.getMano();
+            manoTablero.limpiar();
+            List<FichaDTO> fichasMano = modelo.getFichasMano();
+            System.out.println("UI UPDATE: Recibidas " + (fichasMano != null ? fichasMano.size() : 0) + " fichas del modelo.");
+            if (fichasMano != null) {
+                for (FichaDTO fichaDTO : fichasMano) {
+                    manoTablero.agregar(fichaDTO);
+                }
             }
-        }
 
-        uiTablero.actualizarGrupos();
-        uiTablero.revalidate();
-        uiTablero.repaint();
-        uiMano.actualizarFichas();
-        uiMano.revalidate();
-        uiMano.repaint();
+            uiTablero.actualizarGrupos();
+            uiTablero.revalidate();
+            uiTablero.repaint();
+            uiMano.actualizarFichas();
+            uiMano.revalidate();
+            uiMano.repaint();
+        });
     }
-
 }

@@ -27,19 +27,26 @@ public class UI_Ficha extends JLabel {
     private FichaDTO ficha;
     private ContenedorFichas contenedor;
     private static final int RADIO_BORDE = 15;
+    
+    private double escalaActual = 1.0;
 
     private boolean seleccionada = false;
 
     public UI_Ficha(FichaDTO ficha) {
-        this(ficha, null);
+        this(ficha, null, 1.0);
+    }
+    
+    public UI_Ficha(FichaDTO ficha, ContenedorFichas contenedor) {
+        this(ficha, contenedor, 1.0);
     }
 
-    public UI_Ficha(FichaDTO ficha, ContenedorFichas contenedor) {
+    public UI_Ficha(FichaDTO ficha, ContenedorFichas contenedor, double escalaActual) {
         this.ficha = ficha;
         this.contenedor = contenedor;
+        this.escalaActual = escalaActual;
         configurarComponente();
         habilitarDragAndDrop();
-        habilitarSeleccion();
+        habilitarSeleccion(); 
     }
 
     private void configurarComponente() {
@@ -56,9 +63,7 @@ public class UI_Ficha extends JLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (getParent() != null && !getParent().isEnabled()) {
-                    return;
-                }
+                // Solo permitimos seleccionar si la ficha está en la Mano del jugador
                 if (getParent() instanceof UI_Mano) {
                     toggleSeleccion();
                 }
@@ -73,7 +78,7 @@ public class UI_Ficha extends JLabel {
         if (getParent() instanceof UI_Mano) {
             ((UI_Mano) getParent()).notificarSeleccion(this);
         }
-        repaint();
+        repaint(); 
     }
 
     public void setSeleccionada(boolean seleccionada) {
@@ -94,23 +99,26 @@ public class UI_Ficha extends JLabel {
 
         int width = getWidth();
         int height = getHeight();
+        
+        int radioBordeEscalado = (int) (RADIO_BORDE * escalaActual);
+        float grosorBorde = (float) (2f * escalaActual);
 
         g2d.setColor(new Color(0, 0, 0, 30));
-        g2d.fill(new RoundRectangle2D.Float(3, 3, width - 3, height - 3, RADIO_BORDE, RADIO_BORDE));
+        g2d.fill(new RoundRectangle2D.Float(3, 3, width - 3, height - 3, radioBordeEscalado, radioBordeEscalado));
 
         g2d.setColor(obtenerColorFondo());
-        g2d.fill(new RoundRectangle2D.Float(0, 0, width - 3, height - 3, RADIO_BORDE, RADIO_BORDE));
+        g2d.fill(new RoundRectangle2D.Float(0, 0, width - 3, height - 3, radioBordeEscalado, radioBordeEscalado));
 
         // 2. DIBUJAR BORDE VERDE SI ESTÁ SELECCIONADA
         if (seleccionada) {
-            g2d.setColor(new Color(50, 205, 50));
-            g2d.setStroke(new BasicStroke(4f));
+            g2d.setColor(new Color(50, 205, 50)); 
+            g2d.setStroke(new BasicStroke((float) (4f * escalaActual))); 
         } else {
             g2d.setColor(obtenerColorBorde());
-            g2d.setStroke(new BasicStroke(2f));
+            g2d.setStroke(new BasicStroke(grosorBorde));
         }
 
-        g2d.draw(new RoundRectangle2D.Float(1, 1, width - 4, height - 4, RADIO_BORDE, RADIO_BORDE));
+        g2d.draw(new RoundRectangle2D.Float(1, 1, width - 4, height - 4, radioBordeEscalado, radioBordeEscalado));
 
         g2d.dispose();
 
@@ -125,12 +133,11 @@ public class UI_Ficha extends JLabel {
                 new DragGestureListener() {
             @Override
             public void dragGestureRecognized(DragGestureEvent dge) {
-                if (getParent() != null && !getParent().isEnabled()) {
-                    return;
-                }
 
                 FichaTransferable transferable;
 
+                // 3. LOGICA INTELIGENTE DE ARRASTRE
+                // Si estamos en la mano, preguntamos qué fichas mover
                 if (getParent() instanceof UI_Mano) {
                     UI_Mano mano = (UI_Mano) getParent();
                     List<FichaDTO> listaParaMover = mano.obtenerFichasParaMover(UI_Ficha.this);
@@ -157,13 +164,22 @@ public class UI_Ficha extends JLabel {
     }
 
     private void actualizarVisual() {
+        // Calculamos el tamaño de fuente escalado
+        int tamanoFuenteBase = ficha.isEsComodin() ? 36 : 32;
+        int tamanoFuenteEscalado = (int) (tamanoFuenteBase * escalaActual);
+        
+        // Aseguramos un mínimo para que no desaparezca
+        if (tamanoFuenteEscalado < 8) {
+            tamanoFuenteEscalado = 8;
+        }
+
         if (ficha.isEsComodin()) {
             setText("O");
-            setFont(new Font("Arial", Font.BOLD, 36));
+            setFont(new Font("Arial", Font.BOLD, tamanoFuenteEscalado)); 
             setForeground(new Color(139, 69, 19));
         } else {
             setText(String.valueOf(ficha.getNumero()));
-            setFont(new Font("Arial", Font.BOLD, 32));
+            setFont(new Font("Arial", Font.BOLD, tamanoFuenteEscalado));
             setForeground(obtenerColorTexto());
         }
         setToolTipText(ficha.toString());

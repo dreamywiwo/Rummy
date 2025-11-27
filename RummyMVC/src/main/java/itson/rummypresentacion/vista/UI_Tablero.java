@@ -58,8 +58,7 @@ public class UI_Tablero extends javax.swing.JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g.create();
 
         int centroX = getWidth() / 2;
         int centroY = getHeight() / 2;
@@ -67,6 +66,10 @@ public class UI_Tablero extends javax.swing.JPanel {
         g2d.translate(centroX, centroY);
         g2d.scale(escalaActual, escalaActual);
         g2d.translate(-centroX, -centroY);
+        
+        super.paintComponent(g);
+        
+        g2d.dispose();
     }
 
     private void habilitarDragAndDrop() {
@@ -216,10 +219,11 @@ public class UI_Tablero extends javax.swing.JPanel {
             return;
         }
 
-        int anchoFicha = 60;
-        int altoFicha = 80;
-        int margen = 10;
-        int espacio = 5;
+        int anchoFicha = (int)(60 * escalaActual);
+        int altoFicha = (int) (80 * escalaActual);
+        int margen = (int) (10 * escalaActual);
+        int espacio = (int) (5 * escalaActual);
+        
         int anchoGrupo = (fichas.size() * anchoFicha) + ((fichas.size() - 1) * espacio) + (margen * 2);
         int altoGrupo = altoFicha + (margen * 2) + 20;
 
@@ -429,10 +433,25 @@ public class UI_Tablero extends javax.swing.JPanel {
         removeAll();
         gruposPanels.clear();
 
+        int anchoFichaBase = (int)(60 * escalaActual);
+        int altoFichaBase = (int)(80 * escalaActual);
+        int margenBase = (int)(10 * escalaActual);
+        int espacioBase = (int)(5 * escalaActual);
+
         List<Grupo> grupos = tablero.getGrupos();
-        for (int i = 0; i < grupos.size(); i++) {
-            UI_Grupo grupoPanel = new UI_Grupo(grupos.get(i), i, this);
-            grupoPanel.setBounds(50, 50 + (i * 100), 200, 80);
+        for(int i = 0; i<grupos.size(); i++){
+            Grupo grupoModelo = grupos.get(i);
+            
+            int numFichas = grupoModelo.getFichas().size();
+            int anchoGrupo = (numFichas * anchoFichaBase) + ((numFichas - 1)* espacioBase) + (margenBase * 2);
+            int altoGrupo = altoFichaBase + (margenBase * 2) + 20;
+            
+            UI_Grupo grupoPanel = new UI_Grupo(grupoModelo, i, this);
+            
+            Point posicionOriginal = new Point(50,50 + (i*100));
+            
+            grupoPanel.setBounds(posicionOriginal.x, posicionOriginal.y, anchoGrupo, altoGrupo);
+            
             gruposPanels.add(grupoPanel);
             add(grupoPanel);
         }

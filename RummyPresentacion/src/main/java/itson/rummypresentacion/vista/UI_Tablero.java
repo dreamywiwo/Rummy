@@ -100,6 +100,7 @@ public class UI_Tablero extends ComponenteBase {
         }
     }
 
+
     /**
      * Método para que los grupos hijos notifiquen eventos
      */

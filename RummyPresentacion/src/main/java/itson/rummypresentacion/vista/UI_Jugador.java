@@ -175,22 +175,17 @@ public class UI_Jugador extends ComponenteBase {
     @Override
     public void actualizar(IModelo modelo) {
         try {
-            // Actualizar cantidad de fichas
             if (esJugadorActual) {
-                // Para el jugador actual, obtener su mano real
-                List<FichaDTO> mano = modelo.getManoJugadorActual();
+                List<FichaDTO> mano = modelo.getManoDe(jugadorId); 
                 this.cantidadFichas = mano != null ? mano.size() : 0;
             } else {
-                // Para el oponente, mostrar cantidad mockeada o real si está disponible
                 this.cantidadFichas = obtenerCantidadFichasOponente(modelo);
             }
-            
-            // Actualizar estado del turno
+
             this.esTurnoActual = modelo.esTurnoDe(jugadorId);
-            
-            // Actualizar UI
+
             actualizarVista();
-            
+
         } catch (Exception e) {
             System.err.println("Error actualizando UI_Jugador: " + e.getMessage());
             e.printStackTrace();

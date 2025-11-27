@@ -150,23 +150,26 @@ public class UI_Grupo extends JPanel {
 
     public void actualizarFichas() {
         removeAll();
-        int x = 10;
-        int y = 20;
-        int anchoFicha = 60;
-        int altoFicha = 80;
-        int espacio = 5;
+        
+        double escala = (tableroPanel != null) ? tableroPanel.getEscalaActual(): 1.0;
+        
+        int x = (int) (10 * escala);
+        int y = (int) (20 * escala);
+        int anchoFicha = (int) (60 * escala);
+        int altoFicha = (int) (80 * escala);
+        int espacio = (int) (5 * escala);
 
         grupo.ordenar();
 
         for (FichaDTO ficha : grupo.getFichas()) {
-            UI_Ficha fichaComp = new UI_Ficha(ficha, grupo);
+            UI_Ficha fichaComp = new UI_Ficha(ficha, grupo, escala);
             fichaComp.setBounds(x, y, anchoFicha, altoFicha);
             add(fichaComp);
             x += anchoFicha + espacio;
         }
 
-        int nuevoAncho = x + 10;
-        int nuevoAlto = altoFicha + 40;
+        int nuevoAncho = x + (int) (10 * escala);
+        int nuevoAlto = altoFicha + (int) (40 * escala);
         setPreferredSize(new Dimension(nuevoAncho, nuevoAlto));
         setSize(nuevoAncho, nuevoAlto);
 

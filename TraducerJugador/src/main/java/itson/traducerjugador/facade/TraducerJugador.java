@@ -13,7 +13,7 @@ import itson.traducerjugador.mappers.EventMapper;
  *
  * @author Dana Chavez
  */
-public class TraducerJugador implements ITraducerJugador, IReceptorComponente {
+public class TraducerJugador implements IReceptorComponente {
 
     private final ISerializer serializer;
     private final EventMapper mapper;
@@ -28,7 +28,6 @@ public class TraducerJugador implements ITraducerJugador, IReceptorComponente {
         onMessage(payload);
     }
 
-    @Override
     public void onMessage(String payload) {
         try {
             EventBase base = serializer.deserialize(payload, EventBase.class);

@@ -29,6 +29,7 @@ import itson.traducerdominio.facade.TraducerDominio;
 import itson.traducerdominio.mappers.EventMapper;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -67,6 +68,19 @@ public class broker {
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
 
         List<Ficha> fichasJuego = generarFichasRummy();
+        List<String> idGanador = new ArrayList<>();
+        idGanador.add("f_r10_0");
+        idGanador.add("f_r11_0");
+        idGanador.add("f_r12_0");
+        Iterator<Ficha> it = fichasJuego.iterator();
+        while (it.hasNext()) {
+            Ficha next = it.next();
+            if (idGanador.contains(next.getId())) {
+                j1.getMano().agregarFicha(next);
+                it.remove();
+                System.out.println(next.getId());
+            }
+        }
         Sopa sopa = new Sopa(fichasJuego);
         Tablero tablero = new Tablero();
         Turno turno = new Turno(listaJugadores, 0);

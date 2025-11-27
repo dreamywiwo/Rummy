@@ -15,7 +15,12 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
@@ -28,6 +33,8 @@ public class UI_Grupo extends JPanel {
     private Grupo grupo;
     private int indiceGrupo;
     private UI_Tablero tableroPanel;
+    private List<UI_Ficha> fichasSeleccionadas = new ArrayList<>();
+    private Set<String> idsFichasSeleccionadas = new HashSet<>();
 
     public UI_Grupo(Grupo grupo, int indice, UI_Tablero tableroPanel) {
         this.grupo = grupo;
@@ -103,10 +110,10 @@ public class UI_Grupo extends JPanel {
                     if (tableroPanel != null) {
                         UI_TurnoJugador ventana = tableroPanel.getVentanaPrincipal();
                         if (ventana != null) {
-                            // Notificar actualización del origen (Mano u otro Grupo)
-                            if (origen != null && origenId != null) {
-                                ventana.notificarGrupoActualizado(origenId, origen.getFichas());
-                            }
+//                            // Notificar actualización del origen (Mano u otro Grupo)
+//                            if (origen != null && origenId != null) {
+//                                ventana.notificarGrupoActualizado(origenId, origen.getFichas());
+//                            }
                             ventana.notificarGrupoActualizado(grupo.getId(), grupo.getFichas());
                         }
                         tableroPanel.repaint();
@@ -139,6 +146,34 @@ public class UI_Grupo extends JPanel {
         });
     }
 
+    private void configurarFichaParaSeleccion(UI_Ficha ficha) {
+        ficha.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!UI_Grupo.this.isEnabled()) {
+                    System.out.println("DEBUG - Grupo deshabilitado. Ignorando clic de selección.");
+                    return;
+                }
+
+                ficha.toggleSeleccion();
+
+                if (ficha.isSeleccionada()) {
+                    fichasSeleccionadas.add(ficha);
+                    idsFichasSeleccionadas.add(ficha.getFicha().getId());
+                } else {
+                    fichasSeleccionadas.remove(ficha);
+                    idsFichasSeleccionadas.remove(ficha.getFicha().getId());
+                }
+                if (tableroPanel != null) {
+                    List<String> fichasIds = new ArrayList<>(idsFichasSeleccionadas);
+                    UI_TurnoJugador ventana = tableroPanel.getVentanaPrincipal();
+                } else {
+                    System.err.println("ERROR: UI_Grupo no tiene referencia al padre (UI_Tablero)");
+                }
+            }
+        });
+    }
+
     private void limpiarSeleccionMano() {
         if (tableroPanel != null && tableroPanel.getVentanaPrincipal() != null) {
             UI_Mano uiMano = tableroPanel.getVentanaPrincipal().getUIMano();
@@ -160,6 +195,7 @@ public class UI_Grupo extends JPanel {
 
         for (FichaDTO ficha : grupo.getFichas()) {
             UI_Ficha fichaComp = new UI_Ficha(ficha, grupo);
+            configurarFichaParaSeleccion(fichaComp);
             fichaComp.setBounds(x, y, anchoFicha, altoFicha);
             add(fichaComp);
             x += anchoFicha + espacio;

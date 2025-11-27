@@ -108,6 +108,7 @@ public class Dominio implements IDominio {
         tablero.agregarGrupo(grupoNuevo);
 
         producer.actualizarTablero(TableroMapper.toDTO(tablero));
+        producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
     }
 
     @Override
@@ -185,13 +186,14 @@ public class Dominio implements IDominio {
         }
 
         producer.actualizarTablero(TableroMapper.toDTO(tablero));
+        producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
     }
 
     @Override
     public void tomarFicha() {
         Jugador jugador = turno.getJugadorActual();
         String jugadorId = jugador.getId();
-        
+
         try {
             if (!turno.esTurnoDelJugador(jugadorId)) {
                 producer.mostrarError("No es tu turno de juego.");
@@ -243,7 +245,7 @@ public class Dominio implements IDominio {
     public void terminarTurno() {
         Jugador jugador = turno.getJugadorActual();
         String jugadorId = jugador.getId();
-        
+
         try {
             if (!turno.esTurnoDelJugador(jugadorId)) {
                 producer.mostrarError("No puedes terminar el turno si no es el tuyo.");

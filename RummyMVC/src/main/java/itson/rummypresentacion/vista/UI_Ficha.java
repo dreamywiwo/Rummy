@@ -39,7 +39,7 @@ public class UI_Ficha extends JLabel {
         this.contenedor = contenedor;
         configurarComponente();
         habilitarDragAndDrop();
-        habilitarSeleccion(); 
+        habilitarSeleccion();
     }
 
     private void configurarComponente() {
@@ -56,7 +56,9 @@ public class UI_Ficha extends JLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Solo permitimos seleccionar si la ficha está en la Mano del jugador
+                if (getParent() != null && !getParent().isEnabled()) {
+                    return;
+                }
                 if (getParent() instanceof UI_Mano) {
                     toggleSeleccion();
                 }
@@ -71,7 +73,7 @@ public class UI_Ficha extends JLabel {
         if (getParent() instanceof UI_Mano) {
             ((UI_Mano) getParent()).notificarSeleccion(this);
         }
-        repaint(); 
+        repaint();
     }
 
     public void setSeleccionada(boolean seleccionada) {
@@ -101,8 +103,8 @@ public class UI_Ficha extends JLabel {
 
         // 2. DIBUJAR BORDE VERDE SI ESTÁ SELECCIONADA
         if (seleccionada) {
-            g2d.setColor(new Color(50, 205, 50)); 
-            g2d.setStroke(new BasicStroke(4f)); 
+            g2d.setColor(new Color(50, 205, 50));
+            g2d.setStroke(new BasicStroke(4f));
         } else {
             g2d.setColor(obtenerColorBorde());
             g2d.setStroke(new BasicStroke(2f));
@@ -123,11 +125,12 @@ public class UI_Ficha extends JLabel {
                 new DragGestureListener() {
             @Override
             public void dragGestureRecognized(DragGestureEvent dge) {
+                if (getParent() != null && !getParent().isEnabled()) {
+                    return;
+                }
 
                 FichaTransferable transferable;
 
-                // 3. LOGICA INTELIGENTE DE ARRASTRE
-                // Si estamos en la mano, preguntamos qué fichas mover
                 if (getParent() instanceof UI_Mano) {
                     UI_Mano mano = (UI_Mano) getParent();
                     List<FichaDTO> listaParaMover = mano.obtenerFichasParaMover(UI_Ficha.this);

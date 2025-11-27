@@ -21,6 +21,7 @@ public interface IModelo extends ISubject {
     // Estado del jugador actual
     JugadorDTO getJugadorActual();
     List<FichaDTO> getFichasMano();
+    boolean esTurnoDe(String jugadorID);
     
     // Estado de otros jugadores
     List<JugadorDTO> getOtrosJugadores();

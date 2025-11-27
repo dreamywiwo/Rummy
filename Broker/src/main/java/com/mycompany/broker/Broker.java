@@ -9,6 +9,7 @@ import com.mycompany.conexioninterfaces.IReceptorComponente;
 import interfaces.IBroker;
 import itson.directorio.implementacion.ConnectionEndpoint;
 import itson.directorio.implementacion.Directorio;
+import itson.directorio.interfaces.IDirectorio;
 import itson.rummyeventos.base.EventBase;
 import itson.serializer.interfaces.ISerializer;
 import java.util.HashMap;
@@ -21,14 +22,14 @@ import java.util.Map;
  */
 public class Broker implements IReceptorComponente, IBroker {
 
-    private final Directorio directorio;
+    private final IDirectorio directorio;
     private final IDispatcher dispatcher;
     private final ISerializer serializer;
     private final SubscriptionRegistry registry;
 
     private final Map<String, List<String>> rutas = new HashMap<>();
 
-    public Broker(Directorio directorio, IDispatcher dispatcher, ISerializer serializer, SubscriptionRegistry registry) {
+    public Broker(IDirectorio directorio, IDispatcher dispatcher, ISerializer serializer, SubscriptionRegistry registry) {
         this.directorio = directorio;
         this.dispatcher = dispatcher;
         this.serializer = serializer;

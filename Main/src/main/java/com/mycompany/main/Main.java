@@ -44,7 +44,7 @@ public class Main {
         JugarTurnoEmitter emitter = new JugarTurnoEmitter(jsonSerializer, dispatcher, brokerIp, brokerPort);
         IProducerJugador producer = new ProducerJugador(emitter, miId);
         Modelo modelo = new Modelo(producer);
-        ControladorTurno controlador = new ControladorTurno(modelo, producer);
+        ControladorTurno controlador = new ControladorTurno(modelo, producer, miId);
 
         EventMapper eventMapper = new EventMapper(jsonSerializer);
         eventMapper.setListener(modelo);

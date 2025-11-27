@@ -172,4 +172,12 @@ public class Modelo implements IModelo, ISubject, IListener {
         notificarObservers();
     }
 
+    @Override
+    public boolean esTurnoDe(String jugadorID) {
+        if (turnoActual != null && turnoActual.equals(jugadorID)) {
+            return true;
+        }
+        return false;
+    }
+
 }

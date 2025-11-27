@@ -11,39 +11,45 @@ import java.util.List;
 
 /**
  * Controlador del turno del jugador
+ *
  * @author Dana Chavez
  */
 public class ControladorTurno {
-    
-    private Modelo modelo;
 
-    public ControladorTurno(Modelo modelo, IProducerJugador producerJugador) {
+    private Modelo modelo;
+    private final String jugadorID;
+
+    public ControladorTurno(Modelo modelo, IProducerJugador producerJugador, String jugadorID) {
         this.modelo = modelo;
+        this.jugadorID = jugadorID;
     }
-     
+
     /**
      * Maneja la creación de un nuevo grupo
+     *
      * @param fichas Lista de fichas del nuevo grupo
      */
-    public void crearGrupo(List<FichaDTO> fichas) {       
+    public void crearGrupo(List<FichaDTO> fichas) {
         modelo.crearGrupo(fichas);
     }
-    
+
     /**
      * Maneja la actualización de un grupo existente
+     *
      * @param idGrupo ID del grupo actualizado
      * @param fichas Lista actualizada de fichas
      */
     public void actualizarGrupo(String idGrupo, List<FichaDTO> fichas) {
-        System.out.println("CONTROLADOR: Actualizar grupo " + idGrupo + " con " + fichas.size() + " fichas");      
+        System.out.println("CONTROLADOR: Actualizar grupo " + idGrupo + " con " + fichas.size() + " fichas");
         for (FichaDTO ficha : fichas) {
             System.out.println("   - " + ficha.getId());
         }
         modelo.actualizarGrupo(idGrupo, fichas);
     }
-    
+
     /**
      * Maneja el movimiento de una ficha
+     *
      * @param ficha Ficha movida
      * @param origen Contenedor de origen
      * @param destino Contenedor de destino
@@ -52,21 +58,21 @@ public class ControladorTurno {
         // TODO: Registrar el movimiento
         // TODO: Validar si el movimiento es legal
     }
-    
+
     /**
      * Maneja el intento de terminar el turno
      */
     public void terminarTurno() {
         modelo.terminarTurno();
     }
- 
+
     /**
      * Maneja la acción de tomar una ficha del pozo
      */
     public void tomarFicha() {
         modelo.tomarFicha();
     }
-    
+
     /**
      * Maneja el abandono de la partida
      */
@@ -74,5 +80,17 @@ public class ControladorTurno {
         // TODO: Confirmar abandono
         // TODO: Notificar a otros jugadores
         // TODO: Cerrar ventana o volver al menú
+    }
+
+    public String getJugadorLocalId() {
+        return jugadorID;
+    }
+
+    public String getJugadorActualId() {
+        try {
+            return modelo.getTurnoActual();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

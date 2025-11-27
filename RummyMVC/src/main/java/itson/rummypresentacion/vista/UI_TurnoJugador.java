@@ -24,6 +24,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     private ControladorTurno controlador;
     private Mano mano;
     private Tablero tableroModelo;
+    private String jugadorID;
+    private UI_Jugador uiJugadorActual;
+    private UI_Jugador uiJugadorOponente;
 
     /**
      * Creates new form UI_TurnoJugador
@@ -42,7 +45,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         uiMano = new UI_Mano(uiTablero.getTablero().getManoJugador(), uiTablero);
         jPanelContenedorMano.setLayout(new BorderLayout());
         jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
-
+        jugadorID = controlador.getJugadorLocalId();
         jPanelContenedorJugador.setOpaque(false);
         jPanelContenedorJugador1.setOpaque(false);
         jPanelContenedorJugador2.setOpaque(false);
@@ -126,6 +129,29 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
      */
     public ControladorTurno getControlador() {
         return controlador;
+    }
+
+    private void actualizarEstadoBotones(IModelo modelo) {
+        boolean esMiTurno = modelo.esTurnoDe(jugadorID);
+
+        jButtonTerminarTurno.setEnabled(esMiTurno);
+        jButtonTomarFicha.setEnabled(esMiTurno);
+
+        if (uiMano != null) {
+            uiMano.setEnabled(esMiTurno);
+        }
+        if (uiTablero != null) {
+            uiTablero.setEnabled(esMiTurno);
+        }
+
+        String quienJuega = modelo.getTurnoActual();
+        if (esMiTurno) {
+            this.setTitle("Rummy - ¡ES TU TURNO! (" + jugadorID + ")");
+            jButtonTerminarTurno.setText("TERMINAR TURNO");
+        } else {
+            this.setTitle("Rummy - Esperando a " + (quienJuega != null ? quienJuega : "oponente") + "...");
+            jButtonTerminarTurno.setText("ESPERANDO...");
+        }
     }
 
     /**
@@ -356,7 +382,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
                     manoTablero.agregar(fichaDTO);
                 }
             }
-
+            actualizarEstadoBotones(modelo);
             uiTablero.actualizarGrupos();
             uiTablero.revalidate();
             uiTablero.repaint();

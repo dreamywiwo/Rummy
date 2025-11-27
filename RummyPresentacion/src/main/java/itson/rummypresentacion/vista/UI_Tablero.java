@@ -64,62 +64,42 @@ public class UI_Tablero extends ComponenteBase {
      * Actualiza los grupos del tablero desde el modelo
      */
     private void actualizarGruposTablero(IModelo modelo) {
-        // 1. Limpieza de componentes anteriores
         for (UI_Grupo grupo : gruposTablero) {
             removerComponente(grupo);
             remove(grupo);
         }
         gruposTablero.clear();
-
         List<GrupoDTO> gruposDTO = modelo.getGruposTablero();
         if (gruposDTO != null) {
-
-            int margen = 10;
-            int anchoMaximoGrupo = (int) (getWidth() / 2.5); 
-            int altoGrupo = (int) (getHeight() / 5.5); 
-            int espacioEntreGrupos = margen * 3; // Espacio horizontal entre grupos
-
-            int currentX = margen;
-            int currentY = margen;
-
-            int limiteEnvoltura = getWidth() - anchoMaximoGrupo - margen;
+            int xPos = 10;
+            int yPos = 10;
 
             for (int i = 0; i < gruposDTO.size(); i++) {
                 GrupoDTO grupoDTO = gruposDTO.get(i);
                 UI_Grupo grupoUI = new UI_Grupo("grupotablero" + i);
-
-                if (currentX + anchoMaximoGrupo + margen > limiteEnvoltura) {
-                    currentX = margen;
-                    currentY += altoGrupo + margen; 
-
-                    if (currentY + altoGrupo + margen > getHeight()) {
-                        System.err.println("Advertencia: Se excedió el espacio vertical en el tablero.");
-                        break;
-                    }
-                }
-
-                grupoUI.setBounds(currentX, currentY, anchoMaximoGrupo, altoGrupo);
-
                 grupoUI.setPadre(this);
+                grupoUI.setBounds(xPos, yPos, 400, 100);
                 grupoUI.setEsGrupoDeTablero(true);
-
                 if (grupoDTO.getFichas() != null) {
                     for (FichaDTO f : grupoDTO.getFichas()) {
                         UI_Ficha ui = new UI_Ficha(f);
                         grupoUI.agregarFicha(ui);
                     }
                 }
-
                 add(grupoUI);
                 agregarComponente(grupoUI);
                 gruposTablero.add(grupoUI);
-
-                currentX += anchoMaximoGrupo + espacioEntreGrupos;
+                xPos += 420;
+                if (xPos > 800) {
+                    xPos = 10;
+                    yPos += 120;
+                }
             }
             revalidate();
             repaint();
         }
     }
+
 
     /**
      * Método para que los grupos hijos notifiquen eventos

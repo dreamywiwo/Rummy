@@ -15,11 +15,11 @@
         <module>../DTOs</module>
         <module>../Eventos</module>
         <module>../JsonSerializer</module>
-        <module>../Main</module>
         <module>../Dominio</module>
         <module>../conexion</module>
         <module>../Broker</module>
         <module>../ConexionInterfaces</module>
+        <module>../Launcher</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

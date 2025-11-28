@@ -1,7 +1,7 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
-package com.mycompany.main;
+package itson.rummy.launcher;
 
 import ensambladores.EnsambladorCliente;
 import ensambladores.EnsambladorDominio;
@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Dana Chavez
  */
-public class Main {
+public class Exe {
 
     public static void main(String[] args) {
         String brokerIp = "127.0.0.1";

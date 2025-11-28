@@ -46,4 +46,9 @@ public class ProducerDominio implements IProducerDominio {
         estadoJuegoEmitter.emitirErrorEvent(mensajeError);
     }
 
+    @Override
+    public void juegoTerminado(String jugadorId) {
+        estadoJuegoEmitter.emitirJuegoTerminadoEvent(jugadorId);
+    }
+
 }

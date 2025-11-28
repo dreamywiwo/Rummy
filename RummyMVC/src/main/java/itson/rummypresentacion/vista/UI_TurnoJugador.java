@@ -361,6 +361,25 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
 
         SwingUtilities.invokeLater(() -> {
 
+            if (modelo.juegoTerminado()) {
+                String ganador = modelo.getJugadorGanadorId();
+
+                jButtonTerminarTurno.setEnabled(false);
+                jButtonTomarFicha.setEnabled(false);
+
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "¡El juego ha terminado!\nGanador: " + ganador,
+                        "Juego Terminado",
+                        javax.swing.JOptionPane.INFORMATION_MESSAGE
+                );
+
+                uiMano.setEnabled(false);
+                uiTablero.setEnabled(false);
+
+                return; 
+            }
+
             Tablero tablero = uiTablero.getTablero();
             tablero.getGrupos().clear();
             List<GrupoDTO> grupos = modelo.getGruposEnTablero();

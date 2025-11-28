@@ -8,6 +8,7 @@ import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.rummydtos.FichaDTO;
 import itson.rummydtos.TableroDTO;
 import itson.rummyeventos.actualizaciones.ErrorEvent;
+import itson.rummyeventos.actualizaciones.JuegoTerminadoEvent;
 import itson.rummyeventos.actualizaciones.ManoActualizadaEvent;
 import itson.rummyeventos.actualizaciones.SopaActualizadaEvent;
 import itson.rummyeventos.actualizaciones.TableroActualizadoEvent;
@@ -63,4 +64,9 @@ public class EstadoJuegoEmitter {
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
+    public void emitirJuegoTerminadoEvent(String jugadorId) {
+        JuegoTerminadoEvent event = new JuegoTerminadoEvent(jugadorId);
+        String json = jsonSerializer.serialize(event);
+        dispatcher.enviar(json, brokerPort, brokerIp);
+    }
 }

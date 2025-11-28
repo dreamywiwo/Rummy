@@ -23,4 +23,7 @@ public interface IProducerDominio {
     public abstract void actualizarTurno(String nuevoTurno);
     
     public abstract void mostrarError(String mensajeError);
+
+    public void juegoTerminado(String jugadorId);
+
 }

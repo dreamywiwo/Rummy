@@ -6,6 +6,7 @@ package itson.traducerjugador.mappers;
 
 import itson.rummydtos.TableroDTO;
 import itson.rummyeventos.actualizaciones.ErrorEvent;
+import itson.rummyeventos.actualizaciones.JuegoTerminadoEvent;
 import itson.rummyeventos.actualizaciones.ManoActualizadaEvent;
 import itson.rummyeventos.actualizaciones.SopaActualizadaEvent;
 import itson.rummyeventos.actualizaciones.TableroActualizadoEvent;
@@ -36,6 +37,7 @@ public class EventMapper {
         register("sopa.actualizada", this::handleSopaActualizada);
         register("turno.terminado", this::handleTurnoTerminado);
         register("mensaje.error", this::handleError);
+        register("juego.terminado", this::handleJuegoTerminado);
     }
 
     public void setListener(IListener listener) {
@@ -97,6 +99,8 @@ public class EventMapper {
             TurnoTerminadoEvent event = serializer.deserialize(rawPayload, TurnoTerminadoEvent.class);
             if (listener != null) {
                 listener.terminoTurno(event);
+                
+                //TODO No podemos enviar el evento al mvc
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -106,6 +110,17 @@ public class EventMapper {
     private void handleError(String rawPayload, ISerializer serializer) {
         try {
             ErrorEvent event = serializer.deserialize(rawPayload, ErrorEvent.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleJuegoTerminado(String rawPayload, ISerializer serializer) {
+        try {
+            JuegoTerminadoEvent event = serializer.deserialize(rawPayload, JuegoTerminadoEvent.class);
+            if (listener != null) {
+                listener.marcarJuegoTerminado(event.getJugadorGanadorId());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

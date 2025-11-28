@@ -35,6 +35,9 @@ public class Modelo implements IModelo, ISubject, IListener {
     private String ultimaAccion;
     private boolean accionValida;
     private String mensajeError;
+    private boolean juegoTerminado = false;
+    private String jugadorGanadorId = null;
+
 
     //tendra al producer que se llamara para crear cada evento
     public Modelo(IProducerJugador producer) {
@@ -114,6 +117,17 @@ public class Modelo implements IModelo, ISubject, IListener {
     public String getMensajeError() {
         return mensajeError;
     }
+    
+    
+    @Override
+    public boolean juegoTerminado() {
+        return juegoTerminado;
+    }
+
+    @Override
+    public String getJugadorGanadorId() {
+        return jugadorGanadorId;
+    }
 
     // OBSERVER
     @Override
@@ -178,6 +192,14 @@ public class Modelo implements IModelo, ISubject, IListener {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void marcarJuegoTerminado(String jugadorGanadorId) {
+        this.juegoTerminado = true;
+        this.jugadorGanadorId = jugadorGanadorId;
+
+        notificarObservers();
     }
 
 }

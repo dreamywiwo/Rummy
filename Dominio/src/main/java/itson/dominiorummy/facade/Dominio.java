@@ -218,7 +218,6 @@ public class Dominio implements IDominio {
         producer.actualizarTablero(tableroActualizado);
 
         producer.actualizarTurno(jugadorId);
-
     }
 
     @Override
@@ -279,6 +278,11 @@ public class Dominio implements IDominio {
             }
 
             tablero.marcarFichasConfirmadas(jugadorId);
+
+            if (jugadorActual.getMano().getFichas().isEmpty()) {
+                producer.juegoTerminado(jugadorId); 
+                return;
+            }
 
             Jugador siguienteJugador = turno.avanzarTurno();
             String siguienteJugadorId = siguienteJugador.getId();

@@ -20,4 +20,6 @@ public interface IListener {
     public void recibirMano(List<FichaDTO> mano);
     public void recibirSopa(int cantidad);
     public void recibirError(String mensaje);
+
+    public void marcarJuegoTerminado(String jugadorGanadorId);
 }

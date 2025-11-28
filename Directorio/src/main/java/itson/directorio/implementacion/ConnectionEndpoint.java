@@ -10,6 +10,7 @@ import java.util.Objects;
  * Valor inmutable que representa ip + puerto de un cliente.
  */
 public final class ConnectionEndpoint {
+
     private final String clientId;
     private final String ip;
     private final int port;
@@ -17,22 +18,36 @@ public final class ConnectionEndpoint {
     public ConnectionEndpoint(String clientId, String ip, int port) {
         this.clientId = Objects.requireNonNull(clientId, "clientId");
         this.ip = Objects.requireNonNull(ip, "ip");
-        if (port <= 0 || port > 65535) throw new IllegalArgumentException("port out of range");
+        if (port <= 0 || port > 65535) {
+            throw new IllegalArgumentException("port out of range");
+        }
         this.port = port;
     }
 
-    public String getClientId() { return clientId; }
-    public String getIp() { return ip; }
-    public int getPort() { return port; }
+    public String getClientId() {
+        return clientId;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ConnectionEndpoint)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ConnectionEndpoint)) {
+            return false;
+        }
         ConnectionEndpoint that = (ConnectionEndpoint) o;
-        return port == that.port &&
-               clientId.equals(that.clientId) &&
-               ip.equals(that.ip);
+        return port == that.port
+                && clientId.equals(that.clientId)
+                && ip.equals(that.ip);
     }
 
     @Override
@@ -42,10 +57,10 @@ public final class ConnectionEndpoint {
 
     @Override
     public String toString() {
-        return "ConnectionEndpoint{" +
-               "clientId='" + clientId + '\'' +
-               ", ip='" + ip + '\'' +
-               ", port=" + port +
-               '}';
+        return "ConnectionEndpoint{"
+                + "clientId='" + clientId + '\''
+                + ", ip='" + ip + '\''
+                + ", port=" + port
+                + '}';
     }
 }

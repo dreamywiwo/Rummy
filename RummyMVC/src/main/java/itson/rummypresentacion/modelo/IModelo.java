@@ -36,4 +36,8 @@ public interface IModelo extends ISubject {
     String getUltimaAccion();
     boolean isAccionValida();
     String getMensajeError();   
+
+    public boolean juegoTerminado();
+
+    public String getJugadorGanadorId();
 }

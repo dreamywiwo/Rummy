@@ -1,8 +1,8 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package main.server;
+package ensambladores;
 
 import ClaseDispatcher.ColaDispatcher;
 import ClaseDispatcher.Dispatcher;
@@ -10,57 +10,32 @@ import ClaseDispatcher.SocketOut;
 import claseReceptor.ColaReceptor;
 import claseReceptor.Receptor;
 import claseReceptor.SocketIN;
-import com.mycompany.broker.Broker;
-import com.mycompany.broker.SubscriptionRegistry;
 import com.mycompany.conexioninterfaces.IDispatcher;
-import itson.directorio.implementacion.Directorio;
 import itson.dominiorummy.entidades.Ficha;
 import itson.dominiorummy.entidades.Jugador;
 import itson.dominiorummy.entidades.Sopa;
+import itson.dominiorummy.entidades.Tablero;
 import itson.dominiorummy.entidades.Turno;
 import itson.dominiorummy.facade.Dominio;
 import itson.dominiorummy.facade.IDominio;
 import itson.producerdominio.emitters.EstadoJuegoEmitter;
 import itson.producerdominio.facade.IProducerDominio;
 import itson.producerdominio.facade.ProducerDominio;
-import itson.dominiorummy.entidades.Tablero;
 import itson.serializer.implementacion.JsonSerializer;
 import itson.traducerdominio.facade.TraducerDominio;
 import itson.traducerdominio.mappers.EventMapper;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 /**
  *
  * @author jrasc
  */
-public class broker {
+public class EnsambladorDominio {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        int puertoBroker = 9999;
-        String brokerIp = "192.168.100.4";
-        String ipJ1 = "192.168.100.95";
-        String ipJ2 = "192.168.100.4";
-
-        Jugador j1 = new Jugador("Jugador1", "Daniel");
-        Jugador j2 = new Jugador("Jugador2", "Gael");
-
-        List<Jugador> listaJugadores = new ArrayList<>();
-        listaJugadores.add(j1);
-        listaJugadores.add(j2);
+    public void iniciarJuego(String brokerIp, int brokerPort, int puertoEscuchaJuego, List<Jugador> jugadores) {
 
         JsonSerializer serializer = new JsonSerializer();
-        Directorio directorio = new Directorio();
-        SubscriptionRegistry registry = new SubscriptionRegistry();
-        directorio.registerClient("Jugador1", ipJ1, 9001);
-        registry.addSuscriptor("actualizaciones.estado", "Jugador1");
-        directorio.registerClient("Jugador2", ipJ2, 9002);
-        registry.addSuscriptor("actualizaciones.estado", "Jugador2");
-
         SocketOut socketOut = new SocketOut();
         socketOut.start();
         ColaDispatcher colaDispatcher = new ColaDispatcher();
@@ -68,44 +43,33 @@ public class broker {
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
 
         List<Ficha> fichasJuego = generarFichasRummy();
-        List<String> idGanador = new ArrayList<>();
-        idGanador.add("f_r10_0");
-        idGanador.add("f_r11_0");
-        idGanador.add("f_r12_0");
-        Iterator<Ficha> it = fichasJuego.iterator();
-        while (it.hasNext()) {
-            Ficha next = it.next();
-            if (idGanador.contains(next.getId())) {
-                j1.getMano().agregarFicha(next);
-                it.remove();
-                System.out.println(next.getId());
-            }
-        }
         Sopa sopa = new Sopa(fichasJuego);
         Tablero tablero = new Tablero();
-        Turno turno = new Turno(listaJugadores, 0);
+        Turno turno = new Turno(jugadores, 0);
 
-        EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(serializer, dispatcher, brokerIp, puertoBroker);
+        EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(serializer, dispatcher, brokerIp, brokerPort);
         IProducerDominio producerDominio = new ProducerDominio(estadoEmitter);
 
         IDominio dominio = new Dominio(tablero, producerDominio, turno, sopa, fichasJuego);
-        dominio.agregarJugador(j1);
-        dominio.agregarJugador(j2);
+
+        for (Jugador j : jugadores) {
+            dominio.agregarJugador(j);
+            System.out.println("Dominio: Jugador agregado - " + j.getNombre());
+        }
 
         EventMapper mapperDominio = new EventMapper(serializer, dominio);
         TraducerDominio traducerDominio = new TraducerDominio(serializer, mapperDominio);
 
-        Broker brokerLogic = new Broker(directorio, dispatcher, serializer, registry);
-
         ColaReceptor colaReceptor = new ColaReceptor();
         colaReceptor.attach(new Receptor(traducerDominio));
-        colaReceptor.attach(new Receptor(brokerLogic));
 
-        SocketIN socketIN = new SocketIN(puertoBroker, colaReceptor);
+        SocketIN socketIN = new SocketIN(puertoEscuchaJuego, colaReceptor);
         socketIN.start();
+
+        System.out.println("EnsambladorDominio: Lógica de juego lista en puerto " + puertoEscuchaJuego);
     }
 
-    private static List<Ficha> generarFichasRummy() {
+    private List<Ficha> generarFichasRummy() {
         List<Ficha> fichas = new ArrayList<>();
         String[] colores = {"rojo", "azul", "verde", "amarillo"};
 
@@ -121,5 +85,4 @@ public class broker {
         fichas.add(new Ficha("joker_2", 0, "comodin", true));
         return fichas;
     }
-
 }

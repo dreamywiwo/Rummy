@@ -1,2 +1,4 @@
+ensambladores\EnsambladorDominio.class
+ensambladores\EnsambladorCliente.class
 com\mycompany\main\Main.class
-main\server\broker.class
+ensambladores\EnsambladorServidor.class

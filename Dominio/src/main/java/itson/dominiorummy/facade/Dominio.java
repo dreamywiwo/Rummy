@@ -56,59 +56,61 @@ public class Dominio implements IDominio {
 
         List<FichaPlaced> fichasAInsertar = new ArrayList<>();
 
-        // 1. Procesar cada fichaDTO:
+        List<String> idsSacadosDeMano = new ArrayList<>();
+
         for (FichaDTO dto : fichasDTO) {
             String fichaId = dto.getId();
 
-            // A) Buscar en la mano
             if (mano.tieneFicha(fichaId)) {
                 Ficha base = mano.quitarFicha(fichaId);
+                idsSacadosDeMano.add(fichaId);
+
                 FichaPlaced fp = new FichaPlaced(base, jugador.getId(), turnoActual);
                 fichasAInsertar.add(fp);
                 continue;
             }
 
-            // B) Buscar en todos los grupos del tablero
             FichaPlaced fpDesdeTablero = tablero.buscarFichaPlacedGlobal(fichaId);
 
             if (fpDesdeTablero != null) {
-                tablero.removerFichaGlobal(fichaId); // quitar de donde estaba
+                tablero.removerFichaGlobal(fichaId);
                 fichasAInsertar.add(fpDesdeTablero);
                 continue;
             }
 
-            // C) No viene de ningún lado
             producer.mostrarError("La ficha " + fichaId + " no está disponible.");
+            rollbackCreacion(fichasAInsertar, idsSacadosDeMano, jugador);
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
             return;
         }
 
-        // 2. Crear grupo usando la factory del tablero
-        //    Este método determina automáticamente si es
-        //    GrupoNumero o GrupoSecuencia
         Grupo grupoNuevo = tablero.crearGrupoDesdeFichasPlaced(fichasAInsertar);
 
         if (grupoNuevo == null) {
-            // restaurar mano si ya se quitó fichas
-            for (FichaPlaced fp : fichasAInsertar) {
-                if (fp.getPlacedBy().equals(jugador.getId())
-                        && fp.getPlacedInTurn() == turnoActual) {
-
-                    mano.agregarFicha(fp.getFicha());
-
-                } else {
-                    tablero.restaurarFicha(fp);
-                }
-            }
+            rollbackCreacion(fichasAInsertar, idsSacadosDeMano, jugador);
 
             producer.mostrarError("Las fichas no forman un grupo válido.");
+
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
             return;
         }
-
-        // 3. Registrar el grupo en el tablero
         tablero.agregarGrupo(grupoNuevo);
 
         producer.actualizarTablero(TableroMapper.toDTO(tablero));
         producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
+    }
+
+    private void rollbackCreacion(List<FichaPlaced> fichasProcesadas, List<String> idsDeMano, Jugador jugador) {
+        for (FichaPlaced fp : fichasProcesadas) {
+            String id = fp.getFicha().getId();
+            if (idsDeMano.contains(id)) {
+                jugador.getMano().agregarFicha(fp.getFicha());
+            } else {
+                tablero.restaurarFicha(fp);
+            }
+        }
     }
 
     @Override
@@ -118,8 +120,7 @@ public class Dominio implements IDominio {
         Mano mano = jugador.getMano();
         int turnoActual = turno.getNumeroTurno();
 
-        // Snapshot para rollback
-        List<FichaPlaced> estadoOriginal = tablero.obtenerFichasDeGrupo(grupoId)
+        List<FichaPlaced> estadoOriginalGrupo = tablero.obtenerFichasDeGrupo(grupoId)
                 .stream()
                 .map(FichaPlaced::clonar)
                 .collect(Collectors.toList());
@@ -127,17 +128,14 @@ public class Dominio implements IDominio {
         List<FichaPlaced> fichasAntes = tablero.obtenerFichasDeGrupo(grupoId);
         List<Ficha> manoAntes = mano.clonarContenido();
 
-        // Límpiar el grupo actual
         tablero.limpiarGrupo(grupoId);
 
         List<FichaPlaced> fichasInsertadas = new ArrayList<>();
 
-        // 1. Reconstrucción desde cero
         for (FichaDTO dto : fichasNuevasDTO) {
 
             String fichaId = dto.getId();
 
-            // 1) Estaba antes en el mismo grupo
             FichaPlaced existenteAntes = fichasAntes.stream()
                     .filter(fp -> fp.getFicha().getId().equals(fichaId))
                     .findFirst()
@@ -149,7 +147,6 @@ public class Dominio implements IDominio {
                 continue;
             }
 
-            // 2) Viene de mano
             if (mano.tieneFicha(fichaId)) {
                 Ficha base = mano.quitarFicha(fichaId);
                 FichaPlaced nueva = new FichaPlaced(base, jugador.getId(), turnoActual);
@@ -158,7 +155,6 @@ public class Dominio implements IDominio {
                 continue;
             }
 
-            // 3) Viene de otro grupo del tablero
             FichaPlaced desdeOtroGrupo = tablero.buscarFichaPlacedGlobal(fichaId);
             if (desdeOtroGrupo != null) {
                 tablero.removerFichaGlobal(fichaId);
@@ -167,20 +163,21 @@ public class Dominio implements IDominio {
                 continue;
             }
 
-            // 4) No viene de ningún lado
-            rollback(grupoId, estadoOriginal, manoAntes, jugador);
+            rollback(grupoId, estadoOriginalGrupo, manoAntes, fichasInsertadas, jugador);
             producer.mostrarError("Ficha no disponible: " + fichaId);
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
             return;
         }
 
-        // 2. Validar reglas del grupo
         if (!tablero.validarReglasDeGrupo(grupoId)) {
-            rollback(grupoId, estadoOriginal, manoAntes, jugador);
+            rollback(grupoId, estadoOriginalGrupo, manoAntes, fichasInsertadas, jugador);
             producer.mostrarError("El grupo resultante no es válido");
+
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
             return;
         }
-
-        // 3. Si quedó vacío, se elimina
         if (tablero.grupoEstaVacio(grupoId)) {
             tablero.removerGrupo(grupoId);
         }
@@ -229,15 +226,24 @@ public class Dominio implements IDominio {
             String grupoId,
             List<FichaPlaced> estadoOriginalGrupo,
             List<Ficha> estadoOriginalMano,
+            List<FichaPlaced> fichasIntentadas,
             Jugador jugador
     ) {
-        tablero.limpiarGrupo(grupoId);
-
-        for (FichaPlaced fp : estadoOriginalGrupo) {
-            tablero.agregarFichaAGrupo(grupoId, fp);
-        }
-
+        tablero.revivirGrupo(grupoId, estadoOriginalGrupo);
         jugador.getMano().restaurar(estadoOriginalMano);
+
+        // 3. Restaurar fichas que robamos de OTROS grupos
+        for (FichaPlaced fp : fichasIntentadas) {
+            boolean estabaEnTarget = estadoOriginalGrupo.stream()
+                    .anyMatch(old -> old.getFicha().getId().equals(fp.getFicha().getId()));
+
+            boolean estabaEnMano = estadoOriginalMano.stream()
+                    .anyMatch(old -> old.getId().equals(fp.getFicha().getId()));
+
+            if (!estabaEnTarget && !estabaEnMano) {
+                tablero.restaurarFicha(fp);
+            }
+        }
     }
 
     @Override
@@ -280,7 +286,7 @@ public class Dominio implements IDominio {
             tablero.marcarFichasConfirmadas(jugadorId);
 
             if (jugadorActual.getMano().getFichas().isEmpty()) {
-                producer.juegoTerminado(jugadorId); 
+                producer.juegoTerminado(jugadorId);
                 return;
             }
 

@@ -138,14 +138,19 @@ public class Tablero {
      * existe, no hace nada.
      */
     public void removerFichaGlobal(String fichaId) {
-        for (Grupo g : grupos.values()) {
-            Iterator<FichaPlaced> it = g.getFichas().iterator();
-            while (it.hasNext()) {
-                FichaPlaced fp = it.next();
+        var iterator = grupos.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            Grupo g = entry.getValue();
+            var fichasIt = g.getFichas().iterator();
+            while (fichasIt.hasNext()) {
+                FichaPlaced fp = fichasIt.next();
                 if (fp.getFicha().getId().equals(fichaId)) {
-                    // registrar origen y remover
                     removedOrigin.put(fichaId, g.getId());
-                    it.remove();
+                    fichasIt.remove();
+                    if (g.estaVacio()) {
+                        iterator.remove();
+                    }
                     return;
                 }
             }
@@ -163,20 +168,20 @@ public class Tablero {
         }
 
         String fichaId = fp.getFicha().getId();
-        String origen = removedOrigin.remove(fichaId);
+        String origenId = removedOrigin.remove(fichaId);
 
-        if (origen != null) {
-            Grupo g = grupos.get(origen);
+        if (origenId != null) {
+            Grupo g = grupos.get(origenId);
             if (g != null) {
                 g.agregarFicha(fp);
-                return;
+            } else {
+                List<FichaPlaced> lista = new ArrayList<>();
+                lista.add(fp);
+                Grupo grupoRevivido = new GrupoSecuencia(origenId, lista);
+                agregarGrupo(grupoRevivido);
             }
+            return;
         }
-
-        // Si no tenemos origen registrado o el grupo ya no existe,
-        // creamos un nuevo grupo con id generado y agregamos la ficha.
-        // Preferimos crear un GrupoSecuencia como contenedor neutral;
-
         List<FichaPlaced> lista = new ArrayList<>();
         lista.add(fp);
         String nuevoId = generarIdGrupo();
@@ -200,13 +205,19 @@ public class Tablero {
         sb.append("================\n");
         return sb.toString();
     }
-    
+
     public List<Grupo> getGruposEnMesa() {
-        return new ArrayList<>(grupos.values()); 
+        return new ArrayList<>(grupos.values());
     }
-    
+
     public void marcarFichasConfirmadas(String jugadorId) {
-        this.removedOrigin.clear(); 
-    } 
+        this.removedOrigin.clear();
+    }
+
+    public void revivirGrupo(String grupoId, List<FichaPlaced> fichasParaRestaurar) {
+        grupos.remove(grupoId);
+        Grupo grupoRestaurado = new GrupoSecuencia(grupoId, fichasParaRestaurar);
+        grupos.put(grupoId, grupoRestaurado);
+    }
 
 }

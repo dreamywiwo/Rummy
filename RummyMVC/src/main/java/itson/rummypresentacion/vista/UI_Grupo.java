@@ -15,6 +15,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -75,45 +76,16 @@ public class UI_Grupo extends JPanel {
 
                     String origenId = null;
 
-                    // 2. Procesar remoción del origen para TODAS las fichas
-                    if (origen != null) {
-                        for (FichaDTO ficha : fichasRecibidas) {
-                            origen.remover(ficha);
-                        }
+                    List<FichaDTO> fichasDestino = new ArrayList<>(grupo.getFichas());
+                    fichasDestino.addAll(fichasRecibidas);
 
-                        if (origen instanceof Grupo) {
-                            origenId = ((Grupo) origen).getId();
-                        } else if (origen instanceof Mano) {
-                            origenId = "Mano";
-                            // Si viene de la mano, limpiamos la selección visual
-                            limpiarSeleccionMano();
-                        }
+                    if (origen instanceof Mano) {
+                        limpiarSeleccionMano();
                     }
 
-                    // 3. Agregar todas las fichas a este grupo
-                    for (FichaDTO ficha : fichasRecibidas) {
-                        grupo.agregar(ficha);
-                    }
-
-                    // 4. Actualizar visualmente este grupo
-                    actualizarFichas();
-
-                    // 5. Actualizar visualmente el origen
-                    if (origen != null) {
-                        actualizarOrigenUI(origen);
-                    }
-
-                    // 6. Notificaciones al controlador 
-                    if (tableroPanel != null) {
+                    if (tableroPanel != null && tableroPanel.getVentanaPrincipal() != null) {
                         UI_TurnoJugador ventana = tableroPanel.getVentanaPrincipal();
-                        if (ventana != null) {
-                            // Notificar actualización del origen (Mano u otro Grupo)
-                            if (origen != null && origenId != null) {
-                                ventana.notificarGrupoActualizado(origenId, origen.getFichas());
-                            }
-                            ventana.notificarGrupoActualizado(grupo.getId(), grupo.getFichas());
-                        }
-                        tableroPanel.repaint();
+                        ventana.notificarGrupoActualizado(grupo.getId(), fichasDestino);
                     }
 
                     evt.dropComplete(true);

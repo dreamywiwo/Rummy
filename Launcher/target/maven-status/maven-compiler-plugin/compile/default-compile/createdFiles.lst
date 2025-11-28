@@ -1,4 +1,4 @@
 ensambladores\EnsambladorDominio.class
 ensambladores\EnsambladorCliente.class
-com\mycompany\main\Main.class
 ensambladores\EnsambladorServidor.class
+itson\rummy\launcher\Exe.class

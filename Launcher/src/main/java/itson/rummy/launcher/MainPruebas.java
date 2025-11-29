@@ -46,7 +46,6 @@ public class MainPruebas {
         List<Jugador> listaJugadores = new ArrayList<>();
         listaJugadores.add(new Jugador("Jugador1"));
         listaJugadores.add(new Jugador("Jugador2"));
-        listaJugadores.add(new Jugador("Jugador3"));
 
         // 3. INICIAR EL DOMINIO 
         new Thread(() -> {
@@ -64,7 +63,6 @@ public class MainPruebas {
         // 4. LANZAR LOS CLIENTES        
         lanzarCliente("Jugador1", PUERTO_JUGADOR_1, 50, 50);    
         lanzarCliente("Jugador2", PUERTO_JUGADOR_2, 600, 50);   
-        lanzarCliente("Jugador3", PUERTO_JUGADOR_3, 300, 500);  
     }
 
     /**

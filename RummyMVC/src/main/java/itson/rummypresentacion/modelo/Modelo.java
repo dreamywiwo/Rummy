@@ -37,7 +37,7 @@ public class Modelo implements IModelo, ISubject, IListener {
     private String mensajeError;
     private boolean juegoTerminado = false;
     private String jugadorGanadorId = null;
-
+    private String idJugadorLocal;
 
     //tendra al producer que se llamara para crear cada evento
     public Modelo(IProducerJugador producer) {
@@ -65,7 +65,9 @@ public class Modelo implements IModelo, ISubject, IListener {
     // Implementacion de IModelo
     @Override
     public List<GrupoDTO> getGruposEnTablero() {
-        return new ArrayList<>(gruposEnTablero);
+        synchronized (this) {
+            return new ArrayList<>(gruposEnTablero);
+        }
     }
 
     @Override
@@ -117,8 +119,7 @@ public class Modelo implements IModelo, ISubject, IListener {
     public String getMensajeError() {
         return mensajeError;
     }
-    
-    
+
     @Override
     public boolean juegoTerminado() {
         return juegoTerminado;
@@ -127,6 +128,10 @@ public class Modelo implements IModelo, ISubject, IListener {
     @Override
     public String getJugadorGanadorId() {
         return jugadorGanadorId;
+    }
+
+    public void setJugadorLocal(String idJugador) {
+        this.idJugadorLocal = idJugador;
     }
 
     // OBSERVER
@@ -158,20 +163,25 @@ public class Modelo implements IModelo, ISubject, IListener {
     @Override
     public void recibirTablero(TableroDTO tableroDTO) {
         if (tableroDTO != null && tableroDTO.getGrupos() != null) {
-            this.gruposEnTablero = tableroDTO.getGrupos();
+            this.gruposEnTablero = new ArrayList<>(tableroDTO.getGrupos());
             notificarObservers();
         }
     }
 
     @Override
     public void recibirMano(List<FichaDTO> mano) {
-        if (mano != null) {
-            this.fichasMano = mano;
-            if (this.jugadorActual != null) {
-                jugadorActual.setFichasMano(fichasMano);
+
+        boolean esMiTurno = (turnoActual != null && turnoActual.equals(idJugadorLocal));
+        boolean esInicializacion = (fichasMano == null || fichasMano.isEmpty());
+        if (esInicializacion || esMiTurno) {
+            if (mano != null) {
+                this.fichasMano = mano;
+                if (this.jugadorActual != null) {
+                    jugadorActual.setFichasMano(fichasMano);
+                }
             }
+            notificarObservers();
         }
-        notificarObservers();
     }
 
     @Override

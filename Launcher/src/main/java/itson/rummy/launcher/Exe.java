@@ -19,7 +19,7 @@ import java.util.List;
 public class Exe {
 
     public static void main(String[] args) {
-        String brokerIp = "127.0.0.1";
+        String miIP = "192.168.1.50";
         int puertoBroker = 9999;
         int puertoDominio = 9000;
 
@@ -32,25 +32,21 @@ public class Exe {
 
         EnsambladorDominio dominioAssembler = new EnsambladorDominio();
 
-        dominioAssembler.iniciarJuego(brokerIp, puertoBroker, puertoDominio, jugadores);
-
-        int miPuerto = 9002;
-        String miIp = "127.0.0.1";
-        String miId = "Jugador1";
+        dominioAssembler.iniciarJuego(miIP, puertoBroker, puertoDominio, jugadores);
 
         EnsambladorCliente ensamblador = new EnsambladorCliente();
 
         UI_TurnoJugador ventana = ensamblador.construirJugador(
-                brokerIp,
+                miIP,
                 puertoBroker,
-                miIp,
-                miPuerto,
-                miId
+                miIP,
+                9002,
+                "Jugador1"
         );
 
         java.awt.EventQueue.invokeLater(() -> {
-            System.out.println("Cliente: " + miId);
             ventana.setVisible(true);
+            ventana.setTitle("Jugador1");
         });
     }
 }

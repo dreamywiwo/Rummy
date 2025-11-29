@@ -22,8 +22,6 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     private UI_Tablero uiTablero;
     private UI_Mano uiMano;
     private ControladorTurno controlador;
-    private Mano mano;
-    private Tablero tableroModelo;
     private String jugadorID;
     private UI_Jugador uiJugadorActual;
     private UI_Jugador uiJugadorOponente;
@@ -31,21 +29,22 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     /**
      * Creates new form UI_TurnoJugador
      */
-    public UI_TurnoJugador(ControladorTurno controlador) {
+    public UI_TurnoJugador(ControladorTurno controlador, String idJugador) {
         initComponents();
         this.controlador = controlador;
-        tableroModelo = new Tablero();
-        uiTablero = new UI_Tablero(tableroModelo, this);
+
+        this.jugadorID = idJugador;
+
+        uiTablero = new UI_Tablero(this);
         setLocationRelativeTo(null);
 
         jPanelContenedorTablero.setLayout(new BorderLayout());
-        System.out.println(this.uiTablero);
         jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
 
-        uiMano = new UI_Mano(uiTablero.getTablero().getManoJugador(), uiTablero);
+        uiMano = new UI_Mano(uiTablero);
         jPanelContenedorMano.setLayout(new BorderLayout());
         jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
-        jugadorID = controlador.getJugadorLocalId();
+
         jPanelContenedorJugador.setOpaque(false);
         jPanelContenedorJugador1.setOpaque(false);
         jPanelContenedorJugador2.setOpaque(false);
@@ -53,25 +52,20 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         jPanelContenedorTablero.setOpaque(false);
         jPanelSopa.setOpaque(false);
 
-        configurarEventosBotones();
+        jPanelContenedorJugador1.setVisible(false);
+        jPanelContenedorJugador2.setVisible(false);
+        jPanelContenedorJugador3.setVisible(false);
 
+        configurarEventosBotones();
     }
 
     /**
      * Configura los listeners de los botones
      */
     private void configurarEventosBotones() {
-        jButtonTerminarTurno.addActionListener(e -> {
-            controlador.terminarTurno();
-        });
-
-        jButtonTomarFicha.addActionListener(e -> {
-            controlador.tomarFicha();
-        });
-
-        jButtonAbandonar.addActionListener(e -> {
-            controlador.abandonarPartida();
-        });
+        jButtonTerminarTurno.addActionListener(e -> controlador.terminarTurno());
+        jButtonTomarFicha.addActionListener(e -> controlador.tomarFicha());
+        jButtonAbandonar.addActionListener(e -> controlador.abandonarPartida());
     }
 
     /**
@@ -83,74 +77,30 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         controlador.crearGrupo(fichas);
     }
 
-    /**
-     * Notifica al controlador que se actualizó un grupo
-     *
-     * @param idGrupo ID del grupo actualizado
-     * @param fichas Lista actualizada de fichas
-     */
     public void notificarGrupoActualizado(String idGrupo, List<FichaDTO> fichas) {
         controlador.actualizarGrupo(idGrupo, fichas);
     }
 
-    /**
-     * Notifica al controlador que se movió una ficha
-     *
-     * @param ficha Ficha movida
-     * @param origen Contenedor de origen
-     * @param destino Contenedor de destino
-     */
-    public void notificarFichaMovida(FichaDTO ficha, String origen, String destino) {
-        controlador.moverFicha(ficha, origen, destino);
-    }
-
-    /**
-     * Obtiene el tablero UI
-     *
-     * @return UI_Tablero
-     */
     public UI_Tablero getUITablero() {
         return uiTablero;
     }
 
-    /**
-     * Obtiene la mano UI
-     *
-     * @return UI_Mano
-     */
     public UI_Mano getUIMano() {
         return uiMano;
     }
 
-    /**
-     * Obtiene el controlador
-     *
-     * @return ControladorTurno
-     */
+    public String getJugadorID() {
+        return jugadorID;
+    }
+
     public ControladorTurno getControlador() {
         return controlador;
     }
 
     private void actualizarEstadoBotones(IModelo modelo) {
         boolean esMiTurno = modelo.esTurnoDe(jugadorID);
-
-        jButtonTerminarTurno.setEnabled(esMiTurno);
-        jButtonTomarFicha.setEnabled(esMiTurno);
-
         if (uiMano != null) {
-            uiMano.setEnabled(esMiTurno);
-        }
-        if (uiTablero != null) {
-            uiTablero.setEnabled(esMiTurno);
-        }
-
-        String quienJuega = modelo.getTurnoActual();
-        if (esMiTurno) {
-            this.setTitle("Rummy - ¡ES TU TURNO! (" + jugadorID + ")");
-            jButtonTerminarTurno.setText("TERMINAR TURNO");
-        } else {
-            this.setTitle("Rummy - Esperando a " + (quienJuega != null ? quienJuega : "oponente") + "...");
-            jButtonTerminarTurno.setText("ESPERANDO...");
+            uiMano.actualizarEstado(esMiTurno);
         }
     }
 
@@ -358,54 +308,14 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
      */
     @Override
     public void update(IModelo modelo) {
-
         SwingUtilities.invokeLater(() -> {
-
-            if (modelo.juegoTerminado()) {
-                String ganador = modelo.getJugadorGanadorId();
-
-                jButtonTerminarTurno.setEnabled(false);
-                jButtonTomarFicha.setEnabled(false);
-
-                javax.swing.JOptionPane.showMessageDialog(
-                        this,
-                        "¡El juego ha terminado!\nGanador: " + ganador,
-                        "Juego Terminado",
-                        javax.swing.JOptionPane.INFORMATION_MESSAGE
-                );
-
-                uiMano.setEnabled(false);
-                uiTablero.setEnabled(false);
-
-                return; 
-            }
-
-            Tablero tablero = uiTablero.getTablero();
-            tablero.getGrupos().clear();
-            List<GrupoDTO> grupos = modelo.getGruposEnTablero();
-            if (grupos != null) {
-                for (GrupoDTO grupoDTO : grupos) {
-                    Grupo grupoTablero = new Grupo(grupoDTO.getId());
-                    for (FichaDTO ficha : grupoDTO.getFichas()) {
-                        grupoTablero.agregar(ficha);
-                    }
-                    tablero.agregarGrupo(grupoTablero);
-                }
-            }
-            Mano manoTablero = uiMano.getMano();
-            manoTablero.limpiar();
+            List<GrupoDTO> gruposDelTablero = modelo.getGruposEnTablero();
             List<FichaDTO> fichasMano = modelo.getFichasMano();
-            System.out.println("UI UPDATE: Recibidas " + (fichasMano != null ? fichasMano.size() : 0) + " fichas del modelo.");
-            if (fichasMano != null) {
-                for (FichaDTO fichaDTO : fichasMano) {
-                    manoTablero.agregar(fichaDTO);
-                }
-            }
+            uiTablero.setGruposDesdeDTO(gruposDelTablero);
+            uiMano.setFichas(fichasMano);
             actualizarEstadoBotones(modelo);
-            uiTablero.actualizarGrupos();
             uiTablero.revalidate();
             uiTablero.repaint();
-            uiMano.actualizarFichas();
             uiMano.revalidate();
             uiMano.repaint();
         });

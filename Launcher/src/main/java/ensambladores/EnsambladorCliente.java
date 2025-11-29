@@ -26,41 +26,42 @@ import itson.traducerjugador.mappers.EventMapper;
  * @author jrasc
  */
 public class EnsambladorCliente {
-
+    
     public UI_TurnoJugador construirJugador(String ipBroker, int puertoBroker, String miIp, int miPuerto, String miId) {
         
         JsonSerializer jsonSerializer = new JsonSerializer();
-
+        
         SocketOut socketOut = new SocketOut();
         socketOut.start();
         ColaDispatcher colaDispatcher = new ColaDispatcher();
         colaDispatcher.attach(socketOut);
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
-
+        
         JugarTurnoEmitter emitter = new JugarTurnoEmitter(jsonSerializer, dispatcher, ipBroker, puertoBroker);
         IProducerJugador producer = new ProducerJugador(emitter, miId);
-
+        
         Modelo modelo = new Modelo(producer);
+        modelo.setJugadorLocal(miId);
         ControladorTurno controlador = new ControladorTurno(modelo, producer, miId);
-
-        UI_TurnoJugador ventana = new UI_TurnoJugador(controlador);
-
+        
+        UI_TurnoJugador ventana = new UI_TurnoJugador(controlador, miId);
+        
         modelo.suscribir(ventana);
-
+        
         EventMapper eventMapper = new EventMapper(jsonSerializer);
-
+        
         eventMapper.setListener(modelo);
-
+        
         TraducerJugador traducer = new TraducerJugador(jsonSerializer, eventMapper);
         Receptor receptor = new Receptor(traducer);
         ColaReceptor colaReceptor = new ColaReceptor();
         colaReceptor.attach(receptor);
-
+        
         SocketIN socketIn = new SocketIN(miPuerto, colaReceptor);
         socketIn.start();
-
+        
         System.out.println("Ensamblador: Cliente " + miId + " iniciado en " + miIp + ":" + miPuerto);
-
+        
         return ventana;
     }
 }

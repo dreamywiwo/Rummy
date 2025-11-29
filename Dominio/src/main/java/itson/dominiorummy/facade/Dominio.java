@@ -7,6 +7,8 @@ package itson.dominiorummy.facade;
 import itson.dominiorummy.entidades.Ficha;
 import itson.dominiorummy.entidades.FichaPlaced;
 import itson.dominiorummy.entidades.Grupo;
+import itson.dominiorummy.entidades.GrupoNumero;
+import itson.dominiorummy.entidades.GrupoSecuencia;
 import itson.dominiorummy.entidades.Jugador;
 import itson.dominiorummy.entidades.Mano;
 import itson.dominiorummy.entidades.Sopa;
@@ -133,17 +135,13 @@ public class Dominio implements IDominio {
         List<FichaPlaced> fichasInsertadas = new ArrayList<>();
 
         for (FichaDTO dto : fichasNuevasDTO) {
-
             String fichaId = dto.getId();
 
-            FichaPlaced existenteAntes = fichasAntes.stream()
-                    .filter(fp -> fp.getFicha().getId().equals(fichaId))
-                    .findFirst()
-                    .orElse(null);
-
-            if (existenteAntes != null) {
-                tablero.agregarFichaAGrupo(grupoId, existenteAntes);
-                fichasInsertadas.add(existenteAntes);
+            FichaPlaced existente = fichasAntes.stream()
+                    .filter(fp -> fp.getFicha().getId().equals(fichaId)).findFirst().orElse(null);
+            if (existente != null) {
+                tablero.agregarFichaAGrupo(grupoId, existente);
+                fichasInsertadas.add(existente);
                 continue;
             }
 
@@ -155,11 +153,11 @@ public class Dominio implements IDominio {
                 continue;
             }
 
-            FichaPlaced desdeOtroGrupo = tablero.buscarFichaPlacedGlobal(fichaId);
-            if (desdeOtroGrupo != null) {
+            FichaPlaced robo = tablero.buscarFichaPlacedGlobal(fichaId);
+            if (robo != null) {
                 tablero.removerFichaGlobal(fichaId);
-                tablero.agregarFichaAGrupo(grupoId, desdeOtroGrupo);
-                fichasInsertadas.add(desdeOtroGrupo);
+                tablero.agregarFichaAGrupo(grupoId, robo);
+                fichasInsertadas.add(robo);
                 continue;
             }
 
@@ -169,21 +167,38 @@ public class Dominio implements IDominio {
             producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
             return;
         }
-
-        if (!tablero.validarReglasDeGrupo(grupoId)) {
-            rollback(grupoId, estadoOriginalGrupo, manoAntes, fichasInsertadas, jugador);
-            producer.mostrarError("El grupo resultante no es válido");
-
-            producer.actualizarTablero(TableroMapper.toDTO(tablero));
-            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
-            return;
+        boolean pareceSet = esPotencialmenteSet(fichasInsertadas);
+        Grupo grupoCorrecto;
+        if (pareceSet) {
+            grupoCorrecto = new GrupoNumero(grupoId, fichasInsertadas);
+        } else {
+            grupoCorrecto = new GrupoSecuencia(grupoId, fichasInsertadas);
         }
+        tablero.agregarGrupo(grupoCorrecto);
         if (tablero.grupoEstaVacio(grupoId)) {
             tablero.removerGrupo(grupoId);
         }
 
         producer.actualizarTablero(TableroMapper.toDTO(tablero));
         producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
+    }
+
+    private boolean esPotencialmenteSet(List<FichaPlaced> fichas) {
+        List<Ficha> normales = fichas.stream()
+                .map(FichaPlaced::getFicha)
+                .filter(f -> !f.isEsComodin())
+                .collect(Collectors.toList());
+
+        if (normales.isEmpty() || normales.size() < 2) {
+            return true;
+        }
+        int numRef = normales.get(0).getNumero();
+        for (Ficha f : normales) {
+            if (f.getNumero() != numRef) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -23,14 +23,37 @@ public class TableroMapper {
     public static TableroDTO toDTO(Tablero tablero) {
         List<GrupoDTO> gruposDTO = new ArrayList<>();
         for (Grupo grupo : tablero.getGruposEnMesa()) {
-            gruposDTO.add(grupoaDTO(grupo));
+            if (grupo == null) {
+                continue;
+            }
+            GrupoDTO dto = grupoaDTO(grupo);
+            if (dto == null) {
+                continue;
+            }
+            gruposDTO.add(dto);
         }
         return new TableroDTO(gruposDTO);
     }
 
     private static GrupoDTO grupoaDTO(Grupo grupo) {
-        List<Ficha> fichas = grupo.getFichas().stream().map(FichaPlaced::getFicha).toList();
+        if (grupo == null) {
+            return null;
+        }
+        if (grupo.getFichas() == null) {
+            return null;
+        }
+        List<Ficha> fichas = grupo.getFichas().stream()
+                .filter(fp -> fp != null && fp.getFicha() != null)
+                .map(FichaPlaced::getFicha)
+                .toList();
+        if (fichas.isEmpty()) {
+            return null;
+        }
         List<FichaDTO> fichasDTO = FichaMapper.toDTO(fichas);
-        return new GrupoDTO(grupo.getId(), fichasDTO, true);
+        String id = grupo.getId();
+        if (id == null) {
+            return null;
+        }
+        return new GrupoDTO(id, fichasDTO, true);
     }
 }

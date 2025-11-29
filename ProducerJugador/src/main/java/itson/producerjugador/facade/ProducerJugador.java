@@ -4,6 +4,7 @@
  */
 package itson.producerjugador.facade;
 
+import itson.producerjugador.emitters.InicializarJuegoEmitter;
 import itson.producerjugador.emitters.JugarTurnoEmitter;
 import itson.rummydtos.FichaDTO;
 import java.util.List;
@@ -15,9 +16,11 @@ import java.util.List;
 public class ProducerJugador implements IProducerJugador {
 
     private final JugarTurnoEmitter jugarTurnoEmitter;
+    private final InicializarJuegoEmitter inicializarJuegoEmitter;
 
-    public ProducerJugador(JugarTurnoEmitter jugarTurnoEmitter, String jugadorId) {
+    public ProducerJugador(JugarTurnoEmitter jugarTurnoEmitter, InicializarJuegoEmitter inicializarJuegoEmitter, String jugadorId) {
         this.jugarTurnoEmitter = jugarTurnoEmitter;
+        this.inicializarJuegoEmitter = inicializarJuegoEmitter;
     }
 
     @Override
@@ -38,6 +41,11 @@ public class ProducerJugador implements IProducerJugador {
     @Override
     public void terminarTurno() {
         jugarTurnoEmitter.emitirTerminoTurnoEvent();
+    }
+
+    @Override
+    public void registrarJugador(String miId, String ipCliente, int miPuertoDeEscucha) {
+        inicializarJuegoEmitter.emitirRegistroJugadorEvent(miId, ipCliente, miPuertoDeEscucha);
     }
 
 }

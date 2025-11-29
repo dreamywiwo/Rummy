@@ -11,6 +11,7 @@ import claseReceptor.ColaReceptor;
 import claseReceptor.Receptor;
 import claseReceptor.SocketIN;
 import com.mycompany.conexioninterfaces.IDispatcher;
+import itson.producerjugador.emitters.InicializarJuegoEmitter;
 import itson.producerjugador.emitters.JugarTurnoEmitter;
 import itson.producerjugador.facade.IProducerJugador;
 import itson.producerjugador.facade.ProducerJugador;
@@ -38,7 +39,8 @@ public class EnsambladorCliente {
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
         
         JugarTurnoEmitter emitter = new JugarTurnoEmitter(jsonSerializer, dispatcher, ipBroker, puertoBroker);
-        IProducerJugador producer = new ProducerJugador(emitter, miId);
+        InicializarJuegoEmitter emitter2 = new InicializarJuegoEmitter(jsonSerializer, dispatcher, ipBroker, puertoBroker);
+        IProducerJugador producer = new ProducerJugador(emitter, emitter2, miId);
         
         Modelo modelo = new Modelo(producer);
         modelo.setJugadorLocal(miId);
@@ -61,6 +63,9 @@ public class EnsambladorCliente {
         socketIn.start();
         
         System.out.println("Ensamblador: Cliente " + miId + " iniciado en " + miIp + ":" + miPuerto);
+
+        emitter2.emitirRegistroJugadorEvent(miId, miIp, miPuerto); 
+        System.out.println("Ensamblador: Solicitud de registro enviada automáticamente.");
         
         return ventana;
     }

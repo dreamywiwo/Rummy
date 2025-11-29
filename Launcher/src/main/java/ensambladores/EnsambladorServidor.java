@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package ensambladores;
 
 import ClaseDispatcher.ColaDispatcher;
@@ -11,6 +7,7 @@ import claseReceptor.ColaReceptor;
 import claseReceptor.Receptor;
 import claseReceptor.SocketIN;
 import com.mycompany.broker.Broker;
+import com.mycompany.broker.ProcesadorEventosBroker;
 import com.mycompany.broker.SubscriptionRegistry;
 import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.directorio.implementacion.Directorio;
@@ -19,8 +16,7 @@ import itson.serializer.implementacion.JsonSerializer;
 import itson.serializer.interfaces.ISerializer;
 
 /**
- *
- * @author jrasc
+ * Ensamblador del servidor (Broker de eventos)
  */
 public class EnsambladorServidor {
 
@@ -40,22 +36,11 @@ public class EnsambladorServidor {
 
         Broker brokerLogic = new Broker(directorio, dispatcher, serializer, registry);
 
+        ProcesadorEventosBroker brokerProcesador = new ProcesadorEventosBroker(brokerLogic, serializer);
+
         ColaReceptor colaReceptor = new ColaReceptor();
-        colaReceptor.attach(new Receptor(brokerLogic));
-        
-        String ip1 = "192.168.1.4";
-        String ip2 = "192.168.1.95";
+        colaReceptor.attach(new Receptor(brokerProcesador));
 
-        directorio.registerClient("Jugador1", "192.168.1.4", 9002);
-        registry.addSuscriptor("actualizaciones.estado", "Jugador1");
-        
-        directorio.registerClient("Jugador2", ip2, 9001);
-        registry.addSuscriptor(ip2, "Jugador2");
-
-        directorio.registerClient("Dominio", ip1, 9000);
-        registry.addSuscriptor("acciones.jugador", "Dominio");
-
-        registry.addSuscriptor("acciones.jugador", "Dominio");
         SocketIN socketIN = new SocketIN(puertoEscucha, colaReceptor);
         socketIN.start();
 

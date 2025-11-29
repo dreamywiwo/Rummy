@@ -21,6 +21,7 @@ import itson.dominiorummy.facade.IDominio;
 import itson.producerdominio.emitters.EstadoJuegoEmitter;
 import itson.producerdominio.facade.IProducerDominio;
 import itson.producerdominio.facade.ProducerDominio;
+import itson.producerjugador.emitters.InicializarJuegoEmitter;
 import itson.serializer.implementacion.JsonSerializer;
 import itson.traducerdominio.facade.TraducerDominio;
 import itson.traducerdominio.mappers.EventMapper;
@@ -41,6 +42,9 @@ public class EnsambladorDominio {
         ColaDispatcher colaDispatcher = new ColaDispatcher();
         colaDispatcher.attach(socketOut);
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
+
+        InicializarJuegoEmitter registroEmitter = new InicializarJuegoEmitter(serializer, dispatcher, brokerIp, brokerPort);
+        registroEmitter.emitirRegistroJugadorEvent("Dominio", brokerIp, puertoEscuchaJuego);
 
         List<Ficha> fichasJuego = generarFichasRummy();
         Sopa sopa = new Sopa(fichasJuego);

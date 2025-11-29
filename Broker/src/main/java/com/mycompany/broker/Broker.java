@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * @author jrasc
  */
-public class Broker implements IReceptorComponente, IBroker {
+public class Broker implements IBroker {
 
     private final IDirectorio directorio;
     private final IDispatcher dispatcher;
@@ -34,11 +34,6 @@ public class Broker implements IReceptorComponente, IBroker {
         this.dispatcher = dispatcher;
         this.serializer = serializer;
         this.registry = registry;
-    }
-
-    @Override
-    public void recibirMensaje(String json) {
-        publicar(json);
     }
 
     @Override

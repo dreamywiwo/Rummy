@@ -43,18 +43,12 @@ public class EnsambladorServidor {
         ColaReceptor colaReceptor = new ColaReceptor();
         colaReceptor.attach(new Receptor(brokerLogic));
         
-        String ip1 = "192.168.1.4";
-        String ip2 = "192.168.1.95";
+        String ip1 = "127.0.0.1";
 
-        directorio.registerClient("Jugador1", "192.168.1.4", 9002);
+        directorio.registerClient("Jugador1", ip1, 9002);
         registry.addSuscriptor("actualizaciones.estado", "Jugador1");
         
-        directorio.registerClient("Jugador2", ip2, 9001);
-        registry.addSuscriptor(ip2, "Jugador2");
-
         directorio.registerClient("Dominio", ip1, 9000);
-        registry.addSuscriptor("acciones.jugador", "Dominio");
-
         registry.addSuscriptor("acciones.jugador", "Dominio");
         SocketIN socketIN = new SocketIN(puertoEscucha, colaReceptor);
         socketIN.start();

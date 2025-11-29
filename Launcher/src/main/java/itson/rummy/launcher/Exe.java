@@ -19,7 +19,7 @@ import java.util.List;
 public class Exe {
 
     public static void main(String[] args) {
-        String miIP = "192.168.1.50";
+        String miIP = "127.0.0.1";
         int puertoBroker = 9999;
         int puertoDominio = 9000;
 

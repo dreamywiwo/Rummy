@@ -139,6 +139,7 @@ public class Modelo implements IModelo, ISubject, IListener {
     public void suscribir(IObserver observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
+            System.out.println("[MODELO] Observer suscrito: " + observer.getClass().getSimpleName());
         }
     }
 
@@ -149,7 +150,9 @@ public class Modelo implements IModelo, ISubject, IListener {
 
     @Override
     public void notificarObservers() {
+        System.out.println("[MODELO] notificarObservers() llamado. Observers = " + observers.size());
         for (IObserver observer : observers) {
+            System.out.println("[MODELO] Notificando a " + observer.getClass().getSimpleName());
             observer.update(this);
         }
     }
@@ -157,11 +160,13 @@ public class Modelo implements IModelo, ISubject, IListener {
     @Override
     public void terminoTurno(TurnoTerminadoEvent event) {
         this.turnoActual = event.getNuevoTurnoJugador();
+        System.out.println("[MODELO] terminoTurno() -> nuevoTurnoJugador = " + turnoActual);
         notificarObservers();
     }
 
     @Override
     public void recibirTablero(TableroDTO tableroDTO) {
+        System.out.println("[MODELO] recibirTablero() llamado");
         if (tableroDTO != null && tableroDTO.getGrupos() != null) {
             this.gruposEnTablero = new ArrayList<>(tableroDTO.getGrupos());
             notificarObservers();
@@ -170,7 +175,7 @@ public class Modelo implements IModelo, ISubject, IListener {
 
     @Override
     public void recibirMano(List<FichaDTO> mano) {
-
+        System.out.println("[MODELO] recibirMano() llamado, mano size = " + (mano == null ? 0 : mano.size()));
         boolean esMiTurno = (turnoActual != null && turnoActual.equals(idJugadorLocal));
         boolean esInicializacion = (fichasMano == null || fichasMano.isEmpty());
         if (esInicializacion || esMiTurno) {

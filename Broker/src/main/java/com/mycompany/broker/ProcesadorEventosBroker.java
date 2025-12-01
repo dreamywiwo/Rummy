@@ -21,18 +21,39 @@ public class ProcesadorEventosBroker implements IReceptorComponente {
 
         EventBase base = serializer.deserialize(json, EventBase.class);
 
-        if (base == null || base.getEventType() == null) return;
+        if (base == null || base.getEventType() == null) {
+            return;
+        }
 
         switch (base.getEventType()) {
 
             case RegistroJugadorEvent.EVENT_TYPE -> {
                 RegistroJugadorEvent ev = serializer.deserialize(json, RegistroJugadorEvent.class);
+
+                String jugadorId = ev.getJugadorId();
+                String ip = ev.getIp();
+                int puerto = ev.getPuerto();
                 broker.suscribir(
-                    RegistroJugadorEvent.TOPIC,
-                    ev.getJugadorId(),
-                    ev.getIp(),
-                    ev.getPuerto()
+                        RegistroJugadorEvent.TOPIC, // "sistema.registro"
+                        jugadorId,
+                        ip,
+                        puerto
                 );
+                if ("Dominio".equals(jugadorId)) {
+                    broker.suscribir(
+                            "acciones.jugador",
+                            jugadorId,
+                            ip,
+                            puerto
+                    );
+                } else {
+                    broker.suscribir(
+                            "actualizaciones.estado",
+                            jugadorId,
+                            ip,
+                            puerto
+                    );
+                }
             }
 
             default -> {

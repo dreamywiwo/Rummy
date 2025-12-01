@@ -31,6 +31,8 @@ import java.util.List;
 
 public class EnsambladorDominio {
 
+    private IDominio dominio;
+
     // --- CLASE MOCK INTERNA PARA LA SOPA ---
     private class SopaDeterminista extends Sopa {
 
@@ -63,39 +65,33 @@ public class EnsambladorDominio {
         InicializarJuegoEmitter registroEmitter = new InicializarJuegoEmitter(serializer, dispatcher, brokerIp, brokerPort);
         registroEmitter.emitirRegistroJugadorEvent("Dominio", brokerIp, puertoEscuchaJuego);
 
-        // 1. GENERAR TODAS LAS FICHAS
         List<Ficha> todasLasFichas = generarFichasRummy();
 
-        // 2. MOCK: PREPARAR MANO GANADORA PARA JUGADOR 1 (INDICE 0)
         List<Ficha> manoTrucada = new ArrayList<>();
         manoTrucada.add(buscarYQuitar(todasLasFichas, "rojo", 1));
         manoTrucada.add(buscarYQuitar(todasLasFichas, "rojo", 2));
-        manoTrucada.add(buscarYQuitar(todasLasFichas, "rojo", 3)); 
+        manoTrucada.add(buscarYQuitar(todasLasFichas, "rojo", 3));
         manoTrucada.add(buscarYQuitar(todasLasFichas, "azul", 10));
-        manoTrucada.add(buscarYQuitar(todasLasFichas, "verde", 10)); 
+        manoTrucada.add(buscarYQuitar(todasLasFichas, "verde", 10));
 
-        // 3. MOCK: PREPARAR LA SIGUIENTE FICHA EN LA SOPA
         Ficha fichaParaComer = buscarYQuitar(todasLasFichas, "amarillo", 10);
         todasLasFichas.add(0, fichaParaComer);
 
-        // 4. USAR LA SOPA DETERMINISTA
         Sopa sopa = new SopaDeterminista(todasLasFichas);
 
         Tablero tablero = new Tablero();
 
-        // 5. TURNOS
         Turno turno = new Turno(jugadores, 0);
 
         EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(serializer, dispatcher, brokerIp, brokerPort);
         IProducerDominio producerDominio = new ProducerDominio(estadoEmitter);
 
-        IDominio dominio = new Dominio(tablero, producerDominio, turno, sopa, todasLasFichas);
+        this.dominio = new Dominio(tablero, producerDominio, turno, sopa, todasLasFichas);
 
-        // 6. ASIGNAR JUGADORES E INYECTAR MANO
         for (int i = 0; i < jugadores.size(); i++) {
             Jugador j = jugadores.get(i);
 
-            if (i == 0) { 
+            if (i == 0) {
                 for (Ficha f : manoTrucada) {
                     j.getMano().agregarFicha(f);
                 }
@@ -119,17 +115,27 @@ public class EnsambladorDominio {
         System.out.println("EnsambladorDominio: MODO PRUEBAS ACTIVADO en puerto " + puertoEscuchaJuego);
     }
 
+    public void comenzarPartida() {
+        if (this.dominio == null) {
+            throw new IllegalStateException(
+                    "La partida no puede comenzar porque el dominio no ha sido inicializado. "
+                    + "Llama primero a iniciarJuego()."
+            );
+        }
+        this.dominio.iniciarPartida();
+    }
+
     // UTILIDAD PARA BUSCAR Y EXTRAER FICHAS DEL MAZO GLOBAL
     private Ficha buscarYQuitar(List<Ficha> lista, String color, int numero) {
         Iterator<Ficha> it = lista.iterator();
         while (it.hasNext()) {
             Ficha f = it.next();
             if (f.getColor().equalsIgnoreCase(color) && f.getNumero() == numero) {
-                it.remove(); 
-                return f;   
+                it.remove();
+                return f;
             }
         }
-        return null; 
+        return null;
     }
 
     private List<Ficha> generarFichasRummy() {

@@ -95,12 +95,13 @@ public class EventMapper {
     }
 
     private void handleTurnoTerminado(String rawPayload, ISerializer serializer) {
+
         try {
             TurnoTerminadoEvent event = serializer.deserialize(rawPayload, TurnoTerminadoEvent.class);
-            if (listener != null) {
+            if (listener == null) {
+                System.out.println("El listener es null verifique");
+            } else {
                 listener.terminoTurno(event);
-                
-                //TODO No podemos enviar el evento al mvc
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,6 +111,10 @@ public class EventMapper {
     private void handleError(String rawPayload, ISerializer serializer) {
         try {
             ErrorEvent event = serializer.deserialize(rawPayload, ErrorEvent.class);
+            if (listener != null && event != null) {
+                String mensaje = event.getMensajeError();
+                listener.recibirError(mensaje);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -25,6 +25,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     private String jugadorID;
     private UI_Jugador uiJugadorActual;
     private UI_Jugador uiJugadorOponente;
+    private String ultimoMensajeError = null;
 
     /**
      * Creates new form UI_TurnoJugador
@@ -57,6 +58,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         jPanelContenedorJugador3.setVisible(false);
 
         configurarEventosBotones();
+        actualizarEstadoBotones(false);
     }
 
     /**
@@ -64,7 +66,10 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
      */
     private void configurarEventosBotones() {
         jButtonTerminarTurno.addActionListener(e -> controlador.terminarTurno());
-        jButtonTomarFicha.addActionListener(e -> controlador.tomarFicha());
+        jButtonTomarFicha.addActionListener(e -> {
+            controlador.tomarFicha();
+            controlador.terminarTurno();
+        });
         jButtonAbandonar.addActionListener(e -> controlador.abandonarPartida());
     }
 
@@ -99,8 +104,15 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
 
     private void actualizarEstadoBotones(IModelo modelo) {
         boolean esMiTurno = modelo.esTurnoDe(jugadorID);
+        actualizarEstadoBotones(esMiTurno);
+    }
+
+    private void actualizarEstadoBotones(boolean activo) {
+        jButtonTomarFicha.setEnabled(activo);
+        jButtonTerminarTurno.setEnabled(activo);
+
         if (uiMano != null) {
-            uiMano.actualizarEstado(esMiTurno);
+            uiMano.actualizarEstado(activo);
         }
     }
 
@@ -308,7 +320,9 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
      */
     @Override
     public void update(IModelo modelo) {
+        System.out.println("UI RECIBIÓ ACTUALIZACIÓN para " + jugadorID);
         SwingUtilities.invokeLater(() -> {
+
             List<GrupoDTO> gruposDelTablero = modelo.getGruposEnTablero();
             List<FichaDTO> fichasMano = modelo.getFichasMano();
             uiTablero.setGruposDesdeDTO(gruposDelTablero);
@@ -318,6 +332,21 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
             uiTablero.repaint();
             uiMano.revalidate();
             uiMano.repaint();
+
+            String mensajeError = modelo.getMensajeError();
+            if (mensajeError != null
+                    && !mensajeError.isBlank()
+                    && !mensajeError.equals(ultimoMensajeError)) {
+
+                javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        mensajeError,
+                        "Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                );
+
+                ultimoMensajeError = mensajeError;
+            }
         });
     }
 }

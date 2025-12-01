@@ -24,4 +24,5 @@ public interface IDominio {
 
     public void terminarTurno();
 
+    public void iniciarPartida();
 }

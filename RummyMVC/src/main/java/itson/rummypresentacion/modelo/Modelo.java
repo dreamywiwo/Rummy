@@ -26,6 +26,7 @@ public class Modelo implements IModelo, ISubject, IListener {
     // Estado interno del modelo
     private List<GrupoDTO> gruposEnTablero = new ArrayList<>();
     private JugadorDTO jugadorActual;
+    private String jugadorActivoId;
     private List<FichaDTO> fichasMano = new ArrayList<>();
     private List<JugadorDTO> otrosJugadores;
     private int fichasEnPozo;
@@ -38,6 +39,7 @@ public class Modelo implements IModelo, ISubject, IListener {
     private boolean juegoTerminado = false;
     private String jugadorGanadorId = null;
     private String idJugadorLocal;
+    private String grupoInvalidoId;
 
     //tendra al producer que se llamara para crear cada evento
     public Modelo(IProducerJugador producer) {
@@ -134,6 +136,21 @@ public class Modelo implements IModelo, ISubject, IListener {
         this.idJugadorLocal = idJugador;
     }
 
+    @Override
+    public String getGrupoInvalidoId() {
+        return this.grupoInvalidoId;
+    }
+    
+    @Override
+    public int getCantidadFichasSopa() {
+        return fichasEnPozo;
+    }
+    
+    @Override
+    public String getJugadorActivoId() {
+        return jugadorActivoId;
+    }
+
     // OBSERVER
     @Override
     public void suscribir(IObserver observer) {
@@ -158,8 +175,8 @@ public class Modelo implements IModelo, ISubject, IListener {
     }
 
     @Override
-    public void terminoTurno(TurnoTerminadoEvent event) {
-        this.turnoActual = event.getNuevoTurnoJugador();
+    public void terminoTurno(String jugadorActivoId) {
+        this.turnoActual = jugadorActivoId;
         System.out.println("[MODELO] terminoTurno() -> nuevoTurnoJugador = " + turnoActual);
         notificarObservers();
     }
@@ -175,18 +192,17 @@ public class Modelo implements IModelo, ISubject, IListener {
 
     @Override
     public void recibirMano(List<FichaDTO> mano) {
-        System.out.println("[MODELO] recibirMano() llamado, mano size = " + (mano == null ? 0 : mano.size()));
-        boolean esMiTurno = (turnoActual != null && turnoActual.equals(idJugadorLocal));
-        boolean esInicializacion = (fichasMano == null || fichasMano.isEmpty());
-        if (esInicializacion || esMiTurno) {
-            if (mano != null) {
-                this.fichasMano = mano;
-                if (this.jugadorActual != null) {
-                    jugadorActual.setFichasMano(fichasMano);
-                }
+        System.out.println("[MODELO] recibirMano() -> Actualizando " + (mano != null ? mano.size() : 0) + " fichas.");
+
+        if (mano != null) {
+            this.fichasMano = mano; 
+
+            if (this.jugadorActual != null) {
+                jugadorActual.setFichasMano(fichasMano);
             }
-            notificarObservers();
         }
+
+        notificarObservers();
     }
 
     @Override
@@ -213,6 +229,13 @@ public class Modelo implements IModelo, ISubject, IListener {
     public void marcarJuegoTerminado(String jugadorGanadorId) {
         this.juegoTerminado = true;
         this.jugadorGanadorId = jugadorGanadorId;
+
+        notificarObservers();
+    }
+
+    @Override
+    public void resaltarGrupoInvalido(String grupoId) {
+        this.grupoInvalidoId = grupoId;
 
         notificarObservers();
     }

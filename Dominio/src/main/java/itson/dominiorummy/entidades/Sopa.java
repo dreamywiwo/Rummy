@@ -21,6 +21,10 @@ public class Sopa {
     }
 
     public Ficha tomarFicha() {
+        if (fichas.isEmpty()) {
+            return null; 
+        }
+        
         int indice = random.nextInt(fichas.size());
         return fichas.remove(indice);
     }
@@ -32,6 +36,10 @@ public class Sopa {
 
     public void descartarFicha(Ficha ficha) {
         fichas.remove(ficha);
+    }
+    
+    public int getFichasRestantes() {
+        return fichas.size();
     }
 
 }

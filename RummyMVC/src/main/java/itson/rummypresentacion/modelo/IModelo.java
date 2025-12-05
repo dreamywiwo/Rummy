@@ -40,4 +40,10 @@ public interface IModelo extends ISubject {
     public boolean juegoTerminado();
 
     public String getJugadorGanadorId();
+    
+    String getGrupoInvalidoId();
+    
+    public int getCantidadFichasSopa();
+    public String getJugadorActivoId();
+
 }

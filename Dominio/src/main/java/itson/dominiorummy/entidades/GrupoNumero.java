@@ -13,7 +13,13 @@ public class GrupoNumero extends Grupo {
 
     @Override
     public boolean validarReglas() {
-
+        // 1. Evitar bugs con listas vacías o de 1 elemento
+        if (fichas.isEmpty()) {
+            return false;
+        }
+        if (fichas.size() == 1) {
+            return true; // 1 ficha técnicamente es válida estructuralmente
+        }
         List<Ficha> base = fichas.stream()
                 .map(FichaPlaced::getFicha)
                 .collect(Collectors.toList());
@@ -28,12 +34,35 @@ public class GrupoNumero extends Grupo {
                 continue;
             }
 
-            if (valorRef == null) valorRef = f.getNumero();
-            else if (!valorRef.equals(f.getNumero())) return false;
+            // Validar que todos tengan el mismo número
+            if (valorRef == null) {
+                valorRef = f.getNumero();
+            } else if (!valorRef.equals(f.getNumero())) {
+                return false; // Estructura rota: Números distintos
+            }
 
             colores.add(f.getColor());
         }
 
+        // Validar que no haya colores repetidos
+        // (Cantidad de colores únicos debe ser igual a cantidad de fichas no-comodín)
         return colores.size() == (base.size() - comodines);
+    }
+
+    @Override
+    public int calcularPuntos() {
+        if (fichas.isEmpty()) {
+            return 0;
+        }
+
+        int valorReferencia = 0;
+        for (FichaPlaced fp : fichas) {
+            if (!fp.getFicha().isEsComodin()) {
+                valorReferencia = fp.getFicha().getNumero();
+                break;
+            }
+        }
+
+        return valorReferencia * fichas.size();
     }
 }

@@ -15,11 +15,13 @@ import java.util.List;
  */
 public interface IListener {
 
-    public void terminoTurno(TurnoTerminadoEvent event);
+    public void terminoTurno(String jugadorActivoId);
     public void recibirTablero(TableroDTO tableroDTO);
     public void recibirMano(List<FichaDTO> mano);
     public void recibirSopa(int cantidad);
     public void recibirError(String mensaje);
 
     public void marcarJuegoTerminado(String jugadorGanadorId);
+
+    public void resaltarGrupoInvalido(String grupoId);
 }

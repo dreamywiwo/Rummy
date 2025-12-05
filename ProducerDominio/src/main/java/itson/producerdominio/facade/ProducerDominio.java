@@ -1,10 +1,10 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
-
 package itson.producerdominio.facade;
 
 import itson.producerdominio.emitters.EstadoJuegoEmitter;
+import itson.producerdominio.emitters.InicializarJuegoEmitter;
 import itson.rummydtos.FichaDTO;
 import itson.rummydtos.TableroDTO;
 import java.util.List;
@@ -14,11 +14,13 @@ import java.util.List;
  * @author Dana Chavez
  */
 public class ProducerDominio implements IProducerDominio {
-    
-    EstadoJuegoEmitter estadoJuegoEmitter;
 
-    public ProducerDominio(EstadoJuegoEmitter estadoJuegoEmitter) {
+    EstadoJuegoEmitter estadoJuegoEmitter;
+    InicializarJuegoEmitter inicializarJuegoEmitter;
+
+    public ProducerDominio(EstadoJuegoEmitter estadoJuegoEmitter, InicializarJuegoEmitter inicializarJuegoEmitter) {
         this.estadoJuegoEmitter = estadoJuegoEmitter;
+        this.inicializarJuegoEmitter = inicializarJuegoEmitter;
     }
 
     @Override
@@ -27,8 +29,8 @@ public class ProducerDominio implements IProducerDominio {
     }
 
     @Override
-    public void actualizarManoJugador(List<FichaDTO> snapshotMano) {
-        estadoJuegoEmitter.emitirManoActualizadaEvent(snapshotMano);
+    public void actualizarManoJugador(String jugadorId, List<FichaDTO> snapshotMano) {
+        estadoJuegoEmitter.emitirManoActualizadaEvent(jugadorId, snapshotMano);
     }
 
     @Override
@@ -42,13 +44,28 @@ public class ProducerDominio implements IProducerDominio {
     }
 
     @Override
-    public void mostrarError(String mensajeError) {
-        estadoJuegoEmitter.emitirErrorEvent(mensajeError);
+    public void mostrarError(String jugadorId, String mensajeError) {
+        estadoJuegoEmitter.emitirErrorEvent(jugadorId, mensajeError);
     }
 
     @Override
     public void juegoTerminado(String jugadorId) {
         estadoJuegoEmitter.emitirJuegoTerminadoEvent(jugadorId);
+    }
+
+    @Override
+    public void enviarCantidadFichasPublico(String jugadorId, int size) {
+        estadoJuegoEmitter.emitirCantidadFichasPublicoEvent(jugadorId, size);
+    }
+
+    @Override
+    public void highlightInvalidGroup(String jugadorId, String grupoId) {
+        estadoJuegoEmitter.emitirHighlightInvalidGroupEvent(jugadorId, grupoId);
+    }
+
+    @Override
+    public void registrarDominio(String miId, String ipCliente, int miPuertoDeEscucha) {
+        inicializarJuegoEmitter.emitirRegistroDominioEvent(miId, ipCliente, miPuertoDeEscucha);
     }
 
 }

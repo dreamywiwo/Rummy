@@ -31,6 +31,7 @@ public class UI_Ficha extends JLabel {
     private double escalaActual = 1.0;
 
     private boolean seleccionada = false;
+    private boolean tieneError = false;
 
     public UI_Ficha(FichaDTO ficha) {
         this(ficha, null, 1.0);
@@ -54,11 +55,10 @@ public class UI_Ficha extends JLabel {
         setHorizontalAlignment(CENTER);
         setVerticalAlignment(CENTER);
         setPreferredSize(new Dimension(60, 80));
-        setBorder(new EmptyBorder(5, 5, 5, 5));
+        setBorder(new EmptyBorder(5, 5, 5, 5)); 
         actualizarVisual();
     }
 
-    // 1. DETECTAR EL CLIC
     private void habilitarSeleccion() {
         addMouseListener(new MouseAdapter() {
             @Override
@@ -103,16 +103,22 @@ public class UI_Ficha extends JLabel {
         int radioBordeEscalado = (int) (RADIO_BORDE * escalaActual);
         float grosorBorde = (float) (2f * escalaActual);
 
+        float grosorDestacado = (float) (4f * escalaActual); 
+
+        // Sombra
         g2d.setColor(new Color(0, 0, 0, 30));
         g2d.fill(new RoundRectangle2D.Float(3, 3, width - 3, height - 3, radioBordeEscalado, radioBordeEscalado));
 
+        // Fondo
         g2d.setColor(obtenerColorFondo());
         g2d.fill(new RoundRectangle2D.Float(0, 0, width - 3, height - 3, radioBordeEscalado, radioBordeEscalado));
 
-        // 2. DIBUJAR BORDE VERDE SI ESTÁ SELECCIONADA
-        if (seleccionada) {
+        if (tieneError) {
+            g2d.setColor(Color.RED);
+            g2d.setStroke(new BasicStroke(grosorDestacado));
+        } else if (seleccionada) {
             g2d.setColor(new Color(50, 205, 50));
-            g2d.setStroke(new BasicStroke((float) (4f * escalaActual)));
+            g2d.setStroke(new BasicStroke(grosorDestacado));
         } else {
             g2d.setColor(obtenerColorBorde());
             g2d.setStroke(new BasicStroke(grosorBorde));
@@ -233,6 +239,19 @@ public class UI_Ficha extends JLabel {
             default:
                 return new Color(200, 200, 200, 150);
         }
+    }
+
+    /**
+     * Activa o desactiva el modo de error visual.
+     * @param error true para mostrar borde rojo redondeado, false para normal.
+     */
+    public void setBordeError(boolean error) {
+        this.tieneError = error;
+        repaint();
+    }
+    
+    public boolean tieneError() {
+        return tieneError;
     }
 
     public FichaDTO getFicha() {

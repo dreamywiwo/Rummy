@@ -13,7 +13,7 @@ import java.util.List;
  * @author Dana Chavez
  */
 public class ManoActualizadaEvent extends EventBase {
-
+    private String jugadorId; 
     private List<FichaDTO> manoSnapshot;
 
     public static final String TOPIC = "actualizaciones.estado";
@@ -23,9 +23,18 @@ public class ManoActualizadaEvent extends EventBase {
         super();
     }
 
-    public ManoActualizadaEvent(List<FichaDTO> manoSnapshot) {
+    public ManoActualizadaEvent(String jugadorId, List<FichaDTO> manoSnapshot) {
         super(TOPIC, EVENT_TYPE);
+        this.jugadorId = jugadorId;
         this.manoSnapshot = manoSnapshot;
+    }
+
+    public String getJugadorId() {
+        return jugadorId;
+    }
+
+    public void setJugadorId(String jugadorId) {
+        this.jugadorId = jugadorId;
     }
 
     public List<FichaDTO> getManoSnapshot() {

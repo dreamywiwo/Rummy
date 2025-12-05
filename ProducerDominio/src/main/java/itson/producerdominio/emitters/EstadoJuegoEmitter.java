@@ -7,7 +7,9 @@ package itson.producerdominio.emitters;
 import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.rummydtos.FichaDTO;
 import itson.rummydtos.TableroDTO;
+import itson.rummyeventos.actualizaciones.CantidadFichasPublicoEvent;
 import itson.rummyeventos.actualizaciones.ErrorEvent;
+import itson.rummyeventos.actualizaciones.HighlightInvalidGroupEvent;
 import itson.rummyeventos.actualizaciones.JuegoTerminadoEvent;
 import itson.rummyeventos.actualizaciones.ManoActualizadaEvent;
 import itson.rummyeventos.actualizaciones.SopaActualizadaEvent;
@@ -40,8 +42,8 @@ public class EstadoJuegoEmitter {
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
-    public void emitirManoActualizadaEvent(List<FichaDTO> snapshotMano) {
-        ManoActualizadaEvent event = new ManoActualizadaEvent(snapshotMano);
+    public void emitirManoActualizadaEvent(String jugadorDestino, List<FichaDTO> snapshotMano) {
+        ManoActualizadaEvent event = new ManoActualizadaEvent(jugadorDestino, snapshotMano);
         String json = jsonSerializer.serialize(event);
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
@@ -58,14 +60,26 @@ public class EstadoJuegoEmitter {
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
-    public void emitirErrorEvent(String mensajeError) {
-        ErrorEvent event = new ErrorEvent(mensajeError);
+    public void emitirErrorEvent(String jugadorId, String mensajeError) {
+        ErrorEvent event = new ErrorEvent(jugadorId, mensajeError);
         String json = jsonSerializer.serialize(event);
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
     public void emitirJuegoTerminadoEvent(String jugadorId) {
         JuegoTerminadoEvent event = new JuegoTerminadoEvent(jugadorId);
+        String json = jsonSerializer.serialize(event);
+        dispatcher.enviar(json, brokerPort, brokerIp);
+    }
+
+    public void emitirCantidadFichasPublicoEvent(String jugadorId, int size) {
+        CantidadFichasPublicoEvent event = new CantidadFichasPublicoEvent(jugadorId, size);
+        String json = jsonSerializer.serialize(event);
+        dispatcher.enviar(json, brokerPort, brokerIp);
+    }
+
+    public void emitirHighlightInvalidGroupEvent(String jugadorId, String grupoId) {
+        HighlightInvalidGroupEvent event = new HighlightInvalidGroupEvent(jugadorId, grupoId);
         String json = jsonSerializer.serialize(event);
         dispatcher.enviar(json, brokerPort, brokerIp);
     }

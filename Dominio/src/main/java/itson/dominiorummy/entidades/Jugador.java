@@ -20,7 +20,9 @@ public class Jugador {
 
     private boolean yaBajo30;       
     private boolean haTerminado;   
-    private boolean enTurno;       
+    private boolean enTurno;    
+    
+    private boolean haTomadoFicha;
 
     public Jugador(String nombre) {
         this.id = UUID.randomUUID().toString();
@@ -76,21 +78,24 @@ public class Jugador {
         this.enTurno = enTurno;
     }
     
+    public boolean haTomadoFicha() {
+        return haTomadoFicha;
+    }
+
+    public void setHaTomadoFicha(boolean haTomadoFicha) {
+        this.haTomadoFicha = haTomadoFicha;
+    }
+
+    public void reiniciarEstadoTurno() {
+        this.haTomadoFicha = false;
+    }
+    
     /**
      * Calcula los puntos de la mano actual (sirve para final de partida).
      */
     public int calcularPuntosEnMano() {
         return mano.getFichas().stream()
                 .mapToInt(f -> f.getNumero())
-                .sum();
-    }
-
-    /**
-     * Calcula puntos de una lista de fichas bajadas (para validar primer turno 30pts).
-     */
-    public static int calcularPuntos(List<Ficha> fichas) {
-        return fichas.stream()
-                .mapToInt(Ficha::getNumero)
                 .sum();
     }
 

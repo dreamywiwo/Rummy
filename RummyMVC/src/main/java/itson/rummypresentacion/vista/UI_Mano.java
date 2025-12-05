@@ -1,14 +1,9 @@
 package itson.rummypresentacion.vista;
 
 import itson.rummydtos.FichaDTO;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -27,7 +22,6 @@ public class UI_Mano extends JPanel {
     private final List<UI_Ficha> fichasSeleccionadasVisualmente = new ArrayList<>();
     private final UI_Tablero tableroPanel;
     private boolean habilitado = true;
-    private String titulo = "Tu Mano tiene 0 fichas";
 
     public UI_Mano(UI_Tablero tableroPanel) {
         this(tableroPanel, null);
@@ -49,12 +43,12 @@ public class UI_Mano extends JPanel {
     }
 
     public void setFichas(List<FichaDTO> nuevas) {
-        fichas.clear();
+        fichas.clear(); 
         if (nuevas != null) {
             fichas.addAll(nuevas);
         }
-        ordenar();
-        refrescar();
+        ordenar(); 
+        refrescar(); 
     }
 
     public List<FichaDTO> getFichas() {
@@ -126,21 +120,17 @@ public class UI_Mano extends JPanel {
     }
 
     public void refrescar() {
-        removeAll();
+        this.removeAll();
         fichasSeleccionadasVisualmente.clear();
 
         for (FichaDTO dto : fichas) {
             UI_Ficha uiFicha = new UI_Ficha(dto);
-            add(uiFicha);
+            this.add(uiFicha);
         }
 
-        actualizarTitulo();
-        revalidate();
-        repaint();
-    }
+        this.revalidate();
+        this.repaint();
 
-    private void actualizarTitulo() {
-        titulo = "Tu Mano (" + fichas.size() + " fichas)";
     }
 
     private void configurarDropTarget() {
@@ -213,37 +203,4 @@ public class UI_Mano extends JPanel {
         repaint();
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-                java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-        int padding = 6;
-        int arc = 20;
-
-        int x = padding;
-        int y = padding;
-        int w = getWidth() - padding * 2;
-        int h = getHeight() - padding * 2;
-
-        g2.setColor(new Color(255, 250, 240, 230));
-        g2.fillRoundRect(x, y, w, h, arc, arc);
-
-        g2.setColor(new Color(160, 130, 90, 200));
-        g2.setStroke(new BasicStroke(1.5f));
-        g2.drawRoundRect(x, y, w, h, arc, arc);
-        g2.setColor(new Color(90, 70, 50));
-        Font base = getFont();
-        if (base == null) {
-            base = new Font("SansSerif", Font.BOLD, 12);
-        }
-        g2.setFont(base.deriveFont(Font.BOLD, 12f));
-        FontMetrics fm = g2.getFontMetrics();
-        int textX = x + 12;
-        int textY = y + fm.getAscent() + 4;
-        g2.drawString(titulo, textX, textY);
-        g2.dispose();
-    }
 }

@@ -1,11 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package itson.traducerjugador.mappers;
 
-import itson.rummydtos.TableroDTO;
 import itson.rummyeventos.actualizaciones.ErrorEvent;
+import itson.rummyeventos.actualizaciones.HighlightInvalidGroupEvent;
 import itson.rummyeventos.actualizaciones.JuegoTerminadoEvent;
 import itson.rummyeventos.actualizaciones.ManoActualizadaEvent;
 import itson.rummyeventos.actualizaciones.SopaActualizadaEvent;
@@ -18,14 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-/**
- *
- * @author Dana Chavez
- */
 public class EventMapper {
 
     private final ISerializer serializer;
     private IListener listener;
+
+    private String miJugadorId;
 
     private final Map<String, BiConsumer<String, ISerializer>> handlers = new HashMap<>();
 
@@ -38,10 +32,16 @@ public class EventMapper {
         register("turno.terminado", this::handleTurnoTerminado);
         register("mensaje.error", this::handleError);
         register("juego.terminado", this::handleJuegoTerminado);
+        register("grupo.invalido", this::handleHighlightInvalidGroup);
+
     }
 
     public void setListener(IListener listener) {
         this.listener = listener;
+    }
+
+    public void setJugadorId(String jugadorId) {
+        this.miJugadorId = jugadorId;
     }
 
     public void register(String eventType, BiConsumer<String, ISerializer> handler) {
@@ -61,22 +61,12 @@ public class EventMapper {
         handler.accept(rawPayload, serializer);
     }
 
+
     private void handleTableroActualizado(String rawPayload, ISerializer serializer) {
         try {
             TableroActualizadoEvent event = serializer.deserialize(rawPayload, TableroActualizadoEvent.class);
             if (listener != null) {
                 listener.recibirTablero(event.getTableroSnapshot());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleManoActualizada(String rawPayload, ISerializer serializer) {
-        try {
-            ManoActualizadaEvent event = serializer.deserialize(rawPayload, ManoActualizadaEvent.class);
-            if (listener != null) {
-                listener.recibirMano(event.getManoSnapshot());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,25 +85,10 @@ public class EventMapper {
     }
 
     private void handleTurnoTerminado(String rawPayload, ISerializer serializer) {
-
         try {
             TurnoTerminadoEvent event = serializer.deserialize(rawPayload, TurnoTerminadoEvent.class);
-            if (listener == null) {
-                System.out.println("El listener es null verifique");
-            } else {
-                listener.terminoTurno(event);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleError(String rawPayload, ISerializer serializer) {
-        try {
-            ErrorEvent event = serializer.deserialize(rawPayload, ErrorEvent.class);
-            if (listener != null && event != null) {
-                String mensaje = event.getMensajeError();
-                listener.recibirError(mensaje);
+            if (listener != null) {
+                listener.terminoTurno(event.getNuevoTurnoJugador());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -126,6 +101,57 @@ public class EventMapper {
             if (listener != null) {
                 listener.marcarJuegoTerminado(event.getJugadorGanadorId());
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleManoActualizada(String rawPayload, ISerializer serializer) {
+        try {
+            ManoActualizadaEvent event = serializer.deserialize(rawPayload, ManoActualizadaEvent.class);
+
+            if (!event.getJugadorId().equals(miJugadorId)) {
+                return; 
+            }
+
+            if (listener != null) {
+                listener.recibirMano(event.getManoSnapshot());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleError(String rawPayload, ISerializer serializer) {
+        try {
+            ErrorEvent event = serializer.deserialize(rawPayload, ErrorEvent.class);
+
+            if (!event.getJugadorId().equals(miJugadorId)) {
+                return; 
+            }
+
+            if (listener != null) {
+                listener.recibirError(event.getMensajeError());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void handleHighlightInvalidGroup(String rawPayload, ISerializer serializer) {
+        try {
+            HighlightInvalidGroupEvent event =
+                serializer.deserialize(rawPayload, HighlightInvalidGroupEvent.class);
+
+
+            if (!event.getJugadorId().equals(event.getJugadorId())) {
+                return;
+            }
+            
+            if (listener != null) {
+                listener.resaltarGrupoInvalido(event.getGrupoId());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

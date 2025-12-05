@@ -11,7 +11,7 @@ import itson.rummyeventos.base.EventBase;
  * @author Dana Chavez
  */
 public class ErrorEvent extends EventBase {
-
+    private String jugadorId;
     private String mensajeError;
 
     public static final String TOPIC = "actualizaciones.estado";
@@ -21,9 +21,18 @@ public class ErrorEvent extends EventBase {
         super();
     }
 
-    public ErrorEvent(String mensajeError) {
+    public ErrorEvent(String jugadorId, String mensajeError) {
         super(TOPIC, EVENT_TYPE);
+        this.jugadorId = jugadorId;
         this.mensajeError = mensajeError;
+    }
+
+    public String getJugadorId() {
+        return jugadorId;
+    }
+
+    public void setJugadorId(String jugadorId) {
+        this.jugadorId = jugadorId;
     }
 
     public String getMensajeError() {

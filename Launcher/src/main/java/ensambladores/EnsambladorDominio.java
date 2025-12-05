@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package ensambladores;
 
 import ClaseDispatcher.ColaDispatcher;
@@ -17,140 +13,112 @@ import itson.dominiorummy.entidades.Sopa;
 import itson.dominiorummy.entidades.Tablero;
 import itson.dominiorummy.entidades.Turno;
 import itson.dominiorummy.facade.Dominio;
-import itson.dominiorummy.facade.IDominio;
 import itson.producerdominio.emitters.EstadoJuegoEmitter;
+import itson.producerdominio.emitters.InicializarJuegoEmitter;
 import itson.producerdominio.facade.IProducerDominio;
 import itson.producerdominio.facade.ProducerDominio;
-import itson.producerjugador.emitters.InicializarJuegoEmitter;
 import itson.serializer.implementacion.JsonSerializer;
 import itson.traducerdominio.facade.TraducerDominio;
 import itson.traducerdominio.mappers.EventMapper;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class EnsambladorDominio {
 
-    private IDominio dominio;
+    private Dominio dominio;
 
-    // --- CLASE MOCK INTERNA PARA LA SOPA ---
-    private class SopaDeterminista extends Sopa {
-
-        private final List<Ficha> misFichas;
-
-        public SopaDeterminista(List<Ficha> fichas) {
-            super(fichas);
-            this.misFichas = fichas;
-        }
-
-        @Override
-        public Ficha tomarFicha() {
-            if (misFichas.isEmpty()) {
-                return null;
-            }
-
-            return misFichas.remove(0);
-        }
-    }
-
-    public void iniciarJuego(String brokerIp, int brokerPort, int puertoEscuchaJuego, List<Jugador> jugadores) {
-
-        JsonSerializer serializer = new JsonSerializer();
+    public void iniciarJuego(String ipBroker, int puertoBroker, int puertoEscuchaDominio, List<Jugador> jugadores) {
+        
+        // 1. Configuración de RED SALIENTE
+        JsonSerializer jsonSerializer = new JsonSerializer();
+        
         SocketOut socketOut = new SocketOut();
         socketOut.start();
+        
         ColaDispatcher colaDispatcher = new ColaDispatcher();
         colaDispatcher.attach(socketOut);
+        
         IDispatcher dispatcher = new Dispatcher(colaDispatcher);
 
-        InicializarJuegoEmitter registroEmitter = new InicializarJuegoEmitter(serializer, dispatcher, brokerIp, brokerPort);
-        registroEmitter.emitirRegistroJugadorEvent("Dominio", brokerIp, puertoEscuchaJuego);
+        EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(jsonSerializer, dispatcher, ipBroker, puertoBroker);
 
-        List<Ficha> todasLasFichas = generarFichasRummy();
+        InicializarJuegoEmitter initEmitter = new InicializarJuegoEmitter(jsonSerializer, dispatcher, ipBroker, puertoBroker);
 
-        List<Ficha> manoTrucada = new ArrayList<>();
-        manoTrucada.add(buscarYQuitar(todasLasFichas, "rojo", 1));
-        manoTrucada.add(buscarYQuitar(todasLasFichas, "rojo", 2));
-        manoTrucada.add(buscarYQuitar(todasLasFichas, "rojo", 3));
-        manoTrucada.add(buscarYQuitar(todasLasFichas, "azul", 10));
-        manoTrucada.add(buscarYQuitar(todasLasFichas, "verde", 10));
+        IProducerDominio producer = new ProducerDominio(estadoEmitter, initEmitter); 
 
-        Ficha fichaParaComer = buscarYQuitar(todasLasFichas, "amarillo", 10);
-        todasLasFichas.add(0, fichaParaComer);
-
-        Sopa sopa = new SopaDeterminista(todasLasFichas);
-
+        // 2. INICIALIZACIÓN DE LÓGICA DE JUEGO
+        List<Ficha> mazoCompleto = generarFichasRummy();
+        Sopa sopa = new Sopa(mazoCompleto);
         Tablero tablero = new Tablero();
-
-        Turno turno = new Turno(jugadores, 0);
-
-        EstadoJuegoEmitter estadoEmitter = new EstadoJuegoEmitter(serializer, dispatcher, brokerIp, brokerPort);
-        IProducerDominio producerDominio = new ProducerDominio(estadoEmitter);
-
-        this.dominio = new Dominio(tablero, producerDominio, turno, sopa, todasLasFichas);
-
-        for (int i = 0; i < jugadores.size(); i++) {
-            Jugador j = jugadores.get(i);
-
-            if (i == 0) {
-                for (Ficha f : manoTrucada) {
-                    j.getMano().agregarFicha(f);
+        
+        if (jugadores != null && !jugadores.isEmpty()) {
+            for (Jugador jugador : jugadores) {
+                for (int i = 0; i < 14; i++) {
+                    Ficha f = sopa.tomarFicha();
+                    if (f != null) {
+                        jugador.getMano().agregarFicha(f);
+                    }
                 }
-            } else {
-                for (int k = 0; k < 7; k++) {
-                    j.getMano().agregarFicha(sopa.tomarFicha());
-                }
+                System.out.println("EnsambladorDominio: Se repartieron 14 fichas a " + jugador.getNombre());
             }
-
-            dominio.agregarJugador(j);
-            System.out.println("Dominio: Jugador agregado - " + j.getNombre());
         }
 
-        EventMapper mapperDominio = new EventMapper(serializer, dominio);
-        TraducerDominio traducerDominio = new TraducerDominio(serializer, mapperDominio);
-        ColaReceptor colaReceptor = new ColaReceptor();
-        colaReceptor.attach(new Receptor(traducerDominio));
-        SocketIN socketIN = new SocketIN(puertoEscuchaJuego, colaReceptor);
-        socketIN.start();
+        Turno turno = new Turno(jugadores, 0); 
+        this.dominio = new Dominio(tablero, producer, turno, sopa, mazoCompleto);
+        
+        if (jugadores != null) {
+            for(Jugador j : jugadores){
+                this.dominio.agregarJugador(j);
+            }
+        }
 
-        System.out.println("EnsambladorDominio: MODO PRUEBAS ACTIVADO en puerto " + puertoEscuchaJuego);
+        // 3. Configuración de RED ENTRANTE
+        EventMapper eventMapper = new EventMapper(jsonSerializer, this.dominio);
+        TraducerDominio traducer = new TraducerDominio(jsonSerializer, eventMapper);
+        Receptor receptor = new Receptor(traducer);
+        ColaReceptor colaReceptor = new ColaReceptor();
+        colaReceptor.attach(receptor);
+
+        SocketIN socketIn = new SocketIN(puertoEscuchaDominio, colaReceptor);
+        socketIn.start();
+
+        System.out.println("EnsambladorDominio: Lógica de juego lista en puerto " + puertoEscuchaDominio);
+        
+        // 4. HANDSHAKE (REGISTRO) AUTOMÁTICO
+
+        String dominioId = "DOMINIO_SERVER"; 
+        // Usamos "127.0.0.1" o la IP local donde esté corriendo el dominio
+        initEmitter.emitirRegistroDominioEvent(dominioId, "127.0.0.1", puertoEscuchaDominio);
+        System.out.println("EnsambladorDominio: Solicitud de registro enviada al Broker.");
     }
 
     public void comenzarPartida() {
-        if (this.dominio == null) {
-            throw new IllegalStateException(
-                    "La partida no puede comenzar porque el dominio no ha sido inicializado. "
-                    + "Llama primero a iniciarJuego()."
-            );
+        if (this.dominio != null) {
+            System.out.println("EnsambladorDominio: Ordenando inicio de partida...");
+            this.dominio.iniciarPartida(); 
+        } else {
+            System.err.println("EnsambladorDominio: No se ha inicializado el juego.");
         }
-        this.dominio.iniciarPartida();
-    }
-
-    // UTILIDAD PARA BUSCAR Y EXTRAER FICHAS DEL MAZO GLOBAL
-    private Ficha buscarYQuitar(List<Ficha> lista, String color, int numero) {
-        Iterator<Ficha> it = lista.iterator();
-        while (it.hasNext()) {
-            Ficha f = it.next();
-            if (f.getColor().equalsIgnoreCase(color) && f.getNumero() == numero) {
-                it.remove();
-                return f;
-            }
-        }
-        return null;
     }
 
     private List<Ficha> generarFichasRummy() {
         List<Ficha> fichas = new ArrayList<>();
-        String[] colores = {"rojo", "azul", "verde", "amarillo"};
-        for (int i = 0; i < 2; i++) {
+        String[] colores = {"ROJO", "AZUL", "NEGRO", "AMARILLO"}; 
+
+        for (int set = 0; set < 2; set++) {
             for (String color : colores) {
-                for (int num = 1; num <= 13; num++) {
-                    String id = "f_" + color.charAt(0) + num + "_" + i;
-                    fichas.add(new Ficha(id, num, color, false));
+                for (int numero = 1; numero <= 13; numero++) {
+                    String idUnico = UUID.randomUUID().toString();
+                    Ficha f = new Ficha(idUnico, numero, color, false);
+                    fichas.add(f);
                 }
             }
         }
-        fichas.add(new Ficha("joker_1", 0, "comodin", true));
-        fichas.add(new Ficha("joker_2", 0, "comodin", true));
+        fichas.add(new Ficha(UUID.randomUUID().toString(), 0, "COMODIN", true));
+        fichas.add(new Ficha(UUID.randomUUID().toString(), 0, "COMODIN", true));
+        Collections.shuffle(fichas);
         return fichas;
     }
 }

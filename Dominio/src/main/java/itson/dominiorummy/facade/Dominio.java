@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package itson.dominiorummy.facade;
 
 import itson.dominiorummy.entidades.Ficha;
@@ -10,7 +6,6 @@ import itson.dominiorummy.entidades.Grupo;
 import itson.dominiorummy.entidades.GrupoNumero;
 import itson.dominiorummy.entidades.GrupoSecuencia;
 import itson.dominiorummy.entidades.Jugador;
-import itson.dominiorummy.entidades.Mano;
 import itson.dominiorummy.entidades.Sopa;
 import itson.dominiorummy.entidades.Tablero;
 import itson.dominiorummy.entidades.Turno;
@@ -18,7 +13,6 @@ import itson.dominiorummy.mappers.FichaMapper;
 import itson.dominiorummy.mappers.TableroMapper;
 import itson.producerdominio.facade.IProducerDominio;
 import itson.rummydtos.FichaDTO;
-import itson.rummydtos.TableroDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,10 +20,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-/**
- *
- * @author Dana Chavez
- */
 public class Dominio implements IDominio {
 
     private final Tablero tablero;
@@ -38,103 +28,144 @@ public class Dominio implements IDominio {
     private final Sopa sopa;
     private final List<Ficha> fichas;
     private final Map<String, Jugador> jugadores;
-    private static final Logger LOG = Logger.getLogger(itson.dominiorummy.facade.Dominio.class.getName());
 
-    public Dominio(Tablero tablero, IProducerDominio producer, Turno turno, Sopa sopa, List<Ficha> ficha) {
-        this.fichas = ficha;
+    private static final Logger LOG = Logger.getLogger(Dominio.class.getName());
+
+    public Dominio(Tablero tablero, IProducerDominio producer, Turno turno, Sopa sopa, List<Ficha> fichas) {
+        this.fichas = fichas;
         this.tablero = tablero;
         this.producer = producer;
         this.turno = turno;
         this.jugadores = new HashMap<>();
-        this.sopa = new Sopa(fichas);
+        this.sopa = sopa;
     }
 
+    // INICIAR PARTIDA
     public void iniciarPartida() {
         try {
-            Jugador jugador = turno.getJugadorActual();
-            if (jugador == null) {
+            for (Jugador j : this.jugadores.values()) {
+                producer.actualizarManoJugador(
+                        j.getId(),
+                        FichaMapper.toDTO(j.getMano().getFichas())
+                );
+                System.out.println("[DOMINIO] Mano inicial enviada a: " + j.getNombre());
+            }
+
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            producer.actualizarSopa(sopa.getFichasRestantes());
+
+            Jugador jugadorEnTurno = turno.getJugadorActual();
+            if (jugadorEnTurno == null) {
                 LOG.warning("No hay jugador actual definido al iniciar la partida.");
                 return;
             }
 
-            String jugadorIdInterno = jugador.getId();
-
-            String jugadorIdPublico = jugador.getNombre();
-
-            producer.actualizarManoJugador(
-                    FichaMapper.toDTO(jugador.getMano().getFichas())
-            );
-
-            TableroDTO tableroActualizado = FichaMapper.toDTO(tablero);
-            producer.actualizarTablero(tableroActualizado);
-
-            producer.actualizarTurno(jugadorIdPublico);
+            String jugadorIdTurno = jugadorEnTurno.getId();
+            producer.actualizarTurno(jugadorIdTurno);
 
         } catch (Exception e) {
             LOG.severe("Error al iniciar la partida: " + e.getMessage());
-            producer.mostrarError("Ocurrió un error al iniciar la partida.");
+            e.printStackTrace();
         }
     }
 
+    // CREAR GRUPO
     @Override
     public void crearGrupo(List<FichaDTO> fichasDTO) {
-
         Jugador jugador = turno.getJugadorActual();
-        Mano mano = jugador.getMano();
+        String jugadorId = jugador.getId();
         int turnoActual = turno.getNumeroTurno();
 
         List<FichaPlaced> fichasAInsertar = new ArrayList<>();
-
         List<String> idsSacadosDeMano = new ArrayList<>();
 
-        for (FichaDTO dto : fichasDTO) {
-            String fichaId = dto.getId();
-
-            if (mano.tieneFicha(fichaId)) {
-                Ficha base = mano.quitarFicha(fichaId);
-                idsSacadosDeMano.add(fichaId);
-
-                FichaPlaced fp = new FichaPlaced(base, jugador.getId(), turnoActual);
-                fichasAInsertar.add(fp);
-                continue;
-            }
-
-            FichaPlaced fpDesdeTablero = tablero.buscarFichaPlacedGlobal(fichaId);
-
-            if (fpDesdeTablero != null) {
-                tablero.removerFichaGlobal(fichaId);
-                fichasAInsertar.add(fpDesdeTablero);
-                continue;
-            }
-
-            producer.mostrarError("La ficha " + fichaId + " no está disponible.");
-            rollbackCreacion(fichasAInsertar, idsSacadosDeMano, jugador);
-            producer.actualizarTablero(TableroMapper.toDTO(tablero));
-            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
+        if (!recolectarFichas(fichasDTO, jugador, turnoActual, fichasAInsertar, idsSacadosDeMano)) {
             return;
         }
 
         Grupo grupoNuevo = tablero.crearGrupoDesdeFichasPlaced(fichasAInsertar);
 
-        if (grupoNuevo == null) {
+        if (grupoNuevo == null || !grupoNuevo.validarReglas()) {
             rollbackCreacion(fichasAInsertar, idsSacadosDeMano, jugador);
-
-            producer.mostrarError("Las fichas no forman un grupo válido.");
-
+            producer.mostrarError(jugadorId, "Movimiento inválido: Las fichas no forman una estructura correcta.");
             producer.actualizarTablero(TableroMapper.toDTO(tablero));
-            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
+            producer.actualizarManoJugador(jugadorId, FichaMapper.toDTO(jugador.getMano().getFichas()));
             return;
         }
-        tablero.agregarGrupo(grupoNuevo);
 
+        tablero.agregarGrupo(grupoNuevo);
         producer.actualizarTablero(TableroMapper.toDTO(tablero));
-        producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
+        producer.actualizarManoJugador(jugadorId, FichaMapper.toDTO(jugador.getMano().getFichas()));
+        producer.enviarCantidadFichasPublico(jugadorId, jugador.getMano().getFichas().size());
     }
 
-    private void rollbackCreacion(List<FichaPlaced> fichasProcesadas, List<String> idsDeMano, Jugador jugador) {
-        for (FichaPlaced fp : fichasProcesadas) {
-            String id = fp.getFicha().getId();
-            if (idsDeMano.contains(id)) {
+    // ACTUALIZAR GRUPO
+    @Override
+    public void actualizarGrupo(String grupoId, List<FichaDTO> fichasNuevasDTO) {
+        Jugador jugador = turno.getJugadorActual();
+        String jugadorId = jugador.getId();
+        int turnoActual = turno.getNumeroTurno();
+
+        List<FichaPlaced> fichasDelGrupo = tablero.obtenerFichasDeGrupo(grupoId);
+        List<FichaPlaced> combinacionPrueba = fichasDelGrupo.stream()
+                .map(FichaPlaced::clonar)
+                .collect(Collectors.toList());
+
+        List<FichaPlaced> fichasNuevasInsertar = new ArrayList<>();
+        List<String> idsSacadosDeMano = new ArrayList<>();
+
+        if (!recolectarFichas(fichasNuevasDTO, jugador, turnoActual, fichasNuevasInsertar, idsSacadosDeMano)) {
+            return;
+        }
+
+        combinacionPrueba.addAll(fichasNuevasInsertar);
+        Grupo grupoResultante = tablero.crearGrupoDesdeFichasPlaced(combinacionPrueba);
+
+        if (grupoResultante != null && grupoResultante.validarReglas()) {
+            Grupo grupoFinal = forzarIdGrupo(grupoResultante, grupoId);
+            tablero.removerGrupo(grupoId);
+            tablero.agregarGrupo(grupoFinal);
+        } else {
+            producer.mostrarError(jugadorId, "La ficha no encaja. Se creó un nuevo grupo.");
+            Grupo grupoRebote = tablero.crearGrupoDesdeFichasPlaced(fichasNuevasInsertar);
+            tablero.agregarGrupo(grupoRebote);
+        }
+
+        if (tablero.grupoEstaVacio(grupoId)) {
+            tablero.removerGrupo(grupoId);
+        }
+
+        producer.actualizarTablero(TableroMapper.toDTO(tablero));
+        producer.actualizarManoJugador(jugadorId, FichaMapper.toDTO(jugador.getMano().getFichas()));
+        producer.enviarCantidadFichasPublico(jugadorId, jugador.getMano().getFichas().size());
+    }
+
+    private boolean recolectarFichas(List<FichaDTO> dtos, Jugador jugador, int turnoActual,
+            List<FichaPlaced> destino, List<String> idsMano) {
+        for (FichaDTO dto : dtos) {
+            String fid = dto.getId();
+            if (jugador.getMano().tieneFicha(fid)) {
+                Ficha f = jugador.getMano().quitarFicha(fid);
+                idsMano.add(fid);
+                destino.add(new FichaPlaced(f, jugador.getId(), turnoActual));
+                continue;
+            }
+            FichaPlaced fp = tablero.buscarFichaPlacedGlobal(fid);
+            if (fp != null) {
+                tablero.removerFichaGlobal(fid);
+                destino.add(fp);
+                continue;
+            }
+            producer.mostrarError(jugador.getId(), "Ficha no encontrada: " + fid);
+            rollbackCreacion(destino, idsMano, jugador);
+            return false;
+        }
+        return true;
+    }
+
+    private void rollbackCreacion(List<FichaPlaced> fichas, List<String> idsMano, Jugador jugador) {
+        for (FichaPlaced fp : fichas) {
+            if (idsMano.contains(fp.getFicha().getId())) {
                 jugador.getMano().agregarFicha(fp.getFicha());
             } else {
                 tablero.restaurarFicha(fp);
@@ -142,208 +173,143 @@ public class Dominio implements IDominio {
         }
     }
 
-    @Override
-    public void actualizarGrupo(String grupoId, List<FichaDTO> fichasNuevasDTO) {
-
-        Jugador jugador = turno.getJugadorActual();
-        Mano mano = jugador.getMano();
-        int turnoActual = turno.getNumeroTurno();
-
-        List<FichaPlaced> estadoOriginalGrupo = tablero.obtenerFichasDeGrupo(grupoId)
-                .stream()
-                .map(FichaPlaced::clonar)
-                .collect(Collectors.toList());
-
-        List<FichaPlaced> fichasAntes = tablero.obtenerFichasDeGrupo(grupoId);
-        List<Ficha> manoAntes = mano.clonarContenido();
-
-        tablero.limpiarGrupo(grupoId);
-
-        List<FichaPlaced> fichasInsertadas = new ArrayList<>();
-
-        for (FichaDTO dto : fichasNuevasDTO) {
-            String fichaId = dto.getId();
-
-            FichaPlaced existente = fichasAntes.stream()
-                    .filter(fp -> fp.getFicha().getId().equals(fichaId)).findFirst().orElse(null);
-            if (existente != null) {
-                tablero.agregarFichaAGrupo(grupoId, existente);
-                fichasInsertadas.add(existente);
-                continue;
-            }
-
-            if (mano.tieneFicha(fichaId)) {
-                Ficha base = mano.quitarFicha(fichaId);
-                FichaPlaced nueva = new FichaPlaced(base, jugador.getId(), turnoActual);
-                tablero.agregarFichaAGrupo(grupoId, nueva);
-                fichasInsertadas.add(nueva);
-                continue;
-            }
-
-            FichaPlaced robo = tablero.buscarFichaPlacedGlobal(fichaId);
-            if (robo != null) {
-                tablero.removerFichaGlobal(fichaId);
-                tablero.agregarFichaAGrupo(grupoId, robo);
-                fichasInsertadas.add(robo);
-                continue;
-            }
-
-            rollback(grupoId, estadoOriginalGrupo, manoAntes, fichasInsertadas, jugador);
-            producer.mostrarError("Ficha no disponible: " + fichaId);
-            producer.actualizarTablero(TableroMapper.toDTO(tablero));
-            producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
-            return;
+    private Grupo forzarIdGrupo(Grupo g, String id) {
+        if (g instanceof GrupoNumero) {
+            return new GrupoNumero(id, g.getFichas());
         }
-        boolean pareceSet = esPotencialmenteSet(fichasInsertadas);
-        Grupo grupoCorrecto;
-        if (pareceSet) {
-            grupoCorrecto = new GrupoNumero(grupoId, fichasInsertadas);
-        } else {
-            grupoCorrecto = new GrupoSecuencia(grupoId, fichasInsertadas);
-        }
-        tablero.agregarGrupo(grupoCorrecto);
-        if (tablero.grupoEstaVacio(grupoId)) {
-            tablero.removerGrupo(grupoId);
-        }
-
-        producer.actualizarTablero(TableroMapper.toDTO(tablero));
-        producer.actualizarManoJugador(FichaMapper.toDTO(jugador.getMano().getFichas()));
+        return new GrupoSecuencia(id, g.getFichas());
     }
 
-    private boolean esPotencialmenteSet(List<FichaPlaced> fichas) {
-        List<Ficha> normales = fichas.stream()
-                .map(FichaPlaced::getFicha)
-                .filter(f -> !f.isEsComodin())
-                .collect(Collectors.toList());
-
-        if (normales.isEmpty() || normales.size() < 2) {
-            return true;
-        }
-        int numRef = normales.get(0).getNumero();
-        for (Ficha f : normales) {
-            if (f.getNumero() != numRef) {
-                return false;
-            }
-        }
-        return true;
-    }
-
+    // TOMAR FICHA
     @Override
     public void tomarFicha() {
         Jugador jugador = turno.getJugadorActual();
         String jugadorId = jugador.getId();
-
-        try {
-            if (!turno.esTurnoDelJugador(jugadorId)) {
-                producer.mostrarError("No es tu turno de juego.");
-                return;
-            }
-        } catch (Exception e) {
-            LOG.severe(e.getMessage());
-            producer.mostrarError("Error interno al procesar el grupo.");
-        }
+        int turnoActual = turno.getNumeroTurno();
 
         if (jugador == null) {
-            producer.mostrarError("Jugador no encontrado.");
+            producer.mostrarError(jugadorId, "Jugador no encontrado.");
             return;
         }
 
+        tablero.revertirJugadasDelTurno(jugadorId, turnoActual, jugador.getMano());
+        
         Ficha ficha = sopa.tomarFicha();
-        jugador.getMano().agregarFicha(ficha);
+        if (ficha != null) {
+            jugador.getMano().agregarFicha(ficha);
+            producer.actualizarSopa(sopa.getFichasRestantes());
+        } else {
+            producer.mostrarError(jugadorId, "La sopa está vacía.");
+        }
+
+        jugador.setHaTomadoFicha(true);
+
         List<Ficha> fichasJugador = jugador.getMano().getFichas();
-        producer.actualizarManoJugador(FichaMapper.toDTO(fichasJugador));
+        producer.actualizarManoJugador(jugadorId, FichaMapper.toDTO(fichasJugador));
+        producer.actualizarTablero(TableroMapper.toDTO(tablero)); 
+        producer.enviarCantidadFichasPublico(jugadorId, fichasJugador.size());
 
-        TableroDTO tableroActualizado = FichaMapper.toDTO(tablero);
-        producer.actualizarTablero(tableroActualizado);
-
-        producer.actualizarTurno(jugadorId);
+        terminarTurno();
     }
 
+    // AGREGAR JUGADOR
     @Override
     public void agregarJugador(Jugador jugador) {
         jugadores.put(jugador.getId(), jugador);
     }
 
-    private void rollback(
-            String grupoId,
-            List<FichaPlaced> estadoOriginalGrupo,
-            List<Ficha> estadoOriginalMano,
-            List<FichaPlaced> fichasIntentadas,
-            Jugador jugador
-    ) {
-        tablero.revivirGrupo(grupoId, estadoOriginalGrupo);
-        jugador.getMano().restaurar(estadoOriginalMano);
-
-        // 3. Restaurar fichas que robamos de OTROS grupos
-        for (FichaPlaced fp : fichasIntentadas) {
-            boolean estabaEnTarget = estadoOriginalGrupo.stream()
-                    .anyMatch(old -> old.getFicha().getId().equals(fp.getFicha().getId()));
-
-            boolean estabaEnMano = estadoOriginalMano.stream()
-                    .anyMatch(old -> old.getId().equals(fp.getFicha().getId()));
-
-            if (!estabaEnTarget && !estabaEnMano) {
-                tablero.restaurarFicha(fp);
-            }
-        }
-    }
-
+    // TERMINAR TURNO
     @Override
     public void terminarTurno() {
         Jugador jugador = turno.getJugadorActual();
+        String jugadorId = jugador.getId();
+        int numeroTurnoActual = turno.getNumeroTurno();
 
         if (jugador == null) {
-            producer.mostrarError("Jugador actual no definido.");
+            producer.mostrarError(jugadorId, "Jugador actual no definido.");
             return;
         }
 
-        String jugadorIdInterno = jugador.getId();
-
         try {
-            if (!turno.esTurnoDelJugador(jugadorIdInterno)) {
-                producer.mostrarError("No puedes terminar el turno si no es el tuyo.");
-                return;
-            }
-
-            Jugador jugadorActual = jugadores.get(jugadorIdInterno);
+            Jugador jugadorActual = jugadores.get(jugadorId);
             if (jugadorActual == null) {
-                producer.mostrarError("Jugador no encontrado.");
+                producer.mostrarError(jugadorId, "Jugador no encontrado.");
                 return;
             }
 
+            // 1. Validar grupos < 3 fichas
             for (Grupo grupo : tablero.getGruposEnMesa()) {
-                if (!grupo.validarReglas()) {
-                    producer.mostrarError(
-                            "No puedes terminar el turno: hay un grupo inválido en la mesa (requiere 3+ fichas válidas)."
-                    );
+                if (!grupo.cumpleTamanoMinimo()) {
+                    producer.mostrarError(jugadorId, "No puedes terminar: Hay grupos con menos de 3 fichas.");
+                    producer.highlightInvalidGroup(jugadorId, grupo.getId());
+                    return; // Aquí retorna y NO pasa turno. Correcto.
+                }
+            }
+
+            int puntosDeBajada = 0;
+            boolean huboMovimientoEnTablero = false;
+
+            // 2. Validar reglas de 30 pts y detectar actividad
+            for (Grupo grupo : tablero.getGruposEnMesa()) {
+                if (!jugador.yaBajo30() && grupo.contieneFichasAntiguas(numeroTurnoActual)) {
+                    boolean tieneNuevas = grupo.getFichas().stream()
+                            .anyMatch(fp -> fp.getPlacedInTurn() == numeroTurnoActual);
+                    if (tieneNuevas) {
+                        producer.mostrarError(jugadorId, "No puedes manipular grupos ajenos hasta bajar tus 30 pts.");
+                        return;
+                    }
+                }
+
+                if (grupo.fueCreadoEnTurno(numeroTurnoActual, jugadorId)) {
+                    puntosDeBajada += grupo.calcularPuntos();
+                    huboMovimientoEnTablero = true;
+                } else {
+                    boolean tieneNuevas = grupo.getFichas().stream()
+                            .anyMatch(fp -> fp.getPlacedInTurn() == numeroTurnoActual && fp.getPlacedBy().equals(jugadorId));
+                    if (tieneNuevas) {
+                        huboMovimientoEnTablero = true;
+                    }
+                }
+            }
+
+            if (!jugador.yaBajo30()) {
+                if (huboMovimientoEnTablero && puntosDeBajada < 30) {
+                    producer.mostrarError(jugadorId, "Primera bajada insuficiente (" + puntosDeBajada + "/30 pts).");
+                    return;
+                }
+                if (huboMovimientoEnTablero && puntosDeBajada >= 30) {
+                    jugador.marcarPrimerBajada30Completada();
+                }
+            }
+
+            // 3. Validar inactividad (Si no movió nada, debe haber comido)
+            if (!huboMovimientoEnTablero) {
+                if (!jugadorActual.haTomadoFicha()) {
+                    producer.mostrarError(jugadorId, "No puedes pasar turno sin hacer nada. Baja un juego o toma una ficha.");
                     return;
                 }
             }
 
-            tablero.marcarFichasConfirmadas(jugadorIdInterno);
+            // 4. Confirmar y Avanzar
+            tablero.marcarFichasConfirmadas(jugadorId);
 
             if (jugadorActual.getMano().getFichas().isEmpty()) {
-                String ganadorIdPublico = jugador.getNombre();
-                producer.juegoTerminado(ganadorIdPublico);
+                producer.juegoTerminado(jugador.getNombre());
                 return;
             }
 
             Jugador siguienteJugador = turno.avanzarTurno();
             if (siguienteJugador == null) {
-                producer.mostrarError("No se pudo determinar el siguiente jugador.");
+                producer.mostrarError(jugadorId, "No se pudo determinar el siguiente jugador.");
                 return;
             }
 
-            String siguienteJugadorIdPublico = siguienteJugador.getNombre();
-
-            TableroDTO tableroActualizado = FichaMapper.toDTO(tablero);
-            producer.actualizarTablero(tableroActualizado);
-            producer.actualizarTurno(siguienteJugadorIdPublico);
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            producer.actualizarTurno(siguienteJugador.getId());
 
         } catch (Exception e) {
-            LOG.severe("Error al terminar el turno: " + e.getMessage());
-            producer.mostrarError("Ocurrió un error inesperado al finalizar el turno.");
+            LOG.severe("Error al terminar turno: " + e.getMessage());
+            producer.mostrarError(jugadorId, "Ocurrió un error inesperado.");
         }
     }
-
 }

@@ -13,10 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
 
-/**
- *
- * @author Dana Chavez
- */
 public class MainPruebas {
 
     private static final String IP_LOCALHOST = "127.0.0.1";
@@ -29,6 +25,7 @@ public class MainPruebas {
 
     public static void main(String[] args) {
 
+        // 1. Iniciar Broker
         new Thread(() -> {
             try {
                 System.out.println("[BROKER] Iniciando...");
@@ -41,11 +38,21 @@ public class MainPruebas {
 
         esperar(1000);
 
+        // 2. Crear Jugadores y guardar referencias para obtener sus IDs REALES
         List<Jugador> listaJugadores = new ArrayList<>();
-        listaJugadores.add(new Jugador("Jugador1"));
-        listaJugadores.add(new Jugador("Jugador2"));
+        
+        // Al hacer new Jugador("Nombre"), internamente se genera un UUID. 
+        // Necesitamos ese UUID para el cliente.
+        Jugador jugador1 = new Jugador("Jugador1"); 
+        Jugador jugador2 = new Jugador("Jugador2");
+        
+        listaJugadores.add(jugador1);
+        listaJugadores.add(jugador2);
 
-        System.out.println("[DOMINIO] Conectando al Broker y configurando juego (sin iniciar partida todavía)...");
+        System.out.println("[DOMINIO] IDs Generados -> J1: " + jugador1.getId() + " | J2: " + jugador2.getId());
+
+        // 3. Iniciar Dominio
+        System.out.println("[DOMINIO] Conectando al Broker y configurando juego...");
         EnsambladorDominio ensambladorDominio = new EnsambladorDominio();
         try {
             ensambladorDominio.iniciarJuego(IP_LOCALHOST, PUERTO_BROKER, PUERTO_DOMINIO, listaJugadores);
@@ -53,22 +60,17 @@ public class MainPruebas {
             System.err.println("Error al configurar el Dominio: " + e.getMessage());
         }
 
-        lanzarCliente("Jugador1", PUERTO_JUGADOR_1, 50, 50);
-        lanzarCliente("Jugador2", PUERTO_JUGADOR_2, 600, 50);
+        // 4. Lanzar Clientes USANDO LOS IDs REALES (UUIDs)
+        // Pasamos jugador1.getId() en lugar del texto "Jugador1"
+        lanzarCliente(jugador1.getId(), PUERTO_JUGADOR_1, 50, 50);
+        lanzarCliente(jugador2.getId(), PUERTO_JUGADOR_2, 600, 50);
+        
         esperar(3000);
 
         System.out.println("[MAIN] Clientes listos. Indicando al Dominio que comience la partida...");
         ensambladorDominio.comenzarPartida();
     }
 
-    /**
-     * Método auxiliar para lanzar una ventana de cliente.
-     *
-     * @param id Nombre del jugador
-     * @param puertoEscucha Puerto único para este cliente
-     * @param x Posición X en pantalla
-     * @param y Posición Y en pantalla
-     */
     private static void lanzarCliente(String id, int puertoEscucha, int x, int y) {
         SwingUtilities.invokeLater(() -> {
             EnsambladorCliente ensamblador = new EnsambladorCliente();
@@ -78,18 +80,16 @@ public class MainPruebas {
                     PUERTO_BROKER, // Puerto Broker
                     IP_LOCALHOST, // Mi IP
                     puertoEscucha, // Mi Puerto Único
-                    id // Mi ID
+                    id // Mi ID (UUID)
             );
 
-            ventana.setTitle("Rummy - " + id + " (Puerto " + puertoEscucha + ")");
+            // Ajustamos el título para ver el ID
+            ventana.setTitle("Rummy - " + id.substring(0, 5) + "... (Puerto " + puertoEscucha + ")");
             ventana.setLocation(x, y);
             ventana.setVisible(true);
         });
     }
 
-    /**
-     * Método simple para pausar la ejecución
-     */
     private static void esperar(int millis) {
         try {
             Thread.sleep(millis);

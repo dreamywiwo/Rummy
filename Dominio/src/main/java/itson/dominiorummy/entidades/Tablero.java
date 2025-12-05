@@ -95,26 +95,63 @@ public class Tablero {
     }
 
     public Grupo crearGrupoDesdeFichasPlaced(List<FichaPlaced> fichas) {
-
-        GrupoNumero numTmp = new GrupoNumero("tmp", fichas);
-        GrupoSecuencia seqTmp = new GrupoSecuencia("tmp", fichas);
-
-        boolean esNumero = numTmp.validarReglas();
-        boolean esSecuencia = seqTmp.validarReglas();
+        if (fichas == null || fichas.isEmpty()) {
+            return null;
+        }
 
         String nuevoId = generarIdGrupo();
 
-        if (esNumero && !esSecuencia) {
-            return new GrupoNumero(nuevoId, fichas);
-        }
-        if (esSecuencia && !esNumero) {
+        if (fichas.size() < 3) {
+            if (fichas.size() == 2) {
+                Ficha f1 = fichas.get(0).getFicha();
+                Ficha f2 = fichas.get(1).getFicha();
+                if (!f1.isEsComodin() && !f2.isEsComodin() && f1.getNumero() == f2.getNumero()) {
+                    return new GrupoNumero(nuevoId, fichas);
+                }
+            }
             return new GrupoSecuencia(nuevoId, fichas);
         }
+
+        GrupoNumero pruebaNumero = new GrupoNumero("temp", fichas);
+        GrupoSecuencia pruebaSecuencia = new GrupoSecuencia("temp", fichas);
+
+        boolean esNumero = pruebaNumero.validarReglas();     
+        boolean esSecuencia = pruebaSecuencia.validarReglas(); 
+
+        if (esNumero) {
+            return new GrupoNumero(nuevoId, fichas);
+        }
+
         if (esSecuencia) {
             return new GrupoSecuencia(nuevoId, fichas);
         }
 
-        return null;
+        return new GrupoSecuencia(nuevoId, fichas);
+    }
+    
+    public void revertirJugadasDelTurno(String jugadorId, int turnoActual, Mano manoJugador) {
+        var iteratorGrupos = grupos.entrySet().iterator();
+        while (iteratorGrupos.hasNext()) {
+            var entry = iteratorGrupos.next();
+            Grupo grupo = entry.getValue();
+            List<FichaPlaced> fichasARemover = new ArrayList<>();
+            
+            for (FichaPlaced fp : grupo.getFichas()) {
+                if (fp.getPlacedInTurn() == turnoActual && fp.getPlacedBy().equals(jugadorId)) {
+                    fichasARemover.add(fp);
+                }
+            }
+            
+            for (FichaPlaced fp : fichasARemover) {
+                grupo.getFichas().remove(fp);
+                manoJugador.agregarFicha(fp.getFicha());
+                removedOrigin.remove(fp.getFicha().getId());
+            }
+            
+            if (grupo.estaVacio()) {
+                iteratorGrupos.remove();
+            }
+        }
     }
 
     /**

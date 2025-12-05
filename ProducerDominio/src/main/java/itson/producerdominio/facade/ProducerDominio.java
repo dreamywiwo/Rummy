@@ -6,6 +6,7 @@ package itson.producerdominio.facade;
 import itson.producerdominio.emitters.EstadoJuegoEmitter;
 import itson.producerdominio.emitters.InicializarJuegoEmitter;
 import itson.rummydtos.FichaDTO;
+import itson.rummydtos.JugadorDTO;
 import itson.rummydtos.TableroDTO;
 import java.util.List;
 
@@ -49,8 +50,8 @@ public class ProducerDominio implements IProducerDominio {
     }
 
     @Override
-    public void juegoTerminado(String jugadorId) {
-        estadoJuegoEmitter.emitirJuegoTerminadoEvent(jugadorId);
+    public void juegoTerminado(JugadorDTO jugador) {
+        estadoJuegoEmitter.emitirJuegoTerminadoEvent(jugador);
     }
 
     @Override

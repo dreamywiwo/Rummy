@@ -163,7 +163,6 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
             e.printStackTrace();
         }
 
-
         lblContadorSopa.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
         lblContadorSopa.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -427,6 +426,25 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         System.out.println("UI RECIBIÓ ACTUALIZACIÓN para " + jugadorID);
         SwingUtilities.invokeLater(() -> {
 
+            JugadorDTO ganador = modelo.getGanador();
+
+            if (ganador != null) {
+                PanelBloqueo glass = (PanelBloqueo) getGlassPane();
+                glass.setMensaje("¡JUEGO TERMINADO!\nGanador: " + ganador.getNombre());
+                glass.setVisible(true);
+
+                jButtonTerminarTurno.setEnabled(false);
+                jButtonTomarFicha.setEnabled(false);
+                if (uiMano != null) {
+                    uiMano.actualizarEstado(false);
+                }
+
+                String mensaje = "¡La partida ha finalizado!\nEl ganador es: " + ganador.getNombre();
+                javax.swing.JOptionPane.showMessageDialog(this, mensaje, "Game Over", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+                return; 
+            }
+
             boolean esMiTurno = modelo.esTurnoDe(jugadorID);
 
             if (getGlassPane() != null) {
@@ -502,13 +520,18 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
      * Clase interna para crear el efecto de bloqueo visual (GlassPane).
      * Intercepta eventos de mouse y teclado y dibuja un fondo semitransparente.
      */
+    /**
+     * Clase interna para crear el efecto de bloqueo visual (GlassPane).
+     */
     private class PanelBloqueo extends javax.swing.JPanel {
+
+        private javax.swing.JLabel labelEspera;
 
         public PanelBloqueo() {
             setOpaque(false);
             setLayout(new java.awt.GridBagLayout());
 
-            javax.swing.JLabel labelEspera = new javax.swing.JLabel("ESPERANDO TURNO DEL OPONENTE...");
+            labelEspera = new javax.swing.JLabel("ESPERANDO TURNO DEL OPONENTE...");
             labelEspera.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 24));
             labelEspera.setForeground(java.awt.Color.WHITE);
 
@@ -521,11 +544,15 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
             };
             addMouseListener(mouseAdapter);
             addMouseMotionListener(mouseAdapter);
-
             addKeyListener(new java.awt.event.KeyAdapter() {
             });
-
             setFocusTraversalKeysEnabled(false);
+        }
+
+        public void setMensaje(String mensaje) {
+            labelEspera.setText("<html><center>" + mensaje.replace("\n", "<br>") + "</center></html>");
+            revalidate();
+            repaint();
         }
 
         @Override

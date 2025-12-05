@@ -13,6 +13,7 @@ import itson.dominiorummy.mappers.FichaMapper;
 import itson.dominiorummy.mappers.TableroMapper;
 import itson.producerdominio.facade.IProducerDominio;
 import itson.rummydtos.FichaDTO;
+import itson.rummydtos.JugadorDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -193,7 +194,7 @@ public class Dominio implements IDominio {
         }
 
         tablero.revertirJugadasDelTurno(jugadorId, turnoActual, jugador.getMano());
-        
+
         Ficha ficha = sopa.tomarFicha();
         if (ficha != null) {
             jugador.getMano().agregarFicha(ficha);
@@ -206,7 +207,7 @@ public class Dominio implements IDominio {
 
         List<Ficha> fichasJugador = jugador.getMano().getFichas();
         producer.actualizarManoJugador(jugadorId, FichaMapper.toDTO(fichasJugador));
-        producer.actualizarTablero(TableroMapper.toDTO(tablero)); 
+        producer.actualizarTablero(TableroMapper.toDTO(tablero));
         producer.enviarCantidadFichasPublico(jugadorId, fichasJugador.size());
 
         terminarTurno();
@@ -294,7 +295,12 @@ public class Dominio implements IDominio {
             tablero.marcarFichasConfirmadas(jugadorId);
 
             if (jugadorActual.getMano().getFichas().isEmpty()) {
-                producer.juegoTerminado(jugador.getNombre());
+                JugadorDTO ganadorDTO = new JugadorDTO();
+                ganadorDTO.setId(jugadorActual.getId());
+                ganadorDTO.setNombre(jugadorActual.getNombre());
+                ganadorDTO.setAvatarPath(""); 
+
+                producer.juegoTerminado(ganadorDTO);
                 return;
             }
 

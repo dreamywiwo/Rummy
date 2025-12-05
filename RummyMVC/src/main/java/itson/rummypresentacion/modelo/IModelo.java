@@ -30,7 +30,7 @@ public interface IModelo extends ISubject {
     int getFichasEnPozo();
     String getTurnoActual();
     boolean isPartidaTerminada();
-    String getGanador();
+    JugadorDTO getGanador();
     
     // Información de la última acción
     String getUltimaAccion();

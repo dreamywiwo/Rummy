@@ -1,18 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package itson.rummyeventos.actualizaciones;
 
+import itson.rummydtos.JugadorDTO;
 import itson.rummyeventos.base.EventBase;
 
-/**
- *
- * @author Dana Chavez
- */
 public class JuegoTerminadoEvent extends EventBase {
     
-    private String jugadorGanadorId;
+    private JugadorDTO jugadorGanador;
     
     public static final String TOPIC = "actualizaciones.estado";
     public static final String EVENT_TYPE = "juego.terminado";
@@ -21,13 +14,16 @@ public class JuegoTerminadoEvent extends EventBase {
         super();
     }
 
-    public JuegoTerminadoEvent(String jugadorGanadorId) {
+    public JuegoTerminadoEvent(JugadorDTO jugadorGanador) {
         super(TOPIC, EVENT_TYPE);
-        this.jugadorGanadorId = jugadorGanadorId;
+        this.jugadorGanador = jugadorGanador;
     }
 
-    public String getJugadorGanadorId() {
-        return jugadorGanadorId;
+    public JugadorDTO getJugadorGanador() { // Corregido nombre del getter
+        return jugadorGanador;
     }
 
+    public void setJugadorGanador(JugadorDTO jugadorGanador) {
+        this.jugadorGanador = jugadorGanador;
+    }
 }

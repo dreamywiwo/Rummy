@@ -5,8 +5,8 @@
 package itson.rummypresentacion.modelo;
 
 import itson.rummydtos.FichaDTO;
+import itson.rummydtos.JugadorDTO;
 import itson.rummydtos.TableroDTO;
-import itson.rummyeventos.actualizaciones.TurnoTerminadoEvent;
 import java.util.List;
 
 /**
@@ -21,7 +21,7 @@ public interface IListener {
     public void recibirSopa(int cantidad);
     public void recibirError(String mensaje);
 
-    public void marcarJuegoTerminado(String jugadorGanadorId);
+    public void marcarJuegoTerminado(JugadorDTO ganador);
 
     public void resaltarGrupoInvalido(String grupoId);
 }

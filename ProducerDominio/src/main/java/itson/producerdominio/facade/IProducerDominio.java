@@ -1,6 +1,7 @@
 package itson.producerdominio.facade;
 
 import itson.rummydtos.FichaDTO;
+import itson.rummydtos.JugadorDTO;
 import itson.rummydtos.TableroDTO;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public interface IProducerDominio {
     public abstract void mostrarError(String jugadorId, String mensajeError);
 
     // Público: juego terminado
-    public abstract void juegoTerminado(String jugadorId);
+    public abstract void juegoTerminado(JugadorDTO jugador);
 
     // Público: enviar solo cantidad de fichas del jugador
     public abstract void enviarCantidadFichasPublico(String jugadorId, int size);

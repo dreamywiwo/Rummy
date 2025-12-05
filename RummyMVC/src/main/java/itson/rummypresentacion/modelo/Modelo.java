@@ -9,7 +9,6 @@ import itson.rummydtos.FichaDTO;
 import itson.rummydtos.GrupoDTO;
 import itson.rummydtos.JugadorDTO;
 import itson.rummydtos.TableroDTO;
-import itson.rummyeventos.actualizaciones.TurnoTerminadoEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class Modelo implements IModelo, ISubject, IListener {
     private int fichasEnPozo;
     private String turnoActual;
     private boolean partidaTerminada;
-    private String ganador;
+    private JugadorDTO jugadorGanador;
     private String ultimaAccion;
     private boolean accionValida;
     private String mensajeError;
@@ -103,8 +102,8 @@ public class Modelo implements IModelo, ISubject, IListener {
     }
 
     @Override
-    public String getGanador() {
-        return ganador;
+    public JugadorDTO getGanador() {
+        return jugadorGanador;
     }
 
     @Override
@@ -226,9 +225,9 @@ public class Modelo implements IModelo, ISubject, IListener {
     }
 
     @Override
-    public void marcarJuegoTerminado(String jugadorGanadorId) {
+    public void marcarJuegoTerminado(JugadorDTO ganador) {
         this.juegoTerminado = true;
-        this.jugadorGanadorId = jugadorGanadorId;
+        this.jugadorGanador = ganador;
 
         notificarObservers();
     }

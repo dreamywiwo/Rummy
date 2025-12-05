@@ -99,7 +99,7 @@ public class EventMapper {
         try {
             JuegoTerminadoEvent event = serializer.deserialize(rawPayload, JuegoTerminadoEvent.class);
             if (listener != null) {
-                listener.marcarJuegoTerminado(event.getJugadorGanadorId());
+                listener.marcarJuegoTerminado(event.getJugadorGanador());
             }
         } catch (Exception e) {
             e.printStackTrace();

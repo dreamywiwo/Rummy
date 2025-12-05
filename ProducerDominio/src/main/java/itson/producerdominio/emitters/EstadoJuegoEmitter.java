@@ -6,6 +6,7 @@ package itson.producerdominio.emitters;
 
 import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.rummydtos.FichaDTO;
+import itson.rummydtos.JugadorDTO;
 import itson.rummydtos.TableroDTO;
 import itson.rummyeventos.actualizaciones.CantidadFichasPublicoEvent;
 import itson.rummyeventos.actualizaciones.ErrorEvent;
@@ -66,8 +67,8 @@ public class EstadoJuegoEmitter {
         dispatcher.enviar(json, brokerPort, brokerIp);
     }
 
-    public void emitirJuegoTerminadoEvent(String jugadorId) {
-        JuegoTerminadoEvent event = new JuegoTerminadoEvent(jugadorId);
+    public void emitirJuegoTerminadoEvent(JugadorDTO jugador) {
+        JuegoTerminadoEvent event = new JuegoTerminadoEvent(jugador);
         String json = jsonSerializer.serialize(event);
         dispatcher.enviar(json, brokerPort, brokerIp);
     }

@@ -13,19 +13,17 @@ public class GrupoNumero extends Grupo {
 
     @Override
     public boolean validarReglas() {
-        // 1. Evitar bugs con listas vacías o de 1 elemento
         if (fichas.isEmpty()) {
             return false;
         }
         if (fichas.size() == 1) {
-            return true; // 1 ficha técnicamente es válida estructuralmente
+            return true;
         }
-        List<Ficha> base = fichas.stream()
-                .map(FichaPlaced::getFicha)
-                .collect(Collectors.toList());
 
-        Integer valorRef = null;
-        Set<String> colores = new HashSet<>();
+        List<Ficha> base = fichas.stream().map(FichaPlaced::getFicha).collect(Collectors.toList());
+
+        Integer numRef = null;
+        Set<String> coloresVistos = new HashSet<>();
         int comodines = 0;
 
         for (Ficha f : base) {
@@ -34,19 +32,17 @@ public class GrupoNumero extends Grupo {
                 continue;
             }
 
-            // Validar que todos tengan el mismo número
-            if (valorRef == null) {
-                valorRef = f.getNumero();
-            } else if (!valorRef.equals(f.getNumero())) {
-                return false; // Estructura rota: Números distintos
+            if (numRef == null) {
+                numRef = f.getNumero();
+            } else if (f.getNumero() != numRef) {
+                return false; 
             }
-
-            colores.add(f.getColor());
+            if (!coloresVistos.add(f.getColor())) {
+                return false; 
+            }
         }
 
-        // Validar que no haya colores repetidos
-        // (Cantidad de colores únicos debe ser igual a cantidad de fichas no-comodín)
-        return colores.size() == (base.size() - comodines);
+        return true;
     }
 
     @Override

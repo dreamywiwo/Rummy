@@ -43,6 +43,8 @@ public class UI_Mano extends JPanel {
     }
 
     public void setFichas(List<FichaDTO> nuevas) {
+        limpiarSeleccion(); 
+        
         fichas.clear(); 
         if (nuevas != null) {
             fichas.addAll(nuevas);
@@ -74,7 +76,9 @@ public class UI_Mano extends JPanel {
                 dtosAMover.add(ui.getFicha());
             }
         } else {
-            limpiarSeleccion();
+
+            limpiarSeleccion(); 
+            
             dtosAMover.add(fichaIniciadora.getFicha());
             fichaIniciadora.setSeleccionada(true);
             fichasSeleccionadasVisualmente.add(fichaIniciadora);
@@ -94,23 +98,18 @@ public class UI_Mano extends JPanel {
     }
 
     public void limpiarSeleccion() {
-        for (UI_Ficha ui : fichasSeleccionadasVisualmente) {
+        for (UI_Ficha ui : new ArrayList<>(fichasSeleccionadasVisualmente)) { 
             ui.setSeleccionada(false);
+            ui.repaint();
         }
-        fichasSeleccionadasVisualmente.clear();
+        fichasSeleccionadasVisualmente.clear(); 
     }
 
     private void ordenar() {
         fichas.sort((f1, f2) -> {
-            if (f1.isEsComodin() && !f2.isEsComodin()) {
-                return 1;
-            }
-            if (!f1.isEsComodin() && f2.isEsComodin()) {
-                return -1;
-            }
-            if (f1.isEsComodin() && f2.isEsComodin()) {
-                return 0;
-            }
+            if (f1.isEsComodin() && !f2.isEsComodin()) return 1;
+            if (!f1.isEsComodin() && f2.isEsComodin()) return -1;
+            if (f1.isEsComodin() && f2.isEsComodin()) return 0;
 
             if (f1.getNumero() != f2.getNumero()) {
                 return Integer.compare(f1.getNumero(), f2.getNumero());
@@ -121,7 +120,8 @@ public class UI_Mano extends JPanel {
 
     public void refrescar() {
         this.removeAll();
-        fichasSeleccionadasVisualmente.clear();
+        
+        fichasSeleccionadasVisualmente.clear(); 
 
         for (FichaDTO dto : fichas) {
             UI_Ficha uiFicha = new UI_Ficha(dto);
@@ -130,7 +130,6 @@ public class UI_Mano extends JPanel {
 
         this.revalidate();
         this.repaint();
-
     }
 
     private void configurarDropTarget() {
@@ -155,6 +154,9 @@ public class UI_Mano extends JPanel {
                     evt.acceptDrop(DnDConstants.ACTION_MOVE);
 
                     Transferable t = evt.getTransferable();
+                    if(!t.isDataFlavorSupported(FichaTransferable.FICHA_FLAVOR)) {
+                         evt.dropComplete(false); return; 
+                    }
                     FichaTransferable fichaT = (FichaTransferable) t.getTransferData(FichaTransferable.FICHA_FLAVOR);
 
                     List<FichaDTO> recibidas = fichaT.getFichas();
@@ -168,18 +170,26 @@ public class UI_Mano extends JPanel {
                     }
 
                     Set<String> ids = new HashSet<>();
-                    for (FichaDTO f : recibidas) {
+                    for (FichaDTO f : fichas) {
                         if (f.getId() != null) {
                             ids.add(f.getId());
                         }
                     }
-                    if (!ids.isEmpty()) {
-                        fichas.removeIf(f -> f.getId() != null && ids.contains(f.getId()));
+                    
+                    boolean cambio = false;
+                    for (FichaDTO f : recibidas) {
+                        if (f != null && !ids.contains(f.getId())) {
+                            fichas.add(f);
+                            cambio = true;
+                        }
                     }
+                    
 
-                    fichas.addAll(recibidas);
-                    ordenar();
-                    refrescar();
+                    if (cambio) {
+                        limpiarSeleccion();
+                        ordenar();
+                        refrescar();
+                    }
 
                     evt.dropComplete(true);
 
@@ -202,5 +212,4 @@ public class UI_Mano extends JPanel {
         }
         repaint();
     }
-
 }

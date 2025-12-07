@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -102,34 +103,58 @@ public class Dominio implements IDominio {
 
     // ACTUALIZAR GRUPO
     @Override
-    public void actualizarGrupo(String grupoId, List<FichaDTO> fichasNuevasDTO) {
+    public void actualizarGrupo(String grupoId, List<FichaDTO> fichasEntrantesDTO) {
+
         Jugador jugador = turno.getJugadorActual();
         String jugadorId = jugador.getId();
         int turnoActual = turno.getNumeroTurno();
 
-        List<FichaPlaced> fichasDelGrupo = tablero.obtenerFichasDeGrupo(grupoId);
-        List<FichaPlaced> combinacionPrueba = fichasDelGrupo.stream()
+        List<FichaPlaced> fichasExistentes = tablero.obtenerFichasDeGrupo(grupoId);
+
+        Set<String> idsExistentes = fichasExistentes.stream()
+                .map(fp -> fp.getFicha().getId())
+                .collect(Collectors.toSet());
+
+        List<FichaDTO> fichasRealmenteNuevas = new ArrayList<>();
+
+        for (FichaDTO dto : fichasEntrantesDTO) {
+            if (!idsExistentes.contains(dto.getId())) {
+                fichasRealmenteNuevas.add(dto);
+            }
+        }
+
+        if (fichasRealmenteNuevas.isEmpty()) {
+            return;
+        }
+
+        List<FichaPlaced> combinacionPrueba = fichasExistentes.stream()
                 .map(FichaPlaced::clonar)
                 .collect(Collectors.toList());
 
         List<FichaPlaced> fichasNuevasInsertar = new ArrayList<>();
         List<String> idsSacadosDeMano = new ArrayList<>();
 
-        if (!recolectarFichas(fichasNuevasDTO, jugador, turnoActual, fichasNuevasInsertar, idsSacadosDeMano)) {
+        if (!recolectarFichas(fichasRealmenteNuevas, jugador, turnoActual, fichasNuevasInsertar, idsSacadosDeMano)) {
             return;
         }
 
-        combinacionPrueba.addAll(fichasNuevasInsertar);
-        Grupo grupoResultante = tablero.crearGrupoDesdeFichasPlaced(combinacionPrueba);
 
-        if (grupoResultante != null && grupoResultante.validarReglas()) {
+        combinacionPrueba.addAll(fichasNuevasInsertar);
+
+        Grupo grupoResultante = tablero.crearGrupoDesdeFichasPlaced(combinacionPrueba);
+        boolean esValido = (grupoResultante != null && grupoResultante.validarReglas());
+
+        if (esValido) {
             Grupo grupoFinal = forzarIdGrupo(grupoResultante, grupoId);
             tablero.removerGrupo(grupoId);
             tablero.agregarGrupo(grupoFinal);
         } else {
             producer.mostrarError(jugadorId, "La ficha no encaja. Se creó un nuevo grupo.");
+
             Grupo grupoRebote = tablero.crearGrupoDesdeFichasPlaced(fichasNuevasInsertar);
-            tablero.agregarGrupo(grupoRebote);
+            if (grupoRebote != null) {
+                tablero.agregarGrupo(grupoRebote);
+            }
         }
 
         if (tablero.grupoEstaVacio(grupoId)) {
@@ -298,7 +323,7 @@ public class Dominio implements IDominio {
                 JugadorDTO ganadorDTO = new JugadorDTO();
                 ganadorDTO.setId(jugadorActual.getId());
                 ganadorDTO.setNombre(jugadorActual.getNombre());
-                ganadorDTO.setAvatarPath(""); 
+                ganadorDTO.setAvatarPath("");
 
                 producer.juegoTerminado(ganadorDTO);
                 return;

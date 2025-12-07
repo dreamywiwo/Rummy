@@ -12,54 +12,47 @@ public class GrupoSecuencia extends Grupo {
 
     @Override
     public boolean validarReglas() {
-        // 1. Evitar bugs
         if (fichas.isEmpty()) {
             return false;
         }
         if (fichas.size() == 1) {
-            return true; // 1 ficha es válida estructuralmente
+            return true; 
         }
-        List<Ficha> base = fichas.stream()
-                .map(FichaPlaced::getFicha)
-                .collect(Collectors.toList());
+        List<Ficha> base = fichas.stream().map(FichaPlaced::getFicha).collect(Collectors.toList());
+        List<Ficha> normales = base.stream().filter(f -> !f.isEsComodin()).collect(Collectors.toList());
 
-        List<Ficha> normales = base.stream()
-                .filter(f -> !f.isEsComodin())
-                .collect(Collectors.toList());
-
-        // Si son puros comodines, es válido
         if (normales.isEmpty()) {
-            return true;
+            return true; 
         }
-
-        // 2. Validar mismo color
-        String color = normales.get(0).getColor();
+        // 1. Validar Color Único
+        String colorRef = normales.get(0).getColor();
         for (Ficha f : normales) {
-            if (!f.getColor().equals(color)) {
-                return false; // Estructura rota: Colores distintos
+            if (!f.getColor().equals(colorRef)) {
+                return false; 
             }
         }
 
-        // 3. Validar secuencia numérica
+        // 2. Validar Secuencia Numérica
         normales.sort(Comparator.comparingInt(Ficha::getNumero));
 
-        int comodines = base.size() - normales.size();
-        int expected = normales.get(0).getNumero();
+        int comodinesDisponibles = base.size() - normales.size();
+        int numeroEsperado = normales.get(0).getNumero();
 
         for (Ficha f : normales) {
-            if (f.getNumero() == expected) {
-                expected++;
-            } else if (f.getNumero() > expected) {
-                // Hueco detectado, intentamos rellenar con comodines
-                int gap = f.getNumero() - expected;
-                if (gap > comodines) {
-                    return false; // Estructura rota: Faltan comodines
-                }
-                comodines -= gap;
-                expected = f.getNumero() + 1;
-            } else {
-                return false; // Estructura rota: Números duplicados o desorden
+            if (f.getNumero() < numeroEsperado) {
+                return false;
             }
+
+            // Si hay hueco
+            while (f.getNumero() > numeroEsperado) {
+                if (comodinesDisponibles > 0) {
+                    comodinesDisponibles--;
+                    numeroEsperado++;
+                } else {
+                    return false; // ERROR: Hueco sin comodín
+                }
+            }
+            numeroEsperado++;
         }
 
         return true;

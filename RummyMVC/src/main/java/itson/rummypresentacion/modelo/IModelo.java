@@ -8,6 +8,7 @@ import itson.rummydtos.FichaDTO;
 import itson.rummydtos.GrupoDTO;
 import itson.rummydtos.JugadorDTO;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -25,6 +26,7 @@ public interface IModelo extends ISubject {
     
     // Estado de otros jugadores
     List<JugadorDTO> getOtrosJugadores();
+    public Map<String, Integer> getMapaFichasOponentes();
     
     // Estado del juego
     int getFichasEnPozo();

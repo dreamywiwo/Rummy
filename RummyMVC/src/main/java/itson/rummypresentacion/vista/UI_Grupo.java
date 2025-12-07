@@ -4,6 +4,7 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.utils.FichaTransferable;
 import itson.rummydtos.FichaDTO;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -57,12 +58,12 @@ public class UI_Grupo extends JPanel {
     }
 
     /**
-     * Método para que se le diga a la vista qué está mal. La vista no calcula
-     * nada, solo obedece.
+     * Método para que se le diga a la vista qué está mal.
      */
     public void marcarFichasInvalidas(Set<String> ids) {
         this.idsConError.clear();
-        if (ids != null) {
+
+        if (ids != null && !ids.isEmpty()) {
             this.idsConError.addAll(ids);
         }
         refrescar();
@@ -71,12 +72,10 @@ public class UI_Grupo extends JPanel {
     public void refrescar() {
         removeAll();
 
-        // Recorremos las fichas y verificamos si su ID está en la lista negra
         for (FichaDTO ficha : fichas) {
             if (ficha != null) {
                 UI_Ficha uiFicha = new UI_Ficha(ficha);
 
-                // Lógica de visualización simple: ¿Está en la lista de errores?
                 if (idsConError.contains(ficha.getId())) {
                     uiFicha.setBordeError(true);
                 } else {

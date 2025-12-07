@@ -48,6 +48,8 @@ public abstract class Grupo {
     
     public abstract int calcularPuntos();
     
+    public abstract Grupo clonar();
+    
     /**
      * Verifica si TODAS las fichas de este grupo fueron colocadas en el turno indicado.
      * Sirve para identificar grupos bajados en el turno actual.

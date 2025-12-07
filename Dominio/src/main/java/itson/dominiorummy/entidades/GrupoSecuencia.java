@@ -1,5 +1,6 @@
 package itson.dominiorummy.entidades;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,19 +17,19 @@ public class GrupoSecuencia extends Grupo {
             return false;
         }
         if (fichas.size() == 1) {
-            return true; 
+            return true;
         }
         List<Ficha> base = fichas.stream().map(FichaPlaced::getFicha).collect(Collectors.toList());
         List<Ficha> normales = base.stream().filter(f -> !f.isEsComodin()).collect(Collectors.toList());
 
         if (normales.isEmpty()) {
-            return true; 
+            return true;
         }
         // 1. Validar Color Único
         String colorRef = normales.get(0).getColor();
         for (Ficha f : normales) {
             if (!f.getColor().equals(colorRef)) {
-                return false; 
+                return false;
             }
         }
 
@@ -87,5 +88,16 @@ public class GrupoSecuencia extends Grupo {
         }
 
         return sumaTotal;
+    }
+
+    @Override
+    public Grupo clonar() {
+        List<FichaPlaced> copiaFichas = new ArrayList<>();
+
+        for (FichaPlaced fp : this.fichas) {
+            copiaFichas.add(fp.clonar());
+        }
+
+        return new GrupoSecuencia(this.id, copiaFichas);
     }
 }

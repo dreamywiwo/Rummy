@@ -10,7 +10,10 @@ import itson.rummydtos.GrupoDTO;
 import itson.rummydtos.JugadorDTO;
 import itson.rummypresentacion.modelo.IModelo;
 import itson.rummypresentacion.modelo.IObserver;
+import itson.rummypresentacion.utils.SlideWrapper;
+import itson.rummypresentacion.utils.TableroSlideWrapper;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -38,7 +41,6 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     public UI_TurnoJugador(ControladorTurno controlador, JugadorDTO jugadorLocal) {
         initComponents();
         this.controlador = controlador;
-
         this.jugadorLocal = jugadorLocal;
         this.jugadorID = jugadorLocal.getId();
 
@@ -53,24 +55,16 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         uiTablero = new UI_Tablero(this);
         setLocationRelativeTo(null);
 
-        JScrollPane scroll = new JScrollPane(uiTablero);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.setBorder(null);
-
-        JScrollPane scrollMano = new JScrollPane(uiMano);
-        scrollMano.setOpaque(false);
-        scrollMano.getViewport().setOpaque(false);
-        scrollMano.setBorder(null);
-
-        jPanelContenedorTablero.add(scroll, BorderLayout.CENTER);
+        TableroSlideWrapper tableroDraggable = new TableroSlideWrapper(uiTablero);
 
         jPanelContenedorTablero.setLayout(new BorderLayout());
-        jPanelContenedorTablero.add(uiTablero, BorderLayout.CENTER);
 
-        uiMano = new UI_Mano(uiTablero);
+        jPanelContenedorTablero.add(tableroDraggable, BorderLayout.CENTER);
+
+        uiMano = new UI_Mano(uiTablero, null);
+        SlideWrapper manoDeslizable = new SlideWrapper(uiMano);
         jPanelContenedorMano.setLayout(new BorderLayout());
-        jPanelContenedorMano.add(uiMano, BorderLayout.CENTER);
+        jPanelContenedorMano.add(manoDeslizable, BorderLayout.CENTER);
 
         jPanelContenedorJugador.setOpaque(false);
         jPanelContenedorJugador1.setOpaque(false);
@@ -78,10 +72,6 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
         jPanelContenedorJugador3.setOpaque(false);
         jPanelContenedorTablero.setOpaque(false);
         jPanelSopa.setOpaque(false);
-
-        jPanelContenedorJugador1.setVisible(false);
-        jPanelContenedorJugador2.setVisible(false);
-        jPanelContenedorJugador3.setVisible(false);
 
         configurarEventosBotones();
         actualizarEstadoBotones(false);
@@ -185,7 +175,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
 
         uiJugadorActual = new UI_Jugador(jugadorLocal.getNombre(), jugadorLocal.getAvatarPath());
         uiJugadorActual.setEsTurno(false);
-        uiJugadorActual.setNumeroFichas(14); // Inicial
+        uiJugadorActual.setNumeroFichas(14); 
         jPanelContenedorJugador.add(uiJugadorActual, java.awt.BorderLayout.CENTER);
 
         String avatarRival = "/imageBun.png".equals(jugadorLocal.getAvatarPath())
@@ -442,7 +432,7 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
                 String mensaje = "¡La partida ha finalizado!\nEl ganador es: " + ganador.getNombre();
                 javax.swing.JOptionPane.showMessageDialog(this, mensaje, "Game Over", javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
-                return; 
+                return;
             }
 
             boolean esMiTurno = modelo.esTurnoDe(jugadorID);
@@ -465,12 +455,22 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
             actualizarEstadoBotones(modelo);
 
             if (uiJugadorActual != null) {
-                uiJugadorActual.setEsTurno(esMiTurno);
-                uiJugadorActual.setNumeroFichas(fichasMano.size());
+                uiJugadorActual.setEsTurno(modelo.esTurnoDe(jugadorID));
+                uiJugadorActual.setNumeroFichas(modelo.getFichasMano().size());
             }
 
             if (uiJugadorOponente != null) {
                 uiJugadorOponente.setEsTurno(!esMiTurno);
+
+                java.util.Map<String, Integer> oponentes = modelo.getMapaFichasOponentes();
+
+                for (java.util.Map.Entry<String, Integer> entry : oponentes.entrySet()) {
+                    String idOponente = entry.getKey();
+                    if (!idOponente.equals(this.jugadorID)) {
+                        uiJugadorOponente.setNumeroFichas(entry.getValue());
+                        break;
+                    }
+                }
             }
 
             uiTablero.setGruposDesdeDTO(gruposDelTablero);

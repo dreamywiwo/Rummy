@@ -10,7 +10,9 @@ import itson.rummydtos.GrupoDTO;
 import itson.rummydtos.JugadorDTO;
 import itson.rummydtos.TableroDTO;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -39,6 +41,7 @@ public class Modelo implements IModelo, ISubject, IListener {
     private String jugadorGanadorId = null;
     private String idJugadorLocal;
     private String grupoInvalidoId;
+    private Map<String, Integer> fichasOponentes = new HashMap<>();
 
     //tendra al producer que se llamara para crear cada evento
     public Modelo(IProducerJugador producer) {
@@ -139,15 +142,20 @@ public class Modelo implements IModelo, ISubject, IListener {
     public String getGrupoInvalidoId() {
         return this.grupoInvalidoId;
     }
-    
+
     @Override
     public int getCantidadFichasSopa() {
         return fichasEnPozo;
     }
-    
+
     @Override
     public String getJugadorActivoId() {
         return jugadorActivoId;
+    }
+
+    @Override
+    public Map<String, Integer> getMapaFichasOponentes() {
+        return new HashMap<>(fichasOponentes);
     }
 
     // OBSERVER
@@ -155,7 +163,6 @@ public class Modelo implements IModelo, ISubject, IListener {
     public void suscribir(IObserver observer) {
         if (!observers.contains(observer)) {
             observers.add(observer);
-            System.out.println("[MODELO] Observer suscrito: " + observer.getClass().getSimpleName());
         }
     }
 
@@ -166,9 +173,7 @@ public class Modelo implements IModelo, ISubject, IListener {
 
     @Override
     public void notificarObservers() {
-        System.out.println("[MODELO] notificarObservers() llamado. Observers = " + observers.size());
         for (IObserver observer : observers) {
-            System.out.println("[MODELO] Notificando a " + observer.getClass().getSimpleName());
             observer.update(this);
         }
     }
@@ -176,25 +181,24 @@ public class Modelo implements IModelo, ISubject, IListener {
     @Override
     public void terminoTurno(String jugadorActivoId) {
         this.turnoActual = jugadorActivoId;
-        System.out.println("[MODELO] terminoTurno() -> nuevoTurnoJugador = " + turnoActual);
         notificarObservers();
     }
 
     @Override
     public void recibirTablero(TableroDTO tableroDTO) {
-        System.out.println("[MODELO] recibirTablero() llamado");
         if (tableroDTO != null && tableroDTO.getGrupos() != null) {
             this.gruposEnTablero = new ArrayList<>(tableroDTO.getGrupos());
+
+            this.grupoInvalidoId = null;
+
             notificarObservers();
         }
     }
 
     @Override
     public void recibirMano(List<FichaDTO> mano) {
-        System.out.println("[MODELO] recibirMano() -> Actualizando " + (mano != null ? mano.size() : 0) + " fichas.");
-
         if (mano != null) {
-            this.fichasMano = mano; 
+            this.fichasMano = mano;
 
             if (this.jugadorActual != null) {
                 jugadorActual.setFichasMano(fichasMano);
@@ -236,6 +240,12 @@ public class Modelo implements IModelo, ISubject, IListener {
     public void resaltarGrupoInvalido(String grupoId) {
         this.grupoInvalidoId = grupoId;
 
+        notificarObservers();
+    }
+
+    @Override
+    public void actualizarFichasOponente(String jugadorId, int size) {
+        fichasOponentes.put(jugadorId, size);
         notificarObservers();
     }
 

@@ -1,5 +1,6 @@
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.utils.FichaTransferable;
 import itson.rummydtos.FichaDTO;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -23,6 +24,9 @@ public class UI_Mano extends JPanel {
     private final UI_Tablero tableroPanel;
     private boolean habilitado = true;
 
+    private static final int ANCHO_FICHA = 60;
+    private static final int GAP = 8;
+
     public UI_Mano(UI_Tablero tableroPanel) {
         this(tableroPanel, null);
     }
@@ -31,8 +35,7 @@ public class UI_Mano extends JPanel {
         this.tableroPanel = tableroPanel;
 
         setOpaque(false);
-        setLayout(new FlowLayout(FlowLayout.LEFT, 8, 25));
-        setPreferredSize(new Dimension(780, 110));
+        setLayout(new FlowLayout(FlowLayout.LEFT, GAP, 25));
 
         if (fichasIniciales != null) {
             fichas.addAll(fichasIniciales);
@@ -43,14 +46,14 @@ public class UI_Mano extends JPanel {
     }
 
     public void setFichas(List<FichaDTO> nuevas) {
-        limpiarSeleccion(); 
-        
-        fichas.clear(); 
+        limpiarSeleccion();
+
+        fichas.clear();
         if (nuevas != null) {
             fichas.addAll(nuevas);
         }
-        ordenar(); 
-        refrescar(); 
+        ordenar();
+        refrescar();
     }
 
     public List<FichaDTO> getFichas() {
@@ -77,8 +80,8 @@ public class UI_Mano extends JPanel {
             }
         } else {
 
-            limpiarSeleccion(); 
-            
+            limpiarSeleccion();
+
             dtosAMover.add(fichaIniciadora.getFicha());
             fichaIniciadora.setSeleccionada(true);
             fichasSeleccionadasVisualmente.add(fichaIniciadora);
@@ -98,18 +101,24 @@ public class UI_Mano extends JPanel {
     }
 
     public void limpiarSeleccion() {
-        for (UI_Ficha ui : new ArrayList<>(fichasSeleccionadasVisualmente)) { 
+        for (UI_Ficha ui : new ArrayList<>(fichasSeleccionadasVisualmente)) {
             ui.setSeleccionada(false);
             ui.repaint();
         }
-        fichasSeleccionadasVisualmente.clear(); 
+        fichasSeleccionadasVisualmente.clear();
     }
 
     private void ordenar() {
         fichas.sort((f1, f2) -> {
-            if (f1.isEsComodin() && !f2.isEsComodin()) return 1;
-            if (!f1.isEsComodin() && f2.isEsComodin()) return -1;
-            if (f1.isEsComodin() && f2.isEsComodin()) return 0;
+            if (f1.isEsComodin() && !f2.isEsComodin()) {
+                return 1;
+            }
+            if (!f1.isEsComodin() && f2.isEsComodin()) {
+                return -1;
+            }
+            if (f1.isEsComodin() && f2.isEsComodin()) {
+                return 0;
+            }
 
             if (f1.getNumero() != f2.getNumero()) {
                 return Integer.compare(f1.getNumero(), f2.getNumero());
@@ -120,16 +129,26 @@ public class UI_Mano extends JPanel {
 
     public void refrescar() {
         this.removeAll();
-        
-        fichasSeleccionadasVisualmente.clear(); 
+        fichasSeleccionadasVisualmente.clear();
 
         for (FichaDTO dto : fichas) {
             UI_Ficha uiFicha = new UI_Ficha(dto);
             this.add(uiFicha);
         }
 
+        actualizarTamanoPanel();
+
         this.revalidate();
         this.repaint();
+    }
+
+    private void actualizarTamanoPanel() {
+        int cantidadFichas = fichas.size();
+        int anchoNecesario = (cantidadFichas * (ANCHO_FICHA + GAP)) + 50;
+
+        int anchoFinal = Math.max(780, anchoNecesario);
+
+        setPreferredSize(new Dimension(anchoFinal, 110));
     }
 
     private void configurarDropTarget() {
@@ -154,8 +173,9 @@ public class UI_Mano extends JPanel {
                     evt.acceptDrop(DnDConstants.ACTION_MOVE);
 
                     Transferable t = evt.getTransferable();
-                    if(!t.isDataFlavorSupported(FichaTransferable.FICHA_FLAVOR)) {
-                         evt.dropComplete(false); return; 
+                    if (!t.isDataFlavorSupported(FichaTransferable.FICHA_FLAVOR)) {
+                        evt.dropComplete(false);
+                        return;
                     }
                     FichaTransferable fichaT = (FichaTransferable) t.getTransferData(FichaTransferable.FICHA_FLAVOR);
 
@@ -175,7 +195,7 @@ public class UI_Mano extends JPanel {
                             ids.add(f.getId());
                         }
                     }
-                    
+
                     boolean cambio = false;
                     for (FichaDTO f : recibidas) {
                         if (f != null && !ids.contains(f.getId())) {
@@ -183,7 +203,6 @@ public class UI_Mano extends JPanel {
                             cambio = true;
                         }
                     }
-                    
 
                     if (cambio) {
                         limpiarSeleccion();

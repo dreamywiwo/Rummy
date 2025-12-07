@@ -4,6 +4,7 @@
  */
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.utils.FichaTransferable;
 import itson.rummydtos.FichaDTO;
 import itson.rummydtos.GrupoDTO;
 import java.awt.Component;
@@ -199,8 +200,8 @@ public class UI_Tablero extends javax.swing.JPanel {
     }
 
     private void verificarExpansionTablero(Point p, Dimension d) {
-        int maxX = p.x + d.width + 50;
-        int maxY = p.y + d.height + 50;
+        int maxX = p.x + d.width + 150;
+        int maxY = p.y + d.height + 150;
 
         Dimension current = getPreferredSize();
         boolean cambiar = false;
@@ -217,6 +218,11 @@ public class UI_Tablero extends javax.swing.JPanel {
         if (cambiar) {
             setPreferredSize(current);
             revalidate();
+
+            if (getParent() != null) {
+                getParent().doLayout();
+                getParent().repaint();
+            }
         }
     }
 
@@ -310,12 +316,9 @@ public class UI_Tablero extends javax.swing.JPanel {
         repaint();
     }
 
-    /**
-     * Limpia todos los bordes rojos del tablero.
-     */
     public void limpiarGruposInvalidos() {
-        for (UI_Grupo g : gruposVisuales) {
-            g.marcarFichasInvalidas(new HashSet<>());
+        for (UI_Grupo grupoVisual : gruposVisuales) {
+            grupoVisual.marcarFichasInvalidas(new java.util.HashSet<>());
         }
         revalidate();
         repaint();

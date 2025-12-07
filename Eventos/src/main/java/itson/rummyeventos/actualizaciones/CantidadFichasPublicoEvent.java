@@ -11,28 +11,28 @@ import itson.rummyeventos.base.EventBase;
  * @author Dana Chavez
  */
 public class CantidadFichasPublicoEvent extends EventBase {
-    private String jugadorDestino; 
+    private String jugadorId; 
     private int size;
 
     public static final String TOPIC = "actualizaciones.estado";
-    public static final String EVENT_TYPE = "sopa.actualizada";
+    public static final String EVENT_TYPE = "fichas.jugador.cantidad";
 
     public CantidadFichasPublicoEvent() {
         super();
     }
 
-    public CantidadFichasPublicoEvent(String jugadorDestino, int size) {
+    public CantidadFichasPublicoEvent(String jugadorId, int size) {
         super(TOPIC, EVENT_TYPE);
-        this.jugadorDestino = jugadorDestino;
+        this.jugadorId = jugadorId;
         this.size = size;
     }   
 
-    public String getJugadorDestino() {
-        return jugadorDestino;
+    public String getJugadorId() {
+        return jugadorId;
     }
 
-    public void setJugadorDestino(String jugadorDestino) {
-        this.jugadorDestino = jugadorDestino;
+    public void setJugadorId(String jugadorId) {
+        this.jugadorId = jugadorId;
     }
 
     public int getSize() {

@@ -1,5 +1,6 @@
 package itson.traducerjugador.mappers;
 
+import itson.rummyeventos.actualizaciones.CantidadFichasPublicoEvent;
 import itson.rummyeventos.actualizaciones.ErrorEvent;
 import itson.rummyeventos.actualizaciones.HighlightInvalidGroupEvent;
 import itson.rummyeventos.actualizaciones.JuegoTerminadoEvent;
@@ -33,6 +34,7 @@ public class EventMapper {
         register("mensaje.error", this::handleError);
         register("juego.terminado", this::handleJuegoTerminado);
         register("grupo.invalido", this::handleHighlightInvalidGroup);
+        register("fichas.jugador.cantidad", this::handleCantidadFichas);
 
     }
 
@@ -155,5 +157,15 @@ public class EventMapper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    private void handleCantidadFichas(String rawPayload, ISerializer serializer) {
+        try {
+            CantidadFichasPublicoEvent event = serializer.deserialize(rawPayload, CantidadFichasPublicoEvent.class);
+            
+            if (listener != null) {
+                listener.actualizarFichasOponente(event.getJugadorId(), event.getSize());
+            }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 }

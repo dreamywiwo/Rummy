@@ -1,5 +1,7 @@
 package itson.rummypresentacion.vista;
 
+import itson.rummypresentacion.utils.FichaTransferable;
+import itson.rummypresentacion.utils.ContenedorFichas;
 import itson.rummydtos.FichaDTO;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -63,7 +65,6 @@ public class UI_Ficha extends JLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Solo permitimos seleccionar si la ficha está en la Mano del jugador
                 if (getParent() instanceof UI_Mano) {
                     toggleSeleccion();
                 }
@@ -172,11 +173,9 @@ public class UI_Ficha extends JLabel {
     }
 
     private void actualizarVisual() {
-        // Calculamos el tamaño de fuente escalado
         int tamanoFuenteBase = ficha.isEsComodin() ? 36 : 32;
         int tamanoFuenteEscalado = (int) (tamanoFuenteBase * escalaActual);
 
-        // Aseguramos un mínimo para que no desaparezca
         if (tamanoFuenteEscalado < 8) {
             tamanoFuenteEscalado = 8;
         }

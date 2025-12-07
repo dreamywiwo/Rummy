@@ -1,5 +1,6 @@
 package itson.dominiorummy.entidades;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,10 +36,10 @@ public class GrupoNumero extends Grupo {
             if (numRef == null) {
                 numRef = f.getNumero();
             } else if (f.getNumero() != numRef) {
-                return false; 
+                return false;
             }
             if (!coloresVistos.add(f.getColor())) {
-                return false; 
+                return false;
             }
         }
 
@@ -60,5 +61,16 @@ public class GrupoNumero extends Grupo {
         }
 
         return valorReferencia * fichas.size();
+    }
+
+    @Override
+    public Grupo clonar() {
+        List<FichaPlaced> copiaFichas = new ArrayList<>();
+
+        for (FichaPlaced fp : this.fichas) {
+            copiaFichas.add(fp.clonar());
+        }
+
+        return new GrupoNumero(this.id, copiaFichas);
     }
 }

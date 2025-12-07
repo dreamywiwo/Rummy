@@ -24,4 +24,6 @@ public interface IListener {
     public void marcarJuegoTerminado(JugadorDTO ganador);
 
     public void resaltarGrupoInvalido(String grupoId);
+
+    public void actualizarFichasOponente(String jugadorId, int size);
 }

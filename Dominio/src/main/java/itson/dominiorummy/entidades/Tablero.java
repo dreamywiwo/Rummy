@@ -115,8 +115,8 @@ public class Tablero {
         GrupoNumero pruebaNumero = new GrupoNumero("temp", fichas);
         GrupoSecuencia pruebaSecuencia = new GrupoSecuencia("temp", fichas);
 
-        boolean esNumero = pruebaNumero.validarReglas();     
-        boolean esSecuencia = pruebaSecuencia.validarReglas(); 
+        boolean esNumero = pruebaNumero.validarReglas();
+        boolean esSecuencia = pruebaSecuencia.validarReglas();
 
         if (esNumero) {
             return new GrupoNumero(nuevoId, fichas);
@@ -128,29 +128,27 @@ public class Tablero {
 
         return new GrupoSecuencia(nuevoId, fichas);
     }
-    
-    public void revertirJugadasDelTurno(String jugadorId, int turnoActual, Mano manoJugador) {
-        var iteratorGrupos = grupos.entrySet().iterator();
-        while (iteratorGrupos.hasNext()) {
-            var entry = iteratorGrupos.next();
-            Grupo grupo = entry.getValue();
-            List<FichaPlaced> fichasARemover = new ArrayList<>();
-            
-            for (FichaPlaced fp : grupo.getFichas()) {
-                if (fp.getPlacedInTurn() == turnoActual && fp.getPlacedBy().equals(jugadorId)) {
-                    fichasARemover.add(fp);
-                }
-            }
-            
-            for (FichaPlaced fp : fichasARemover) {
-                grupo.getFichas().remove(fp);
-                manoJugador.agregarFicha(fp.getFicha());
-                removedOrigin.remove(fp.getFicha().getId());
-            }
-            
-            if (grupo.estaVacio()) {
-                iteratorGrupos.remove();
-            }
+
+    public Tablero clonar() {
+        Tablero copia = new Tablero();
+
+        copia.contadorGrupos = this.contadorGrupos;
+
+        for (Grupo g : this.grupos.values()) {
+            copia.agregarGrupo(g.clonar());
+        }
+
+        return copia;
+    }
+
+    public void restaurarEstado(Tablero backup) {
+        this.grupos.clear();
+        this.removedOrigin.clear();
+
+        this.contadorGrupos = backup.contadorGrupos;
+
+        for (Grupo g : backup.getGrupos()) {
+            this.agregarGrupo(g.clonar());
         }
     }
 

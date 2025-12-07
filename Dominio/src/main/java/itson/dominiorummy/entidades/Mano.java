@@ -4,29 +4,33 @@
  */
 package itson.dominiorummy.entidades;
 
-import itson.rummydtos.FichaDTO;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- *
- * @author victoria
- */
-
 public class Mano {
 
     private final List<Ficha> fichas = new ArrayList<>();
 
-    public Mano() {}
+    public Mano() {
+    }
 
     public List<Ficha> getFichas() {
         return fichas;
     }
 
+    public void setFichas(List<Ficha> nuevasFichas) {
+        this.fichas.clear();
+        if (nuevasFichas != null) {
+            this.fichas.addAll(nuevasFichas);
+        }
+    }
+
     public void agregarFicha(Ficha f) {
-        if (f != null) fichas.add(f);
+        if (f != null) {
+            fichas.add(f);
+        }
     }
 
     public boolean tieneFicha(String fichaId) {
@@ -34,7 +38,8 @@ public class Mano {
     }
 
     /**
-     * Quita la primera ocurrencia con id y la retorna. Retorna null si no existe.
+     * Quita la primera ocurrencia con id y la retorna. Retorna null si no
+     * existe.
      */
     public Ficha quitarFicha(String fichaId) {
         Iterator<Ficha> it = fichas.iterator();
@@ -50,21 +55,26 @@ public class Mano {
 
     /**
      * Clona el contenido (deep copy de fichas para snapshot/rollback).
+     * Puede ser usado por Dominio para crear el backup inicial.
      */
     public List<Ficha> clonarContenido() {
         return fichas.stream()
                 .map(Ficha::clonar)
                 .collect(Collectors.toList());
     }
+    
+    /**
+     * Método de utilidad alternativo para clonar la lista 
+     * (por si Dominio lo llama como clonarFichas en alguna versión).
+     */
+    public List<Ficha> clonarFichas() {
+        return clonarContenido();
+    }
 
     /**
      * Restaurar la mano a un estado (lista de fichas copiada).
      */
     public void restaurar(List<Ficha> estadoOriginal) {
-        fichas.clear();
-        if (estadoOriginal != null) {
-            estadoOriginal.forEach(f -> fichas.add(f.clonar()));
-        }
+        setFichas(estadoOriginal);
     }
-
 }

@@ -48,4 +48,9 @@ public class ProducerJugador implements IProducerJugador {
         inicializarJuegoEmitter.emitirRegistroJugadorEvent(miId, ipCliente, miPuertoDeEscucha);
     }
 
+    @Override
+    public void devolverFicha(String grupoId, String fichaId) {
+        jugarTurnoEmitter.emitirFichaDevueltaEvent(grupoId, fichaId);
+    }
+
 }

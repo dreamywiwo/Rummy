@@ -223,6 +223,25 @@ public class Tablero {
         Grupo nuevo = new GrupoSecuencia(nuevoId, lista);
         agregarGrupo(nuevo);
     }
+    
+    /**
+     * Busca una ficha en un grupo específico, la quita y devuelve la Ficha original.
+     * Si el grupo queda vacío, devuelve true en 'grupoQuedoVacio'.
+     */
+    public Ficha quitarFichaDeGrupo(String grupoId, String fichaId) {
+        Grupo grupo = grupos.get(grupoId);
+        if (grupo == null) return null;
+
+        java.util.Iterator<FichaPlaced> it = grupo.getFichas().iterator();
+        while (it.hasNext()) {
+            FichaPlaced fp = it.next();
+            if (fp.getFicha().getId().equals(fichaId)) {
+                it.remove();
+                return fp.getFicha();
+            }
+        }
+        return null;
+    }
 
     @Override
     public String toString() {

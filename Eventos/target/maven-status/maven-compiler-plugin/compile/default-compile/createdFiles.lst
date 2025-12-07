@@ -8,6 +8,7 @@ itson\rummyeventos\sistema\RegistroDominioEvent.class
 itson\rummyeventos\sistema\RegistroJugadorEvent.class
 itson\rummyeventos\actualizaciones\ErrorEvent.class
 itson\rummyeventos\actualizaciones\TableroActualizadoEvent.class
+itson\rummyeventos\acciones\FichaDevueltaEvent.class
 itson\rummyeventos\acciones\GrupoCreadoEvent.class
 itson\rummyeventos\acciones\TerminoTurnoEvent.class
 itson\rummyeventos\actualizaciones\HighlightInvalidGroupEvent.class

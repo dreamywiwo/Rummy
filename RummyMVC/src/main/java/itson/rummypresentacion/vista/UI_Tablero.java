@@ -323,5 +323,20 @@ public class UI_Tablero extends javax.swing.JPanel {
         revalidate();
         repaint();
     }
+    
+    /**
+     * Busca en qué grupo visual se encuentra una ficha específica.
+     * Retorna el ID del grupo o null si no está en el tablero.
+     */
+    public String obtenerIdGrupoDeFicha(String fichaId) {
+        for (UI_Grupo g : gruposVisuales) {
+            for (FichaDTO f : g.getFichas()) {
+                if (f.getId().equals(fichaId)) {
+                    return g.getIdGrupo();
+                }
+            }
+        }
+        return null; 
+    }
 
 }

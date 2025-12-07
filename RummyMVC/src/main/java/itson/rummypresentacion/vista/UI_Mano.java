@@ -177,28 +177,41 @@ public class UI_Mano extends JPanel {
                         evt.dropComplete(false);
                         return;
                     }
-                    FichaTransferable fichaT = (FichaTransferable) t.getTransferData(FichaTransferable.FICHA_FLAVOR);
 
+                    FichaTransferable fichaT = (FichaTransferable) t.getTransferData(FichaTransferable.FICHA_FLAVOR);
                     List<FichaDTO> recibidas = fichaT.getFichas();
+
                     if (recibidas == null || recibidas.isEmpty()) {
                         evt.dropComplete(false);
                         return;
                     }
 
-                    if (tableroPanel != null) {
-                        tableroPanel.removerFichasDeOtrosContenedores(recibidas, UI_Mano.this);
+                    boolean vienenDelTablero = false;
+
+                    for (FichaDTO f : recibidas) {
+                        String grupoOrigenId = tableroPanel.obtenerIdGrupoDeFicha(f.getId());
+
+                        if (grupoOrigenId != null) {
+                            tableroPanel.getVentanaPrincipal().solicitarDevolverFicha(grupoOrigenId, f.getId());
+                            vienenDelTablero = true;
+                        }
                     }
 
-                    Set<String> ids = new HashSet<>();
+                    if (vienenDelTablero) {
+                        evt.dropComplete(true);
+                        return;
+                    }
+
+                    Set<String> misIds = new HashSet<>();
                     for (FichaDTO f : fichas) {
                         if (f.getId() != null) {
-                            ids.add(f.getId());
+                            misIds.add(f.getId());
                         }
                     }
 
                     boolean cambio = false;
                     for (FichaDTO f : recibidas) {
-                        if (f != null && !ids.contains(f.getId())) {
+                        if (!misIds.contains(f.getId())) {
                             fichas.add(f);
                             cambio = true;
                         }

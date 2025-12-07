@@ -100,6 +100,10 @@ public class UI_TurnoJugador extends javax.swing.JFrame implements IObserver {
     public void notificarGrupoActualizado(String idGrupo, List<FichaDTO> fichas) {
         controlador.actualizarGrupo(idGrupo, fichas);
     }
+    
+    public void solicitarDevolverFicha(String grupoId, String fichaId) {
+        controlador.devolverFicha(grupoId, fichaId); 
+    }
 
     public UI_Tablero getUITablero() {
         return uiTablero;

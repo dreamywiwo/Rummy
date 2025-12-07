@@ -65,6 +65,10 @@ public class Modelo implements IModelo, ISubject, IListener {
     public void tomarFicha() {
         producer.tomarFicha();
     }
+    
+    public void devolverFicha(String grupoId, String fichaId) {
+        producer.devolverFicha(grupoId, fichaId);
+    }
 
     // Implementacion de IModelo
     @Override
@@ -248,5 +252,6 @@ public class Modelo implements IModelo, ISubject, IListener {
         fichasOponentes.put(jugadorId, size);
         notificarObservers();
     }
+
 
 }

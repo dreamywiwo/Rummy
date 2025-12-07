@@ -6,6 +6,7 @@ package itson.producerjugador.emitters;
 
 import com.mycompany.conexioninterfaces.IDispatcher;
 import itson.rummydtos.FichaDTO;
+import itson.rummyeventos.acciones.FichaDevueltaEvent;
 import itson.rummyeventos.acciones.FichaTomadaEvent;
 import itson.rummyeventos.acciones.GrupoActualizadoEvent;
 import itson.rummyeventos.acciones.GrupoCreadoEvent;
@@ -52,6 +53,12 @@ public class JugarTurnoEmitter {
 
     public void emitirTerminoTurnoEvent() {
         TerminoTurnoEvent event = new TerminoTurnoEvent();
+        String json = jsonSerializer.serialize(event);
+        dispatcher.enviar(json, brokerPort, brokerIp);
+    }
+
+    public void emitirFichaDevueltaEvent(String grupoId, String fichaId) {
+        FichaDevueltaEvent event = new FichaDevueltaEvent(grupoId, fichaId);
         String json = jsonSerializer.serialize(event);
         dispatcher.enviar(json, brokerPort, brokerIp);
     }

@@ -93,4 +93,8 @@ public class ControladorTurno {
             return null;
         }
     }
+
+    public void devolverFicha(String grupoId, String fichaId) {
+        modelo.devolverFicha(grupoId, fichaId);
+    }
 }

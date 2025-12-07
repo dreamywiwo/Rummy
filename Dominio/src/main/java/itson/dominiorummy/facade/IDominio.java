@@ -25,4 +25,6 @@ public interface IDominio {
     public void terminarTurno();
 
     public void iniciarPartida();
+    
+    public void devolverFichaAMano(String grupoId, String fichaId);
 }

@@ -22,4 +22,6 @@ public interface IProducerJugador {
     public abstract void terminarTurno();
     
     public abstract void registrarJugador(String miId, String ipCliente, int miPuertoDeEscucha);
+
+    public void devolverFicha(String grupoId, String fichaId);
 }

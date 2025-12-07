@@ -5,6 +5,7 @@
 package itson.traducerdominio.mappers;
 
 import itson.dominiorummy.facade.IDominio;
+import itson.rummyeventos.acciones.FichaDevueltaEvent;
 import itson.rummyeventos.acciones.FichaTomadaEvent;
 import itson.rummyeventos.acciones.GrupoActualizadoEvent;
 import itson.rummyeventos.acciones.GrupoCreadoEvent;
@@ -36,6 +37,7 @@ public class EventMapper {
         register("grupo.actualizado", this::handleGrupoActualizado);
         register("ficha.tomada", this::handleFichaTomada);
         register("termino.turno", this::handleTerminoTurno);
+        register("ficha.devuelta", this::handleFichaDevuelta);
     }
     
     public void register(String eventType, BiConsumer<String, ISerializer> handler) {
@@ -88,6 +90,15 @@ public class EventMapper {
         try {
             TerminoTurnoEvent event = serializer.deserialize(rawPayload, TerminoTurnoEvent.class);
             dominio.terminarTurno();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void handleFichaDevuelta(String rawPayload, ISerializer serializer) {
+        try {
+            FichaDevueltaEvent event = serializer.deserialize(rawPayload, FichaDevueltaEvent.class);
+            dominio.devolverFichaAMano(event.getGrupoId(), event.getFichaId());
         } catch (Exception e) {
             e.printStackTrace();
         }

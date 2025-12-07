@@ -31,7 +31,7 @@ public class Dominio implements IDominio {
     private final List<Ficha> fichas;
     private final Map<String, Jugador> jugadores;
 
-    // --- VARIABLES PARA EL SNAPSHOT (BACKUP) ---
+    // --- VARIABLES PARA EL SNAPSHOT ---
     private Tablero tableroBackup;
     private List<Ficha> manoJugadorBackup;
 
@@ -70,7 +70,6 @@ public class Dominio implements IDominio {
             String jugadorIdTurno = jugadorEnTurno.getId();
             producer.actualizarTurno(jugadorIdTurno);
 
-            // GUARDAMOS EL PRIMER BACKUP AL INICIAR
             guardarBackupInicioTurno();
 
         } catch (Exception e) {
@@ -79,13 +78,10 @@ public class Dominio implements IDominio {
         }
     }
 
-    // --- MÉTODOS DE CONTROL DE ESTADO (SNAPSHOT) ---
     private void guardarBackupInicioTurno() {
         Jugador jugador = turno.getJugadorActual();
         if (jugador != null) {
-            // Requiere que Tablero tenga el método .clonar() implementado
             this.tableroBackup = tablero.clonar();
-            // Creamos una copia nueva de la lista de fichas
             this.manoJugadorBackup = new ArrayList<>(jugador.getMano().getFichas());
         }
     }
@@ -98,15 +94,10 @@ public class Dominio implements IDominio {
 
         Jugador jugador = turno.getJugadorActual();
 
-        // 1. Restaurar el tablero (usando método auxiliar en Tablero o reemplazando grupos)
-        // Se asume que Tablero tiene un método para restaurar estado desde otro tablero
-        // O puedes hacerlo manualmente aquí si tienes acceso a la lista de grupos:
         this.tablero.restaurarEstado(this.tableroBackup);
 
-        // 2. Restaurar la mano del jugador
         jugador.getMano().setFichas(new ArrayList<>(this.manoJugadorBackup));
 
-        // 3. Actualizar vistas
         producer.actualizarTablero(TableroMapper.toDTO(this.tablero));
         producer.actualizarManoJugador(jugador.getId(), FichaMapper.toDTO(jugador.getMano().getFichas()));
     }
@@ -388,6 +379,42 @@ public class Dominio implements IDominio {
             LOG.severe("Error al terminar turno: " + e.getMessage());
             e.printStackTrace();
             producer.mostrarError(jugadorId, "Ocurrió un error inesperado.");
+        }
+    }
+    
+    // DEVOLVER FICHA A MANO 
+    @Override
+    public void devolverFichaAMano(String grupoId, String fichaId) {
+        Jugador jugador = turno.getJugadorActual();
+        String jugadorId = jugador.getId();
+
+        if (jugador == null) return;
+
+        boolean eraMia = manoJugadorBackup.stream()
+                .anyMatch(f -> f.getId().equals(fichaId));
+
+        if (!eraMia) {
+            producer.mostrarError(jugadorId, "No puedes llevarte a la mano una ficha que ya estaba en la mesa.");
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            return;
+        }
+
+        Ficha fichaRecuperada = tablero.quitarFichaDeGrupo(grupoId, fichaId);
+
+        if (fichaRecuperada != null) {
+            jugador.getMano().agregarFicha(fichaRecuperada);
+
+            if (tablero.grupoEstaVacio(grupoId)) {
+                tablero.removerGrupo(grupoId);
+            }
+
+            producer.actualizarTablero(TableroMapper.toDTO(tablero));
+            producer.actualizarManoJugador(jugadorId, FichaMapper.toDTO(jugador.getMano().getFichas()));
+            producer.enviarCantidadFichasPublico(jugadorId, jugador.getMano().getFichas().size());
+            
+        } else {
+             producer.mostrarError(jugadorId, "La ficha ya no se encuentra en ese grupo.");
+             producer.actualizarTablero(TableroMapper.toDTO(tablero));
         }
     }
 }
